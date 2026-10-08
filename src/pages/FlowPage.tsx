@@ -18,6 +18,8 @@ import {
   type Roast,
 } from '../data';
 import { BeanSummary } from '../features/beans/BeanSummary';
+import { LabelScan } from '../features/beans/scan/LabelScan';
+import type { LabelGuess } from '../features/beans/scan/parseLabel';
 import { MethodRanking } from '../features/beans/MethodRanking';
 import { useBeans } from '../features/beans/store';
 import { BrewSession, doseLine } from '../features/brewing/BrewSession';
@@ -205,9 +207,18 @@ function DescribeBeans({ initial }: { initial?: BeanProfile }) {
     }
   };
 
+  // Skan etykiety: palenie tylko, jeśli jeszcze nie wybrane; nuty się dokładają.
+  const applyScan = (guess: LabelGuess) =>
+    save({
+      roast: roast ?? guess.roast,
+      notes: [...new Set([...notes, ...guess.notes])],
+      kind: guess.kind ?? kind,
+    });
+
   return (
     <div className="mt-6 space-y-6">
       <p className="text-ink-muted">Palenie i nuty znajdziesz na opakowaniu.</p>
+      <LabelScan onResult={applyScan} />
       <fieldset>
         <legend className="font-medium">Palenie</legend>
         <div className="mt-2 flex flex-wrap gap-2">

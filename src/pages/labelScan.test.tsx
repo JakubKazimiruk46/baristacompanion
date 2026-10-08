@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readLabel } from '../features/beans/scan/ocr';
 import { beansStore } from '../features/beans/store';
+import { flowStore } from '../features/flow/store';
 import { renderApp } from '../test/renderApp';
 
 // Prawdziwe rozpoznawanie tekstu (WASM, modele z CDN) nie działa w jsdom.
@@ -12,7 +13,9 @@ const photo = () => new File(['jpeg'], 'etykieta.jpg', { type: 'image/jpeg' });
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   beansStore.reset();
+  flowStore.reset();
 });
 
 afterEach(() => {
@@ -66,6 +69,21 @@ describe('skan etykiety w formularzu ziaren', () => {
     await user.upload(screen.getByLabelText('Zeskanuj etykietę'), photo());
     expect(await screen.findByText(/Nie udało się nic odczytać/)).toBeInTheDocument();
     expect(screen.getByLabelText('Nazwa')).toHaveValue('');
+  });
+
+  it('ścieżka „Mam kawę”: skan opisuje ziarna i odblokowuje następny krok', async () => {
+    read.mockResolvedValue('BRAZYLIA SANTOS\nśrednio palona\nnuty: czekolada, orzech laskowy');
+    const { user } = renderApp('/mam-kawe');
+    const next = screen.getByRole('link', { name: 'Dalej: polecane metody' });
+    expect(next).toHaveAttribute('aria-disabled', 'true');
+
+    await user.upload(screen.getByLabelText('Zeskanuj etykietę'), photo());
+    await screen.findByText(/Z etykiety/);
+    expect(within(screen.getByRole('group', { name: 'Palenie' })).getByLabelText('średnie')).toBeChecked();
+    const notes = screen.getByRole('group', { name: 'Nuty smakowe' });
+    expect(within(notes).getByLabelText('czekoladowe')).toBeChecked();
+    expect(within(notes).getByLabelText('orzechowe')).toBeChecked();
+    expect(next).not.toHaveAttribute('aria-disabled');
   });
 
   it('błąd (np. brak internetu przy pierwszym skanie)', async () => {

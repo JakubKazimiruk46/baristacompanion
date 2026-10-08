@@ -50,7 +50,7 @@ Uzupełnić MVP o to, co konkurencja ma, a nam brakuje, bez backendu i kont. Kol
    - obrazek PNG można udostępnić albo zapisać,
    - kolor tła ma kontrast z białym tekstem ≥ 4,5:1 dla każdego napoju.
 8. **Skan etykiety.** Gotowe, gdy:
-   - w formularzu ziaren da się zrobić zdjęcie etykiety,
+   - w formularzu ziaren i w pierwszym kroku „Mam kawę” da się zrobić zdjęcie etykiety,
    - rozpoznane dane wypełniają formularz,
    - parser ma testy na polskich i angielskich etykietach.
 
@@ -60,4 +60,3 @@ Po każdym kroku: `npm run typecheck`, `npm test`, osobny commit. Na koniec `npm
 
 - rozpoznawanie etykiet przez AI (wymaga backendu),
 - synchronizacja ulubionych, dziennika i półki między urządzeniami,
-- skan etykiety w ścieżce „Mam kawę” (na razie tylko w „Moich ziarnach”).
