@@ -14,20 +14,31 @@ import {
   ROASTS,
   type BrewMethod,
 } from '../data';
+import { DoseCalculator } from '../features/brewing/DoseCalculator';
+import { formatGrams, scaleMethod } from '../features/brewing/dose';
+import { useWaterMl } from '../features/brewing/doseStore';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
 import { GrindScale } from '../features/brewing/GrindScale';
 import { ColdBrewVariantsSection } from '../features/coldbrew/ColdBrewLinks';
 import { useColdBrew } from '../features/coldbrew/store';
 import { DrinkCard } from '../features/drinks/DrinkCard';
+import { EntryCard } from '../features/journal/EntryCard';
+import { useJournal } from '../features/journal/store';
 import { formatSeconds } from '../lib/format';
+import { useNow } from '../lib/useNow';
 import { NotFoundPage } from './NotFoundPage';
 
 export function MethodPage() {
   const { methodId } = useParams();
-  const location = useLocation();
   const method = methodId ? getMethod(methodId) : undefined;
   if (!method) return <NotFoundPage />;
+  return <MethodDetails key={method.id} method={method} />;
+}
 
+function MethodDetails({ method: base }: { method: BrewMethod }) {
+  const location = useLocation();
+  // Kroki z ilościami z kalkulatora (ostatnio wybranymi dla tej metody).
+  const method = scaleMethod(base, useWaterMl(base));
   const drinks = drinksForMethod(method.id);
   const from = location.pathname + location.search;
 
@@ -45,13 +56,19 @@ export function MethodPage() {
       <StartButton method={method} />
 
       <dl className="mt-6 grid grid-cols-2 gap-3">
-        <Fact label="Proporcja" value={formatRatio(method)}>
-          {method.dose.coffeeG} g kawy na {method.dose.waterMl} ml wody
+        <Fact label="Proporcja" value={formatRatio(base)}>
+          {formatGrams(method.dose.coffeeG)} g kawy na {method.dose.waterMl} ml wody
         </Fact>
         <Fact label="Woda" value={formatWaterTemp(method)} />
         <Fact label="Czas" value={formatSeconds(method.totalTimeSec)} />
         <Fact label="Trudność" value={DIFFICULTY_LABELS[method.difficulty]} />
       </dl>
+
+      <Section title="Ile zaparzyć">
+        <DoseCalculator method={base} />
+      </Section>
+
+      <LastBrew methodId={method.id} />
 
       <Section title="Mielenie">
         <GrindScale grind={method.grind} />
@@ -169,5 +186,25 @@ function Fact({ label, value, children }: { label: string; value: string; childr
       <dd className="mt-0.5 text-lg font-semibold">{value}</dd>
       {children && <dd className="text-xs text-ink-muted">{children}</dd>}
     </div>
+  );
+}
+
+/** Ostatnie parzenie tą metodą z dziennika: ocena i notatka pomagają poprawić następne. */
+function LastBrew({ methodId }: { methodId: string }) {
+  const entries = useJournal().filter((entry) => entry.methodId === methodId);
+  const now = useNow(60_000);
+  const last = entries[0];
+  if (!last) return null;
+  return (
+    <Section
+      title="Ostatnio"
+      action={
+        <Link to="/parzenie/dziennik" className="text-sm font-medium text-accent">
+          Dziennik
+        </Link>
+      }
+    >
+      <EntryCard entry={last} now={now} heading="h3" />
+    </Section>
   );
 }

@@ -1,10 +1,13 @@
 import { Link } from 'react-router';
-import { ChevronRightIcon, ClockIcon } from '../components/icons';
+import { ChevronRightIcon, ClockIcon, JournalIcon } from '../components/icons';
 import { MethodIcon } from '../components/MethodIcon';
 import { PageHeader } from '../components/PageHeader';
 import { DIFFICULTY_LABELS, GRIND_LABELS, methods } from '../data';
 import { ColdBrewBadge } from '../features/coldbrew/ColdBrewLinks';
-import { formatSeconds } from '../lib/format';
+import { dayAndTime } from '../features/coldbrew/time';
+import { useJournal } from '../features/journal/store';
+import { count, formatSeconds } from '../lib/format';
+import { useNow } from '../lib/useNow';
 
 export function BrewingPage() {
   return (
@@ -13,7 +16,8 @@ export function BrewingPage() {
         title="Parzenie"
         lead="Metody alternatywne krok po kroku: od mielenia po stoper."
       />
-      <ul className="space-y-3">
+      <JournalLink />
+      <ul className="mt-4 space-y-3">
         {methods.map((method) => (
           <li key={method.id}>
             <Link
@@ -46,5 +50,30 @@ export function BrewingPage() {
         ))}
       </ul>
     </>
+  );
+}
+
+/** Wejście do dziennika: liczba wpisów i kiedy było ostatnie parzenie. */
+function JournalLink() {
+  const entries = useJournal();
+  const now = useNow(60_000);
+  const last = entries[0];
+  return (
+    <Link
+      to="/parzenie/dziennik"
+      viewTransition
+      className="flex items-center gap-3 rounded-2xl bg-accent-soft p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
+      <JournalIcon className="size-7 shrink-0 text-accent" />
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">Dziennik parzeń</span>
+        <span className="block text-sm">
+          {last
+            ? `${count(entries.length, ['wpis', 'wpisy', 'wpisów'])} · ostatnio ${dayAndTime(last.brewedAt, now)}`
+            : 'Oceny i notatki z Twoich parzeń'}
+        </span>
+      </span>
+      <ChevronRightIcon className="size-5 shrink-0 text-accent" />
+    </Link>
   );
 }

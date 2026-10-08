@@ -62,6 +62,50 @@ const ICONS: Record<string, (props: IconProps) => ReactNode> = {
       <path d="M6 21h12" />
     </Svg>
   ),
+  // Tygielek: pękaty dzbanuszek z wąską szyjką i długą rączką.
+  tygielek: (props) => (
+    <Svg {...props}>
+      <path d="M6.5 8h8l-.8 2.2c1.6 1.4 2.3 3.6 2.3 6.3a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4c0-2.7.7-4.9 2.3-6.3L6.5 8Z" />
+      <path d="M14.8 9.5 21 6.5" />
+      <path d="M5.5 8h1" />
+    </Svg>
+  ),
+  // Kalita Wave: drip z płaskim dnem i falowanym filtrem na kubku.
+  kalita: (props) => (
+    <Svg {...props}>
+      <path d="M4 4h16l-3.5 7.5h-9L4 4Z" />
+      <path d="M8 4.5l1.5 6.5M12 4.5v6.5M16 4.5 14.5 11" />
+      <path d="M9.5 11.5h5V13h-5z" />
+      <path d="M6.5 15h11v2a4 4 0 0 1-4 4h-3a4 4 0 0 1-4-4v-2Z" />
+    </Svg>
+  ),
+  // Clever Dripper: stożek z zaworem w dnie, na kubku.
+  clever: (props) => (
+    <Svg {...props}>
+      <path d="M4.5 3.5h15l-4 8.5h-7l-4-8.5Z" />
+      <path d="M10 12h4v2h-4z" />
+      <path d="M12 14v1" />
+      <path d="M6.5 16h11v1a4 4 0 0 1-4 4h-3a4 4 0 0 1-4-4v-1Z" />
+    </Svg>
+  ),
+  // Phin: metalowy filtr z pokrywką na szklance, kapiąca kawa.
+  phin: (props) => (
+    <Svg {...props}>
+      <path d="M8.5 2.5h7M9 4.5h6V9H9z" />
+      <path d="M6 9.5h12" />
+      <path d="M12 11v.01" strokeWidth={2.2} />
+      <path d="M7.5 12.5h9l-.9 7.6a1 1 0 0 1-1 .9H9.4a1 1 0 0 1-1-.9l-.9-7.6Z" />
+    </Svg>
+  ),
+  // Syfon: górna bańka z rurką nad kulistą dolną bańką i palnik.
+  syfon: (props) => (
+    <Svg {...props}>
+      <path d="M9 2.5h6v4a3 3 0 0 1-6 0v-4Z" />
+      <path d="M12 9.5V12" />
+      <circle cx="12" cy="15.5" r="4" />
+      <path d="M9.5 21.5h5" />
+    </Svg>
+  ),
   // Cold brew: słoik z płatkiem śniegu.
   'cold-brew': (props) => (
     <Svg {...props}>

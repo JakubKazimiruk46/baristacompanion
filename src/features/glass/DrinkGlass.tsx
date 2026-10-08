@@ -31,6 +31,10 @@ type DrinkGlassProps = {
   variant?: 'full' | 'thumb';
   /** Dekoracje do narysowania. Domyślnie z drink.serving. */
   decorations?: Decoration[];
+  /** Animacja nalewania (domyślnie w wersji full). Karta do udostępnienia jej nie chce. */
+  animate?: boolean;
+  /** Położenie, gdy rysunek jest częścią większego SVG (karta do udostępnienia). */
+  frame?: { x: number; y: number; width: number; height: number };
   className?: string;
 };
 
@@ -38,6 +42,8 @@ export function DrinkGlass({
   drink,
   variant = 'full',
   decorations = drink.serving.decorations,
+  animate,
+  frame,
   className,
 }: DrinkGlassProps) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
@@ -59,8 +65,9 @@ export function DrinkGlass({
   // więc mała szklanka wygląda na małą.
   const viewTop = Math.max(0, shape.top - (full ? 40 : 14));
 
+  const animated = animate ?? full;
   const anim = (className: string, delayMs: number) =>
-    full ? { className, style: { animationDelay: `${delayMs}ms` } as CSSProperties } : {};
+    animated ? { className, style: { animationDelay: `${delayMs}ms` } as CSSProperties } : {};
 
   const description = `${drink.name}, ${vessel.name}. Warstwy od dołu: ${drink.layers
     .map((layer) => `${layer.name} ${layer.volumeMl} ml`)
@@ -69,8 +76,9 @@ export function DrinkGlass({
   return (
     <svg
       viewBox={`0 ${viewTop} ${full ? VIEW_W : VESSEL_VIEW_W} ${VIEW_H - viewTop}`}
-      preserveAspectRatio="xMidYMax meet"
+      preserveAspectRatio={frame ? 'xMidYMid meet' : 'xMidYMax meet'}
       className={className}
+      {...frame}
       data-vessel={vessel.id}
       {...(full
         ? { role: 'img', 'aria-labelledby': `${uid}-title` }
@@ -171,7 +179,12 @@ export function DrinkGlass({
       </g>
 
       {full && (
-        <Labels bands={bands} shape={shape} minY={viewTop + 8} delay={(i) => i * STEP_MS + 300} />
+        <Labels
+          bands={bands}
+          shape={shape}
+          minY={viewTop + 8}
+          delay={animated ? (i) => i * STEP_MS + 300 : undefined}
+        />
       )}
     </svg>
   );
@@ -197,7 +210,9 @@ function drinkSurface(
 }
 
 function iceCount(extras: Extra[]): number {
-  return extras.some((e) => e.kind === 'ice' && e.amount.includes('pełna')) ? 6 : 4;
+  return extras.some((e) => e.kind === 'ice' && typeof e.amount === 'string' && e.amount.includes('pełna'))
+    ? 6
+    : 4;
 }
 
 function Band({
@@ -338,7 +353,8 @@ function Labels({
   bands: LayerBand[];
   shape: VesselShape;
   minY: number;
-  delay: (index: number) => number;
+  /** Opóźnienie pojawienia się podpisu; bez niego podpisy są od razu. */
+  delay?: (index: number) => number;
 }) {
   const LINE = 13;
   const TEXT_X = 206;
@@ -357,8 +373,7 @@ function Labels({
         return (
           <g
             key={bands[i]!.layer.name}
-            className="pour-fade"
-            style={{ animationDelay: `${delay(i)}ms` }}
+            {...(delay && { className: 'pour-fade', style: { animationDelay: `${delay(i)}ms` } })}
           >
             <circle cx={edge} cy={block.center} r={2} className="fill-ink/50" />
             <path

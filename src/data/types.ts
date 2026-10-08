@@ -49,7 +49,10 @@ export type GrindSize = (typeof GRIND_SIZES)[number];
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface BrewStep {
-  /** Krótkie polecenie, czytelne z daleka. */
+  /**
+   * Krótkie polecenie, czytelne z daleka. Ilości jako znaczniki, które kalkulator zamienia
+   * na liczby: {coffee} (g kawy), {water} (ml wody), {water*0.6} (część wody). Tak samo w detail.
+   */
   text: string;
   /** Szczegóły i wskazówki. */
   detail?: string;
@@ -57,6 +60,20 @@ export interface BrewStep {
   durationSec?: number;
   /** true: użytkownik coś robi (zalewa, miesza); false: tylko czeka. */
   action: boolean;
+}
+
+/** Ile da się zaparzyć naraz: granice kalkulatora ilości. */
+export interface BrewScaling {
+  /** Ile ml wody na jedną osobę. */
+  servingMl: number;
+  /** Ile wody mieści sprzęt. */
+  waterMl: Range;
+  /** O ile zmienia się ilość wody w kalkulatorze. */
+  stepMl: number;
+  /** Sprzęt w stałych rozmiarach (kawiarka): zamiast osób i mililitrów wybiera się rozmiar. */
+  sizes?: { label: string; waterMl: number }[];
+  /** Wskazówka przy kalkulatorze. */
+  note?: string;
 }
 
 export interface BrewMethod extends Reviewable {
@@ -71,6 +88,7 @@ export interface BrewMethod extends Reviewable {
   grind: GrindSize;
   /** Podstawowa porcja: proporcja kawa:woda. */
   dose: { coffeeG: number; waterMl: number };
+  scaling: BrewScaling;
   waterTempC: Range;
   totalTimeSec: number;
   difficulty: Difficulty;
@@ -110,6 +128,32 @@ export interface FrothingMethod extends Reviewable {
   tip?: string;
 }
 
+// ── Składniki ───────────────────────────────────────────────────────────
+
+/** Zamiennik: inny składnik z katalogu i co się zmieni po zamianie. */
+export interface Substitute {
+  id: string;
+  note: string;
+}
+
+export const INGREDIENT_GROUPS = ['milk', 'syrup', 'dairy', 'fruit', 'mixer', 'spice', 'sweet', 'basic'] as const;
+export type IngredientGroup = (typeof INGREDIENT_GROUPS)[number];
+
+/**
+ * Składnik z katalogu (półka „Co mam w domu”, lista zakupów, zamienniki). Mleka i syropy
+ * są w katalogu pod swoimi id.
+ */
+export interface Ingredient {
+  id: string;
+  name: string;
+  group: IngredientGroup;
+  /** Prawie każdy ma go w domu (lód, cukier): na półce od początku. */
+  staple?: boolean;
+  /** Jest zawsze (woda): nie ma go na półce i nigdy nie brakuje. */
+  always?: boolean;
+  substitutes?: Substitute[];
+}
+
 // ── Syropy ──────────────────────────────────────────────────────────────
 
 export interface Syrup extends Reviewable {
@@ -118,6 +162,8 @@ export interface Syrup extends Reviewable {
   color: string;
   easyToBuy: boolean;
   buyNote: string;
+  /** Czym zastąpić syrop, gdy nie ma go w domu i nie chcesz robić. */
+  substitutes?: Substitute[];
   recipe: {
     timeMin: number;
     yieldMl: number;
@@ -191,12 +237,28 @@ export interface Layer {
 
 export type ExtraKind = 'fruit' | 'ice-cream' | 'cream' | 'spice' | 'mixer' | 'ice' | 'other';
 
+export const AMOUNT_UNITS = ['ml', 'g', 'cube', 'scoop', 'tsp'] as const;
+export type AmountUnit = (typeof AMOUNT_UNITS)[number];
+
+/** Ilość, którą da się pomnożyć przez liczbę porcji. max: zakres, np. 4–5 kostek. */
+export interface Quantity {
+  value: number;
+  max?: number;
+  unit: AmountUnit;
+}
+
+/** Ilość dodatku: liczba (mnoży się z porcjami) albo opis, który się nie mnoży („pełna szklanka”). */
+export type Amount = Quantity | string;
+
 export type Extra =
   | { kind: 'syrup'; syrupId: string; amountMl: number; optional?: boolean }
   | {
       kind: ExtraKind;
+      /** Składnik z katalogu (półka, lista zakupów, zamienniki). */
+      ingredientId: string;
+      /** Nazwa w tym napoju, np. „tonik, dobrze schłodzony”. */
       name: string;
-      amount: string;
+      amount: Amount;
       optional?: boolean;
       /** Zmiksuj z mlekiem. */
       blended?: boolean;

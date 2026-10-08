@@ -1,6 +1,7 @@
 import { act, cleanup, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COLD_BREW_KEY, coldBrewStore } from '../features/coldbrew/store';
+import { journalStore } from '../features/journal/store';
 import { renderApp } from '../test/renderApp';
 
 const START = new Date(2026, 9, 8, 20, 0); // środa, 20:00 czasu lokalnego
@@ -12,6 +13,7 @@ beforeEach(() => {
   vi.setSystemTime(START);
   localStorage.clear();
   coldBrewStore.reset();
+  journalStore.reset();
 });
 
 afterEach(() => {
@@ -48,6 +50,8 @@ describe('cold brew', () => {
       startedAt: START.getTime(),
       hours: 12,
       variantId: 'cynamon',
+      coffeeG: 100,
+      waterMl: 800,
     });
   });
 
@@ -100,16 +104,22 @@ describe('cold brew', () => {
     const drinks = screen.getByRole('region', { name: 'Co z niego zrobić' });
     expect(within(drinks).getByRole('heading', { name: 'Cold brew z cynamonem' })).toBeInTheDocument();
 
+    // Zakończenie zapisuje wpis w dzienniku i otwiera go do oceny.
     await user.click(screen.getByRole('button', { name: 'Zakończ' }));
-    expect(router.state.location.pathname).toBe('/parzenie/cold-brew');
+    const [entry] = journalStore.getSnapshot();
+    expect(entry).toMatchObject({ methodId: 'cold-brew', variantId: 'cynamon', coffeeG: 100, waterMl: 800 });
+    expect(router.state.location.pathname).toBe(`/parzenie/dziennik/${entry!.id}`);
+    expect(screen.getByRole('heading', { level: 1, name: 'Cold brew z cynamonem' })).toBeInTheDocument();
     expect(localStorage.getItem(COLD_BREW_KEY)).toBe('null');
   });
 
-  it('można przerwać macerację', async () => {
-    const { user } = await startCinnamon12h();
+  it('można przerwać macerację, bez wpisu w dzienniku', async () => {
+    const { user, router } = await startCinnamon12h();
     await user.click(screen.getByRole('button', { name: 'Przerwij' }));
     await user.click(screen.getByRole('button', { name: 'Przerwij macerację' }));
     expect(coldBrewStore.getSnapshot()).toBeNull();
+    expect(journalStore.getSnapshot()).toEqual([]);
+    expect(router.state.location.pathname).toBe('/parzenie/cold-brew');
   });
 
   it('napoje na cold brew prowadzą do maceracji z właściwą przyprawą', () => {

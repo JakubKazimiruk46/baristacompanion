@@ -1,6 +1,7 @@
 import { ClockIcon } from '../../components/icons';
 import { ReviewNote } from '../../components/ReviewNote';
 import type { Syrup } from '../../data';
+import { SubstitutesSection } from '../drinks/Substitutes';
 
 /** Kup albo zrób sam: gdzie kupić i szybki przepis domowy. */
 export function SyrupRecipe({ syrup }: { syrup: Syrup }) {
@@ -45,6 +46,7 @@ export function SyrupRecipe({ syrup }: { syrup: Syrup }) {
         </ol>
         <p className="mt-3 text-sm text-ink-muted">{recipe.storage}</p>
       </section>
+      <SubstitutesSection substitutes={syrup.substitutes} />
       <ReviewNote item={syrup} />
     </div>
   );

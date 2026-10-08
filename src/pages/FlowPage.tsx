@@ -18,9 +18,14 @@ import {
   type Roast,
 } from '../data';
 import { BeanSummary } from '../features/beans/BeanSummary';
+import { LabelScan } from '../features/beans/scan/LabelScan';
+import type { LabelGuess } from '../features/beans/scan/parseLabel';
 import { MethodRanking } from '../features/beans/MethodRanking';
 import { useBeans } from '../features/beans/store';
-import { BrewSession } from '../features/brewing/BrewSession';
+import { BrewSession, doseLine } from '../features/brewing/BrewSession';
+import { DoseCalculator } from '../features/brewing/DoseCalculator';
+import { scaleMethod } from '../features/brewing/dose';
+import { useWaterMl } from '../features/brewing/doseStore';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
 import { GrindScale } from '../features/brewing/GrindScale';
 import { DrinkCard } from '../features/drinks/DrinkCard';
@@ -41,6 +46,8 @@ import {
   type FlowStep,
 } from '../features/flow/flow';
 import { flowStore, updateFlow, useFlow } from '../features/flow/store';
+import { StarRating } from '../features/journal/StarRating';
+import { journalStore, useJournal } from '../features/journal/store';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
 import { formatSeconds } from '../lib/format';
 import { isLongBrew } from './BrewSessionPage';
@@ -200,9 +207,18 @@ function DescribeBeans({ initial }: { initial?: BeanProfile }) {
     }
   };
 
+  // Skan etykiety: palenie tylko, jeśli jeszcze nie wybrane; nuty się dokładają.
+  const applyScan = (guess: LabelGuess) =>
+    save({
+      roast: roast ?? guess.roast,
+      notes: [...new Set([...notes, ...guess.notes])],
+      kind: guess.kind ?? kind,
+    });
+
   return (
     <div className="mt-6 space-y-6">
       <p className="text-ink-muted">Palenie i nuty znajdziesz na opakowaniu.</p>
+      <LabelScan onResult={applyScan} />
       <fieldset>
         <legend className="font-medium">Palenie</legend>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -297,6 +313,9 @@ function MethodStep() {
         <span className="font-medium">Potrzebujesz: </span>
         {method.equipment.join(', ')}
       </p>
+      <Section title="Ile zaparzyć">
+        <DoseCalculator method={method} />
+      </Section>
       <NextLink to={stepPath('napoje')}>Dalej: co z tego zrobić</NextLink>
     </>
   );
@@ -353,13 +372,15 @@ function DrinksStep() {
 function BrewStep() {
   const flow = useFlow();
   const navigate = useNavigate();
-  const method = getMethod(flow.methodId!)!;
+  const base = getMethod(flow.methodId!)!;
+  const method = scaleMethod(base, useWaterMl(base));
   const drink = flow.drinkId ? getDrink(flow.drinkId) : undefined;
   const next = stepPath(afterBrewing(flow));
 
   const header = (
     <FlowHeader step="parzenie">
       <p className="mt-3 font-display text-2xl font-semibold">{method.name}</p>
+      <p className="mt-1 text-sm text-ink-muted">{doseLine(method)}</p>
       {drink?.base.note && (
         <p className="mt-2 rounded-2xl bg-accent-soft p-3 text-sm">
           <span className="font-semibold">Do napoju „{drink.name}”: </span>
@@ -386,7 +407,18 @@ function BrewStep() {
     );
   }
 
-  return <BrewSession key={method.id} method={method} header={header} onFinish={() => navigate(next)} />;
+  return (
+    <BrewSession
+      key={method.id}
+      method={method}
+      header={header}
+      journal={{ beanId: flow.beanId, drinkId: flow.drinkId ?? undefined }}
+      onFinish={(entryId) => {
+        updateFlow({ entryId });
+        navigate(next);
+      }}
+    />
+  );
 }
 
 // ── 6. Złóż napój ───────────────────────────────────────────────────────
@@ -446,6 +478,7 @@ function ServeStep() {
         <p className="font-display text-2xl font-semibold">Smacznego!</p>
         <p className="mt-1 text-ink-muted">Od ziaren do filiżanki. Następnym razem spróbuj czegoś nowego.</p>
       </div>
+      <FlowRating entryId={flow.entryId} />
       <div className="mt-4 space-y-3">
         <button
           type="button"
@@ -462,5 +495,27 @@ function ServeStep() {
         </Link>
       </div>
     </>
+  );
+}
+
+/** Ocena parzenia z tej ścieżki. Wpis powstał sam po „Zakończ”; notatkę dopisuje się w dzienniku. */
+function FlowRating({ entryId }: { entryId?: string }) {
+  const entry = useJournal().find((e) => e.id === entryId);
+  if (!entry) return null;
+  return (
+    <div className="mt-4 rounded-3xl bg-surface p-5">
+      <StarRating
+        legend="Jak wyszła kawa?"
+        value={entry.rating}
+        onChange={(rating) => journalStore.update(entry.id, { rating })}
+      />
+      <Link
+        to={`/parzenie/dziennik/${entry.id}`}
+        className="mt-2 inline-flex h-10 items-center gap-1 text-sm font-medium text-accent"
+      >
+        Dopisz notatkę w dzienniku
+        <ChevronRightIcon className="size-4" />
+      </Link>
+    </div>
   );
 }

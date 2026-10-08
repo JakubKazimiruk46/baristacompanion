@@ -161,3 +161,98 @@ export function BeanIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Serce (ulubione). Wypełnione: fill="currentColor". */
+export function HeartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 20.5s-7.5-4.6-7.5-10.3A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.6c0 5.7-7.5 10.3-7.5 10.3Z" />
+    </Icon>
+  );
+}
+
+export function MinusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 12h14" />
+    </Icon>
+  );
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </Icon>
+  );
+}
+
+/** Gwiazdka oceny. Wypełniona: fill="currentColor". */
+export function StarIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8L12 3.8Z" />
+    </Icon>
+  );
+}
+
+/** Notes z zakładką (dziennik parzeń). */
+export function JournalIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1.5 1.5 0 0 1-1.5-1.5v-14A1.5 1.5 0 0 1 6 3.5Z" />
+      <path d="M8.5 8h6M8.5 11.5h6M8.5 15h3.5" />
+    </Icon>
+  );
+}
+
+/** Półka ze słoikami (co mam w domu). */
+export function PantryIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 20.5h18M3 11h18" />
+      <path d="M5.5 11V6.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V11M7 5.5V4h2v1.5" />
+      <path d="M13.5 11V8a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3" />
+      <path d="M5 20.5V16a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4.5M14 20.5v-6l2-1.5 2 1.5v6" />
+    </Icon>
+  );
+}
+
+/** Koszyk (lista zakupów). */
+export function CartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 4h2.2l2.3 11h10.2l2-8H6.3" />
+      <circle cx="9" cy="19" r="1.4" />
+      <circle cx="16.5" cy="19" r="1.4" />
+    </Icon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </Icon>
+  );
+}
+
+/** Strzałka z pudełka (udostępnij). */
+export function ShareIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 15V3.5M8 7.5l4-4 4 4" />
+      <path d="M7 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7.5A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5h-1" />
+    </Icon>
+  );
+}
+
+/** Aparat (skan etykiety). */
+export function CameraIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.3l1.4-2h5.6l1.4 2h2.3A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9Z" />
+      <circle cx="12" cy="12.5" r="3.5" />
+    </Icon>
+  );
+}

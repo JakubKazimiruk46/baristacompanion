@@ -1,7 +1,10 @@
 import { Link } from 'react-router';
 import { BeanIcon, BrewIcon, ChevronRightIcon, DrinkIcon } from '../components/icons';
+import { Section } from '../components/Section';
 import { getDrink } from '../data';
 import { ColdBrewBadge } from '../features/coldbrew/ColdBrewLinks';
+import { DrinkCard } from '../features/drinks/DrinkCard';
+import { useFavorites } from '../features/favorites/store';
 import { flowStore } from '../features/flow/store';
 import { DrinkGlass } from '../features/glass/DrinkGlass';
 
@@ -47,6 +50,8 @@ export function StartPage() {
         <ColdBrewBadge link />
       </div>
 
+      <FavoriteDrinks />
+
       <nav aria-label="Na skróty" className="mt-6">
         <ul className="space-y-3">
           {SHORTCUTS.map(({ to, label, hint, Icon }) => (
@@ -70,5 +75,34 @@ export function StartPage() {
         </ul>
       </nav>
     </>
+  );
+}
+
+const FAVORITES_ON_START = 3;
+
+/** Ulubione napoje na skróty: kilka ostatnio dodanych i link do wszystkich. */
+function FavoriteDrinks() {
+  const ids = useFavorites();
+  if (ids.length === 0) return null;
+  const shown = ids.slice(0, FAVORITES_ON_START).map((id) => getDrink(id)!);
+  return (
+    <Section
+      title="Twoje ulubione"
+      action={
+        ids.length > FAVORITES_ON_START && (
+          <Link to="/napoje?ulubione=1" className="text-sm font-medium text-accent">
+            Wszystkie ({ids.length})
+          </Link>
+        )
+      }
+    >
+      <ul className="space-y-3">
+        {shown.map((drink) => (
+          <li key={drink.id}>
+            <DrinkCard drink={drink} from="/" />
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }

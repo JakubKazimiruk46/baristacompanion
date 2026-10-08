@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
+import { Section } from '../components/Section';
 import { Sheet } from '../components/Sheet';
 import { BeanSummary } from '../features/beans/BeanSummary';
 import { MethodRanking } from '../features/beans/MethodRanking';
 import { beansStore, useBeans } from '../features/beans/store';
+import { EntryCard } from '../features/journal/EntryCard';
+import { useJournal } from '../features/journal/store';
+import { useNow } from '../lib/useNow';
 import { NotFoundPage } from './NotFoundPage';
 
 const secondary =
@@ -42,6 +46,8 @@ export function BeanPage() {
         {showRanking && <MethodRanking profile={bean.profile} />}
       </section>
 
+      <BeanBrews beanId={bean.id} />
+
       <div className="mt-6 flex gap-3">
         <Link to={`/ziarna/${bean.id}/edycja`} className={secondary}>
           Edytuj
@@ -70,5 +76,25 @@ export function BeanPage() {
         </div>
       </Sheet>
     </>
+  );
+}
+
+const BREWS_SHOWN = 5;
+
+/** Parzenia tych ziaren z dziennika (wybrane na ekranie końcowym albo w ścieżce „Mam kawę”). */
+function BeanBrews({ beanId }: { beanId: string }) {
+  const entries = useJournal().filter((entry) => entry.beanId === beanId);
+  const now = useNow(60_000);
+  if (entries.length === 0) return null;
+  return (
+    <Section title="Z dziennika parzeń">
+      <ul className="space-y-3">
+        {entries.slice(0, BREWS_SHOWN).map((entry) => (
+          <li key={entry.id}>
+            <EntryCard entry={entry} now={now} heading="h3" />
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }

@@ -36,7 +36,9 @@ const fixtures = [
     id: 'zimna-ze-smietana',
     temperature: 'cold',
     prepTimeMin: 25,
-    extras: [{ kind: 'cream', name: 'śmietana', amount: '50 ml', dairy: true }],
+    extras: [
+      { kind: 'cream', ingredientId: 'smietanka-30', name: 'śmietana', amount: '50 ml', dairy: true },
+    ],
   }),
   drink({ id: 'zimna-czarna', temperature: 'cold', prepTimeMin: 960 }),
 ];
@@ -92,6 +94,15 @@ describe('filterDrinks', () => {
     ).toEqual(['zimna-z-owsianym']);
   });
 
+  it('ulubione: tylko napoje z listy, razem z innymi filtrami', () => {
+    const favoriteIds = ['goraca-czarna', 'zimna-czarna'];
+    expect(ids(filterDrinks(fixtures, { favorites: true }, { favoriteIds }))).toEqual(favoriteIds);
+    expect(ids(filterDrinks(fixtures, { favorites: true, temperature: 'cold' }, { favoriteIds }))).toEqual([
+      'zimna-czarna',
+    ]);
+    expect(filterDrinks(fixtures, { favorites: true })).toEqual([]);
+  });
+
   it('na prawdziwych danych: zimne + roślinne wyklucza kawę mrożoną z bitą śmietaną', () => {
     const result = ids(filterDrinks(drinks, { temperature: 'cold', plantBased: true }));
     expect(result).toContain('espresso-tonic');
@@ -102,9 +113,16 @@ describe('filterDrinks', () => {
 
 describe('filtry w adresie', () => {
   it('zapis i odczyt dają te same filtry', () => {
-    const filters = { temperature: 'cold', milk: 'without', plantBased: true, maxTimeMin: 10 } as const;
+    const filters = {
+      favorites: true,
+      available: true,
+      temperature: 'cold',
+      milk: 'without',
+      plantBased: true,
+      maxTimeMin: 10,
+    } as const;
     const params = filtersToParams(filters);
-    expect(params.toString()).toBe('temp=zimne&mleko=bez&roslinne=1&czas=10');
+    expect(params.toString()).toBe('ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10');
     expect(filtersFromParams(params)).toEqual(filters);
   });
 

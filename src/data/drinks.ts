@@ -22,8 +22,13 @@ export const drinks: Drink[] = [
       note: 'Kawa z kawiarki zamiast espresso. Pasują owocowe, średnio palone ziarna.',
     },
     extras: [
-      { kind: 'mixer', name: 'tonik, dobrze schłodzony', amount: '150 ml' },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      {
+        kind: 'mixer',
+        ingredientId: 'tonik',
+        name: 'tonik, dobrze schłodzony',
+        amount: { value: 150, unit: 'ml' },
+      },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -70,10 +75,11 @@ export const drinks: Drink[] = [
       { kind: 'syrup', syrupId: 'pomaranczowy', amountMl: 15 },
       {
         kind: 'mixer',
+        ingredientId: 'sok-pomaranczowy',
         name: 'sok pomarańczowy, najlepiej świeżo wyciśnięty',
-        amount: '100 ml',
+        amount: { value: 100, unit: 'ml' },
       },
-      { kind: 'ice', name: 'lód', amount: '3–4 kostki' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['niska szklanka', 'łyżka', 'talerzyk na cukier'],
     layers: [
@@ -156,7 +162,7 @@ export const drinks: Drink[] = [
     base: {
       methodId: 'kawiarka',
       amountMl: 40,
-      alternativeMethodIds: ['aeropress'],
+      alternativeMethodIds: ['aeropress', 'phin'],
       note: 'Kawa z kawiarki zamiast espresso.',
     },
     milk: { options: ['skondensowane', 'skondensowane-kokosowe'], amountMl: 30, prep: 'plain' },
@@ -194,9 +200,15 @@ export const drinks: Drink[] = [
     },
     milk: { options: ['krowie', 'owsiane-barista', 'migdalowe'], amountMl: 150, prep: 'blend' },
     extras: [
-      { kind: 'fruit', name: 'maliny (mogą być mrożone)', amount: '60 g', blended: true },
+      {
+        kind: 'fruit',
+        ingredientId: 'maliny',
+        name: 'maliny (mogą być mrożone)',
+        amount: { value: 60, unit: 'g' },
+        blended: true,
+      },
       { kind: 'syrup', syrupId: 'malinowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: '3–4 kostki' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'blender'],
     layers: [
@@ -245,8 +257,9 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
         name: 'lody waniliowe (mogą być roślinne)',
-        amount: '2 gałki',
+        amount: { value: 2, unit: 'scoop' },
         blended: true,
       },
     ],
@@ -393,10 +406,20 @@ export const drinks: Drink[] = [
       note: 'Koncentrat cold brew, w którym macerował się cynamon.',
     },
     extras: [
-      { kind: 'spice', name: 'laska cynamonu do maceracji', amount: '1 laska na 800 ml wody' },
-      { kind: 'mixer', name: 'zimna woda', amount: '100 ml' },
+      {
+        kind: 'spice',
+        ingredientId: 'laska-cynamonu',
+        name: 'laska cynamonu do maceracji',
+        amount: '1 laska na 800 ml wody',
+      },
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'zimna woda',
+        amount: { value: 100, unit: 'ml' },
+      },
       { kind: 'syrup', syrupId: 'cynamonowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['niska szklanka'],
     layers: [{ name: 'cold brew', volumeMl: 200, color: '#3d2416', kind: 'liquid' }],
@@ -439,10 +462,11 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'spice',
+        ingredientId: 'kardamon',
         name: 'zielony kardamon, lekko zgnieciony, do maceracji',
         amount: '4–5 strąków na 800 ml wody',
       },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -535,7 +559,7 @@ export const drinks: Drink[] = [
     },
     extras: [
       { kind: 'syrup', syrupId: 'karmelowy', amountMl: 20 },
-      { kind: 'ice', name: 'lód', amount: 'pełna szklanka' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: 'pełna szklanka' },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -578,7 +602,12 @@ export const drinks: Drink[] = [
       note: 'Kawa z kawiarki zamiast espresso, podana gorąca.',
     },
     extras: [
-      { kind: 'ice-cream', name: 'lody waniliowe (mogą być roślinne)', amount: '1–2 gałki' },
+      {
+        kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
+        name: 'lody waniliowe (mogą być roślinne)',
+        amount: { value: 1, max: 2, unit: 'scoop' },
+      },
     ],
     equipment: ['pucharek lub niska szklanka', 'łyżeczka'],
     layers: [
@@ -617,7 +646,14 @@ export const drinks: Drink[] = [
     temperature: 'hot',
     prepTimeMin: 10,
     base: { methodId: 'kawiarka', amountMl: 60, alternativeMethodIds: ['aeropress'] },
-    extras: [{ kind: 'mixer', name: 'gorąca woda', amount: '120 ml' }],
+    extras: [
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'gorąca woda',
+        amount: { value: 120, unit: 'ml' },
+      },
+    ],
     equipment: ['filiżanka lub kubek', 'czajnik'],
     layers: [{ name: 'kawa', volumeMl: 180, color: '#3f2416', kind: 'liquid' }],
     steps: [
@@ -646,8 +682,18 @@ export const drinks: Drink[] = [
       note: 'Zaparz mocniej niż zwykle: 15 g kawy na 150 ml gorącej wody i 100 g lodu w dzbanku.',
     },
     extras: [
-      { kind: 'ice', name: 'lód do dzbanka', amount: '100 g' },
-      { kind: 'ice', name: 'lód do szklanki', amount: '3–4 kostki' },
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód do dzbanka',
+        amount: { value: 100, unit: 'g' },
+      },
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód do szklanki',
+        amount: { value: 3, max: 4, unit: 'cube' },
+      },
     ],
     equipment: ['dzbanek', 'niska szklanka'],
     layers: [{ name: 'kawa mrożona', volumeMl: 220, color: '#6b3a1f', kind: 'liquid' }],
@@ -715,8 +761,19 @@ export const drinks: Drink[] = [
       note: 'Mocna kawa z kawiarki. Jeśli wolisz łagodniej, dolej trochę gorącej wody.',
     },
     extras: [
-      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: '100 ml', dairy: true },
-      { kind: 'other', name: 'cukier puder', amount: '1 łyżeczka' },
+      {
+        kind: 'cream',
+        ingredientId: 'smietanka-30',
+        name: 'śmietanka 30%, ubita',
+        amount: { value: 100, unit: 'ml' },
+        dairy: true,
+      },
+      {
+        kind: 'other',
+        ingredientId: 'cukier-puder',
+        name: 'cukier puder',
+        amount: { value: 1, unit: 'tsp' },
+      },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka'],
     layers: [
@@ -759,8 +816,19 @@ export const drinks: Drink[] = [
     },
     milk: { options: ['krowie'], amountMl: 50, prep: 'warm' },
     extras: [
-      { kind: 'other', name: 'gorzka czekolada', amount: '30 g' },
-      { kind: 'cream', name: 'śmietanka 30%, lekko ubita', amount: '40 ml', dairy: true },
+      {
+        kind: 'other',
+        ingredientId: 'gorzka-czekolada',
+        name: 'gorzka czekolada',
+        amount: { value: 30, unit: 'g' },
+      },
+      {
+        kind: 'cream',
+        ingredientId: 'smietanka-30',
+        name: 'śmietanka 30%, lekko ubita',
+        amount: { value: 40, unit: 'ml' },
+        dairy: true,
+      },
     ],
     equipment: ['mała szklanka', 'rondelek', 'trzepaczka', 'łyżeczka'],
     layers: [
@@ -795,8 +863,19 @@ export const drinks: Drink[] = [
       note: 'Mocna kawa z kawiarki, schłodzona przed dodaniem.',
     },
     extras: [
-      { kind: 'ice-cream', name: 'lody waniliowe', amount: '2 gałki' },
-      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: '80 ml', dairy: true },
+      {
+        kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
+        name: 'lody waniliowe',
+        amount: { value: 2, unit: 'scoop' },
+      },
+      {
+        kind: 'cream',
+        ingredientId: 'smietanka-30',
+        name: 'śmietanka 30%, ubita',
+        amount: { value: 80, unit: 'ml' },
+        dairy: true,
+      },
       { kind: 'syrup', syrupId: 'czekoladowy', amountMl: 10, optional: true },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka', 'długa łyżeczka', 'słomka'],
@@ -825,5 +904,101 @@ export const drinks: Drink[] = [
         },
       ],
     },
+  },
+  {
+    id: 'kawa-po-turecku',
+    name: 'Kawa po turecku',
+    tagline: 'Gęsta kawa z tygielka, z pianką i kardamonem',
+    description:
+      'Mocna, gęsta kawa parzona w tygielku, często z cukrem i szczyptą kardamonu. Podawana w małej filiżance ze szklanką zimnej wody i czymś słodkim. Fusy zostają na dnie.',
+    temperature: 'hot',
+    prepTimeMin: 8,
+    base: {
+      methodId: 'tygielek',
+      amountMl: 60,
+      note: 'Cukier i kardamon wsypuje się do tygielka razem z kawą, przed podgrzewaniem.',
+    },
+    extras: [
+      {
+        kind: 'other',
+        ingredientId: 'cukier',
+        name: 'cukier, do tygielka',
+        amount: { value: 1, unit: 'tsp' },
+        optional: true,
+      },
+      {
+        kind: 'spice',
+        ingredientId: 'kardamon-mielony',
+        name: 'mielony kardamon, do tygielka',
+        amount: 'szczypta',
+        optional: true,
+      },
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'zimna woda do popicia',
+        amount: { value: 150, unit: 'ml' },
+      },
+    ],
+    equipment: ['tygielek (cezve)', 'mała filiżanka', 'szklanka na wodę'],
+    layers: [
+      { name: 'kawa z fusami', volumeMl: 50, color: '#3a2014', kind: 'liquid' },
+      { name: 'pianka', volumeMl: 10, color: '#8a5a3a', kind: 'foam' },
+    ],
+    steps: [
+      'Wsyp do tygielka kawę, a jeśli lubisz, także cukier i szczyptę kardamonu.',
+      'Zaparz kawę w tygielku (przepis w metodzie).',
+      'Rozłóż piankę łyżeczką do filiżanki, a potem powoli dolej kawę.',
+      'Podaj ze szklanką zimnej wody i odczekaj minutę, aż fusy opadną.',
+    ],
+    serving: {
+      vessel: 'espresso-cup',
+      why: 'Mała filiżanka, bo kawa jest gęsta i mocna. Obok szklanka zimnej wody i coś słodkiego, np. lokum.',
+      decorations: [],
+    },
+    needsReview: true,
+    reviewNote: 'Ilość cukru i kardamonu do sprawdzenia.',
+  },
+  {
+    id: 'kawa-po-wietnamsku',
+    name: 'Kawa po wietnamsku',
+    tagline: 'Kawa z phin na mleku skondensowanym, z lodem',
+    description:
+      'Cà phê sữa đá: mocna kawa kapie z phin prosto na słodkie mleko skondensowane, a po zamieszaniu trafia na lód. Słodka, gęsta i bardzo orzeźwiająca.',
+    temperature: 'cold',
+    prepTimeMin: 10,
+    base: {
+      methodId: 'phin',
+      amountMl: 70,
+      alternativeMethodIds: ['kawiarka', 'aeropress'],
+      note: 'Bez phin zrób mocną kawę w kawiarce albo w AeroPressie.',
+    },
+    milk: { options: ['skondensowane', 'skondensowane-kokosowe'], amountMl: 30, prep: 'plain' },
+    extras: [
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód',
+        amount: { value: 5, max: 6, unit: 'cube' },
+      },
+    ],
+    equipment: ['phin', 'niska szklanka', 'długa łyżeczka'],
+    layers: [
+      { name: 'mleko skondensowane', volumeMl: 30, color: '#f1e2bd', kind: 'liquid' },
+      { name: 'kawa', volumeMl: 70, color: '#2f1a10', kind: 'liquid' },
+    ],
+    steps: [
+      'Wlej mleko skondensowane na dno szklanki.',
+      'Postaw phin na szklance i zaparz kawę prosto na mleko. Zanim zamieszasz, pokaż gościom dwie warstwy.',
+      'Zamieszaj, aż kawa połączy się z mlekiem i nabierze karmelowego koloru.',
+      'Wsyp lód i zamieszaj jeszcze raz.',
+    ],
+    serving: {
+      vessel: 'low-glass',
+      why: 'Niska szklanka mieści lód. Przed zamieszaniem widać białą i czarną warstwę, a potem karmelowy kolor.',
+      decorations: [],
+    },
+    needsReview: true,
+    reviewNote: 'Proporcja mleka skondensowanego do kawy do sprawdzenia: w Wietnamie bywa nawet 1:2.',
   },
 ];

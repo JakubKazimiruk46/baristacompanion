@@ -12,13 +12,15 @@ import {
   drinksForMethod,
   getColdBrewVariant,
   getDrink,
+  variantTitle,
   type BrewMethod,
   type BrewStep,
-  type ColdBrewVariant,
 } from '../../data';
 import { useNow } from '../../lib/useNow';
+import { formatGrams } from '../brewing/dose';
 import { formatRatio } from '../brewing/format';
 import { DrinkCard } from '../drinks/DrinkCard';
+import { journalStore } from '../journal/store';
 import { createIcs, downloadIcs } from './ics';
 import { coldBrewStore, useColdBrew, type ColdBrewRun } from './store';
 import { dayAndTime, formatRemaining, isReady, progress, readyAt } from './time';
@@ -33,9 +35,6 @@ function splitSteps(method: BrewMethod) {
   const index = method.steps.findIndex((step) => (step.durationSec ?? 0) >= 3600);
   return { before: method.steps.slice(0, index), after: method.steps.slice(index + 1) };
 }
-
-export const variantTitle = (variant: ColdBrewVariant) =>
-  variant.spice ? `Cold brew ${variant.name.toLowerCase()}` : 'Cold brew';
 
 /** Cold brew maceruje się 12–24 h: zamiast stopera zapisujemy start i pokazujemy godzinę gotowości. */
 export function ColdBrewSession({ method }: { method: BrewMethod }) {
@@ -67,7 +66,7 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
       />
 
       <dl className="grid grid-cols-2 gap-3">
-        <Fact label="Kawa" value={`${method.dose.coffeeG} g, grubo`} />
+        <Fact label="Kawa" value={`${formatGrams(method.dose.coffeeG)} g, grubo`} />
         <Fact label="Woda" value={`${method.dose.waterMl} ml, zimna`} />
         <Fact label="Koncentrat" value={formatRatio(method)} />
         <Fact label="Do picia" value="rozcieńcz 1:1" />
@@ -132,7 +131,15 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
       <button
         type="button"
         className={`mt-3 ${primary}`}
-        onClick={() => coldBrewStore.set({ startedAt: Date.now(), hours, variantId })}
+        onClick={() =>
+          coldBrewStore.set({
+            startedAt: Date.now(),
+            hours,
+            variantId,
+            coffeeG: method.dose.coffeeG,
+            waterMl: method.dose.waterMl,
+          })
+        }
       >
         Zalane, zaczynam macerację
       </button>
@@ -151,9 +158,21 @@ function ColdBrewStatus({ method, run }: { method: BrewMethod; run: ColdBrewRun 
   const at = readyAt(run.startedAt, run.hours);
   const percent = Math.round(progress(run.startedAt, run.hours, now) * 100);
 
-  const finish = () => {
+  const stop = () => {
     coldBrewStore.set(null);
     navigate(`/parzenie/${method.id}`, { replace: true });
+  };
+
+  // Gotowe cold brew trafia do dziennika, a ekran wpisu pozwala je od razu ocenić.
+  const finish = () => {
+    const entry = journalStore.add({
+      methodId: method.id,
+      coffeeG: run.coffeeG ?? method.dose.coffeeG,
+      waterMl: run.waterMl ?? method.dose.waterMl,
+      variantId: run.variantId,
+    });
+    coldBrewStore.set(null);
+    navigate(`/parzenie/dziennik/${entry.id}`, { replace: true });
   };
 
   if (ready || finishing) {
@@ -258,7 +277,7 @@ function ColdBrewStatus({ method, run }: { method: BrewMethod; run: ColdBrewRun 
           <button
             type="button"
             className="flex h-12 flex-1 items-center justify-center rounded-full bg-red-700 font-semibold text-white"
-            onClick={finish}
+            onClick={stop}
           >
             Przerwij macerację
           </button>

@@ -1,11 +1,26 @@
 import { drinks } from './drinks';
+import { extraIngredients } from './ingredients';
 import { methods } from './methods';
 import { frothingMethods, frothingSummary, milks } from './milks';
 import { syrups } from './syrups';
-import type { BrewMethod, Drink, Milk, Syrup } from './types';
+import type { BrewMethod, Drink, Ingredient, Milk, Syrup } from './types';
 import { vessels } from './vessels';
 
-export { drinks, frothingMethods, frothingSummary, methods, milks, syrups, vessels };
+/** Katalog składników: mleka, syropy i dodatki napojów (półka, zakupy, zamienniki). */
+const ingredients: Ingredient[] = [
+  ...milks.map((milk): Ingredient => ({ id: milk.id, name: milk.name, group: 'milk' })),
+  ...syrups.map(
+    (syrup): Ingredient => ({
+      id: syrup.id,
+      name: syrup.name,
+      group: 'syrup',
+      ...(syrup.substitutes && { substitutes: syrup.substitutes }),
+    }),
+  ),
+  ...extraIngredients,
+];
+
+export { drinks, frothingMethods, frothingSummary, ingredients, methods, milks, syrups, vessels };
 export * from './coldBrew';
 export * from './labels';
 export * from './types';
@@ -16,11 +31,13 @@ const methodsById = byId(methods);
 const drinksById = byId(drinks);
 const milksById = byId(milks);
 const syrupsById = byId(syrups);
+const ingredientsById = byId(ingredients);
 
 export const getMethod = (id: string): BrewMethod | undefined => methodsById.get(id);
 export const getDrink = (id: string): Drink | undefined => drinksById.get(id);
 export const getMilk = (id: string): Milk | undefined => milksById.get(id);
 export const getSyrup = (id: string): Syrup | undefined => syrupsById.get(id);
+export const getIngredient = (id: string): Ingredient | undefined => ingredientsById.get(id);
 
 /** Metody, którymi da się zrobić bazę napoju: główna i alternatywne. */
 export function baseMethodIds(drink: Drink): string[] {

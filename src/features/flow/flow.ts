@@ -22,6 +22,8 @@ export interface FlowState {
   methodId?: string;
   /** Wybrany napój; null = czysta kawa bez dodatków. */
   drinkId?: string | null;
+  /** Wpis w dzienniku z parzenia w tej ścieżce (ocena na ostatnim kroku). */
+  entryId?: string;
 }
 
 export const stepPath = (step: FlowStep) => (step === 'ziarna' ? '/mam-kawe' : `/mam-kawe/${step}`);

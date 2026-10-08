@@ -6,9 +6,15 @@ export interface ColdBrewRun {
   startedAt: number;
   hours: number;
   variantId: string;
+  /** Ilości z kalkulatora w chwili zalania (do dziennika). Starsze zapisy ich nie mają. */
+  coffeeG?: number;
+  waterMl?: number;
 }
 
 export const COLD_BREW_KEY = 'barista-companion.cold-brew.v1';
+
+const optionalNumber = (value: unknown) =>
+  value === undefined || (typeof value === 'number' && Number.isFinite(value) && value > 0);
 
 function parseRun(value: unknown): ColdBrewRun | null {
   if (typeof value !== 'object' || value === null) return null;
@@ -18,7 +24,9 @@ function parseRun(value: unknown): ColdBrewRun | null {
     Number.isFinite(run.startedAt) &&
     (COLD_BREW_HOURS as readonly number[]).includes(run.hours as number) &&
     typeof run.variantId === 'string' &&
-    getColdBrewVariant(run.variantId) !== undefined;
+    getColdBrewVariant(run.variantId) !== undefined &&
+    optionalNumber(run.coffeeG) &&
+    optionalNumber(run.waterMl);
   return valid ? (run as ColdBrewRun) : null;
 }
 

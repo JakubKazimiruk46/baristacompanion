@@ -1,4 +1,5 @@
 import type {
+  AmountUnit,
   BeanProfile,
   DecorationKind,
   Difficulty,
@@ -6,6 +7,7 @@ import type {
   FrothingKind,
   FrothQuality,
   GrindSize,
+  IngredientGroup,
   MilkPrep,
   Roast,
   Temperature,
@@ -80,6 +82,26 @@ export const MILK_PREP_LABELS: Record<MilkPrep, string> = {
   warm: 'podgrzane',
   blend: 'zmiksowane',
   plain: 'prosto z lodówki',
+};
+
+export const INGREDIENT_GROUP_LABELS: Record<IngredientGroup, string> = {
+  milk: 'Mleko',
+  syrup: 'Syropy',
+  dairy: 'Śmietanka i lody',
+  fruit: 'Owoce i soki',
+  mixer: 'Napoje',
+  spice: 'Przyprawy',
+  sweet: 'Słodkie',
+  basic: 'Podstawy',
+};
+
+/** Jednostki ilości w trzech formach: 1 kostka, 2 kostki, 5 kostek. */
+export const UNIT_FORMS: Record<AmountUnit, [string, string, string]> = {
+  ml: ['ml', 'ml', 'ml'],
+  g: ['g', 'g', 'g'],
+  cube: ['kostka', 'kostki', 'kostek'],
+  scoop: ['gałka', 'gałki', 'gałek'],
+  tsp: ['łyżeczka', 'łyżeczki', 'łyżeczek'],
 };
 
 export const DECORATION_LABELS: Record<DecorationKind, string> = {

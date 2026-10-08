@@ -1,7 +1,8 @@
 import { Link } from 'react-router';
 import type { FromState } from '../../components/BackLink';
-import { ChevronRightIcon } from '../../components/icons';
+import { ChevronRightIcon, HeartIcon } from '../../components/icons';
 import type { Drink } from '../../data';
+import { useFavorites } from '../favorites/store';
 import { DrinkGlass } from '../glass/DrinkGlass';
 import { DrinkMeta } from './DrinkMeta';
 
@@ -15,6 +16,7 @@ type DrinkCardProps = {
 };
 
 export function DrinkCard({ drink, from, to, onSelect }: DrinkCardProps) {
+  const favorite = useFavorites().includes(drink.id);
   return (
     <Link
       to={to ?? `/napoje/${drink.id}`}
@@ -31,6 +33,12 @@ export function DrinkCard({ drink, from, to, onSelect }: DrinkCardProps) {
           <DrinkMeta drink={drink} />
         </div>
       </div>
+      {favorite && (
+        <span className="shrink-0 text-accent">
+          <HeartIcon className="size-5" fill="currentColor" />
+          <span className="sr-only">Ulubiony</span>
+        </span>
+      )}
       <ChevronRightIcon className="size-5 shrink-0 text-ink-muted" />
     </Link>
   );

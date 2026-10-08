@@ -1,18 +1,31 @@
 import { hasMilk, isPlantBasedPossible, type Drink, type Temperature } from '../../data';
+import { canMake } from '../shelf/availability';
+import { DEFAULT_SHELF, type Shelf } from '../shelf/store';
 
 export const TIME_LIMITS = [10, 15, 30] as const;
 export type TimeLimit = (typeof TIME_LIMITS)[number];
 
 export interface DrinkFilters {
+  favorites?: boolean;
+  /** Tylko napoje, które da się zrobić z tego, co jest w domu. */
+  available?: boolean;
   temperature?: Temperature;
   milk?: 'with' | 'without';
   plantBased?: boolean;
   maxTimeMin?: TimeLimit;
 }
 
+/** Stan użytkownika, którego potrzebują niektóre filtry. */
+export interface FilterContext {
+  favoriteIds?: string[];
+  shelf?: Shelf;
+}
+
 /** Wszystkie filtry działają razem (AND). */
-export function filterDrinks(list: Drink[], filters: DrinkFilters): Drink[] {
+export function filterDrinks(list: Drink[], filters: DrinkFilters, context: FilterContext = {}): Drink[] {
   return list.filter((drink) => {
+    if (filters.favorites && !context.favoriteIds?.includes(drink.id)) return false;
+    if (filters.available && !canMake(drink, context.shelf ?? DEFAULT_SHELF)) return false;
     if (filters.temperature && drink.temperature !== filters.temperature) return false;
     if (filters.milk === 'with' && !hasMilk(drink)) return false;
     if (filters.milk === 'without' && hasMilk(drink)) return false;
@@ -26,7 +39,7 @@ export function hasActiveFilters(filters: DrinkFilters): boolean {
   return Object.values(filters).some((value) => value !== undefined && value !== false);
 }
 
-// Filtry trzymamy w adresie (?temp=zimne&mleko=bez&roslinne=1&czas=10),
+// Filtry trzymamy w adresie (?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10),
 // więc po powrocie z ekranu napoju lista wygląda tak samo.
 
 const TEMP_PARAM: Record<Temperature, string> = { hot: 'cieple', cold: 'zimne' };
@@ -40,6 +53,8 @@ export function filtersFromParams(params: URLSearchParams): DrinkFilters {
   const milk = invert(MILK_PARAM)[params.get('mleko') ?? ''];
   const time = Number(params.get('czas'));
   const filters: DrinkFilters = {};
+  if (params.get('ulubione') === '1') filters.favorites = true;
+  if (params.get('mam') === '1') filters.available = true;
   if (temperature) filters.temperature = temperature;
   if (milk) filters.milk = milk;
   if (params.get('roslinne') === '1') filters.plantBased = true;
@@ -49,6 +64,8 @@ export function filtersFromParams(params: URLSearchParams): DrinkFilters {
 
 export function filtersToParams(filters: DrinkFilters): URLSearchParams {
   const params = new URLSearchParams();
+  if (filters.favorites) params.set('ulubione', '1');
+  if (filters.available) params.set('mam', '1');
   if (filters.temperature) params.set('temp', TEMP_PARAM[filters.temperature]);
   if (filters.milk) params.set('mleko', MILK_PARAM[filters.milk]);
   if (filters.plantBased) params.set('roslinne', '1');

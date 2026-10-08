@@ -11,6 +11,20 @@ export const methods: BrewMethod[] = [
     equipment: ['kawiarka (np. na 3 filiżanki)', 'młynek', 'czajnik', 'kuchenka'],
     grind: 'fine',
     dose: { coffeeG: 17, waterMl: 150 },
+    scaling: {
+      servingMl: 75,
+      waterMl: { min: 50, max: 450 },
+      stepMl: 50,
+      sizes: [
+        { label: 'na 1 filiżankę', waterMl: 50 },
+        { label: 'na 2 filiżanki', waterMl: 100 },
+        { label: 'na 3 filiżanki', waterMl: 150 },
+        { label: 'na 4 filiżanki', waterMl: 200 },
+        { label: 'na 6 filiżanek', waterMl: 300 },
+        { label: 'na 9 filiżanek', waterMl: 450 },
+      ],
+      note: 'Kawiarka parzy zawsze tyle, ile mieści: sitko napełniasz do pełna, a wodę wlewasz do zaworu. Wybierz rozmiar swojej kawiarki.',
+    },
     waterTempC: { min: 90, max: 100 },
     totalTimeSec: 480,
     difficulty: 'easy',
@@ -34,7 +48,7 @@ export const methods: BrewMethod[] = [
       {
         text: 'Wsyp kawę do sitka i wyrównaj',
         detail:
-          'Do pełna, ale bez ubijania. Przetrzyj brzeg sitka, żeby uszczelka dobrze przylegała.',
+          'Ok. {coffee} g: do pełna, ale bez ubijania. Przetrzyj brzeg sitka, żeby uszczelka dobrze przylegała.',
         action: true,
       },
       {
@@ -61,7 +75,7 @@ export const methods: BrewMethod[] = [
     ],
     needsReview: true,
     reviewNote:
-      'Woda gorąca czy zimna? Przyjęto gorącą z czajnika (krócej na ogniu, mniej goryczy); część poradników każe nalewać zimną.',
+      'Woda gorąca czy zimna? Przyjęto gorącą z czajnika (krócej na ogniu, mniej goryczy); część poradników każe nalewać zimną. Rozmiary kawiarek: przyjęto ok. 50 ml wody na filiżankę.',
   },
   {
     id: 'prasa-francuska',
@@ -73,6 +87,12 @@ export const methods: BrewMethod[] = [
     equipment: ['prasa francuska', 'młynek', 'czajnik', 'łyżka'],
     grind: 'coarse',
     dose: { coffeeG: 30, waterMl: 500 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 250, max: 1000 },
+      stepMl: 50,
+      note: 'Mała prasa mieści ok. 350 ml, duża ok. 1 litra. Wody nalej najwyżej do dolnej krawędzi metalowej obręczy.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 600,
     difficulty: 'easy',
@@ -88,9 +108,9 @@ export const methods: BrewMethod[] = [
         durationSec: 30,
         action: true,
       },
-      { text: 'Wsyp 30 g grubo zmielonej kawy do dzbanka', action: true },
+      { text: 'Wsyp {coffee} g grubo zmielonej kawy do dzbanka', action: true },
       {
-        text: 'Zalej 500 ml wody',
+        text: 'Zalej {water} ml wody',
         detail: 'Zalej całą kawę równomiernie. Nie wkładaj jeszcze tłoka.',
         action: true,
       },
@@ -137,6 +157,12 @@ export const methods: BrewMethod[] = [
     equipment: ['szklanka lub kubek', 'czajnik', 'spodek do przykrycia', 'łyżeczka'],
     grind: 'medium-fine',
     dose: { coffeeG: 12, waterMl: 200 },
+    scaling: {
+      servingMl: 200,
+      waterMl: { min: 150, max: 350 },
+      stepMl: 25,
+      note: 'Jedna szklanka albo kubek na osobę. Dla kilku osób przygotuj kilka szklanek.',
+    },
     waterTempC: { min: 90, max: 96 },
     totalTimeSec: 360,
     difficulty: 'easy',
@@ -147,12 +173,12 @@ export const methods: BrewMethod[] = [
     },
     steps: [
       {
-        text: 'Wsyp 2 płaskie łyżki kawy do szklanki',
-        detail: 'Ok. 12 g na 200 ml wody.',
+        text: 'Wsyp {coffee} g kawy do szklanki',
+        detail: 'Bez wagi: płaska łyżka to ok. 6 g.',
         action: true,
       },
       {
-        text: 'Zalej gorącą wodą, nie wrzątkiem',
+        text: 'Zalej {water} ml gorącej wody, nie wrzątku',
         detail: 'Odczekaj chwilę po zagotowaniu. Wrzątek parzy kawę zbyt gorzko.',
         action: true,
       },
@@ -175,6 +201,69 @@ export const methods: BrewMethod[] = [
       'Mielenie: przyjęto średnio-drobno. Tradycyjnie bardzo drobno („po turecku”), ale wtedy w naparze jest więcej fusów.',
   },
   {
+    id: 'tygielek',
+    name: 'Tygielek',
+    brewName: 'kawa z tygielka',
+    inMethod: 'w tygielku',
+    description:
+      'Kawa po turecku: zmielona na pył kawa podgrzewana powoli z zimną wodą w małym tygielku (cezve). Wychodzi gęsta i mocna, z drobną pianką na wierzchu i fusami na dnie filiżanki.',
+    equipment: ['tygielek (cezve)', 'młynek, który mieli na pył', 'łyżeczka', 'kuchenka', 'małe filiżanki'],
+    grind: 'extra-fine',
+    dose: { coffeeG: 7, waterMl: 70 },
+    scaling: {
+      servingMl: 70,
+      waterMl: { min: 70, max: 280 },
+      stepMl: 70,
+      note: 'Tygielek parzy 1–4 filiżanek naraz. Wody nalej najwyżej do najwęższego miejsca: pianka potrzebuje miejsca.',
+    },
+    waterTempC: { min: 10, max: 20 },
+    totalTimeSec: 300,
+    difficulty: 'medium',
+    suits: {
+      roasts: ['medium', 'dark'],
+      notes: ['chocolate', 'nutty', 'spicy'],
+      why: 'Kawa długo grzeje się razem z fusami, więc oddaje dużo smaku. Średnie i ciemne palenie wychodzi gęsto i czekoladowo, a korzenne nuty pasują do kardamonu, z którym często się ją parzy. Jasne palenie bywa tu ostre i kwaśne.',
+    },
+    steps: [
+      {
+        text: 'Wsyp {coffee} g kawy do tygielka',
+        detail: 'Zmielonej na pył, jak mąka. Jeśli słodzisz, dosyp cukier teraz: ok. łyżeczka na filiżankę.',
+        action: true,
+      },
+      {
+        text: 'Zalej {water} ml zimnej wody i zamieszaj',
+        detail: 'Mieszaj tylko teraz, aż kawa połączy się z wodą. Później już nie mieszaj.',
+        action: true,
+      },
+      {
+        text: 'Podgrzewaj na najmniejszym ogniu',
+        detail: 'Powoli: na powierzchni zbiera się ciemna, drobna pianka. Nie odchodź od kuchenki.',
+        durationSec: 150,
+        action: false,
+      },
+      {
+        text: 'Gdy pianka zacznie rosnąć, zdejmij z ognia',
+        detail: 'Zanim kawa się zagotuje i wykipi. Rozłóż łyżeczką trochę pianki do filiżanek.',
+        action: true,
+      },
+      {
+        text: 'Postaw z powrotem, aż pianka znów się podniesie',
+        detail: 'Tylko kilkanaście sekund. Wrzenie zniszczyłoby piankę.',
+        durationSec: 20,
+        action: true,
+      },
+      {
+        text: 'Powoli przelej do filiżanek i odczekaj',
+        detail: 'Fusy opadną na dno. Pij małymi łykami i zostaw fusy w filiżance.',
+        durationSec: 60,
+        action: false,
+      },
+    ],
+    needsReview: true,
+    reviewNote:
+      'Proporcja 7 g na 70 ml, czas podgrzewania i to, czy piankę podnosi się raz, czy dwa razy, do sprawdzenia.',
+  },
+  {
     id: 'drip',
     name: 'Drip (V60)',
     brewName: 'kawa z dripa',
@@ -190,6 +279,12 @@ export const methods: BrewMethod[] = [
     ],
     grind: 'medium-fine',
     dose: { coffeeG: 15, waterMl: 250 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 150, max: 500 },
+      stepMl: 50,
+      note: 'V60 01 mieści do ok. 300 ml, V60 02 do ok. 500 ml. Przy większej ilości parzenie trwa dłużej.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 300,
     difficulty: 'medium',
@@ -205,24 +300,24 @@ export const methods: BrewMethod[] = [
         action: true,
       },
       {
-        text: 'Wsyp 15 g kawy i wyrównaj',
+        text: 'Wsyp {coffee} g kawy i wyrównaj',
         detail: 'Postaw całość na wadze i wytaruj ją.',
         action: true,
       },
       {
-        text: 'Zalej 40 ml wody i odczekaj',
+        text: 'Zalej {water*0.16} ml wody i odczekaj',
         detail: 'Zwilż całą kawę. Napęcznieje i uwolni dwutlenek węgla (to tzw. bloom).',
         durationSec: 40,
         action: true,
       },
       {
-        text: 'Dolewaj powoli wodę do 150 ml',
+        text: 'Dolewaj powoli wodę do {water*0.6} ml',
         detail: 'Lej ruchem okrężnym, od środka na zewnątrz, omijając ścianki filtra.',
         durationSec: 30,
         action: true,
       },
       {
-        text: 'Dolej resztę do 250 ml',
+        text: 'Dolej resztę do {water} ml',
         detail: 'Na koniec delikatnie zakręć dripem, żeby wyrównać kawę.',
         durationSec: 30,
         action: true,
@@ -238,6 +333,69 @@ export const methods: BrewMethod[] = [
     ],
   },
   {
+    id: 'kalita',
+    name: 'Kalita Wave',
+    brewName: 'kawa z Kality',
+    inMethod: 'w Kalicie',
+    description:
+      'Drip z płaskim dnem i trzema małymi otworami. Woda przepływa przez kawę równiej niż w stożkowym V60, więc łatwiej o powtarzalny, słodki napar. Dobry pierwszy przelew.',
+    equipment: [
+      'Kalita Wave (185)',
+      'filtr falowany do Kality',
+      'czajnik z wąską wylewką',
+      'waga kuchenna',
+      'dzbanek lub kubek',
+    ],
+    grind: 'medium',
+    dose: { coffeeG: 15, waterMl: 250 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 150, max: 500 },
+      stepMl: 50,
+      note: 'Kalita 155 mieści do ok. 300 ml, Kalita 185 do ok. 500 ml.',
+    },
+    waterTempC: { min: 92, max: 96 },
+    totalTimeSec: 240,
+    difficulty: 'easy',
+    suits: {
+      roasts: ['light', 'medium'],
+      notes: ['fruity', 'floral', 'caramel'],
+      why: 'Płaskie dno parzy równo i wydobywa słodycz. Jasne i średnie palenie wychodzi owocowo i kwiatowo, ale łagodniej i słodziej niż w V60.',
+    },
+    steps: [
+      {
+        text: 'Włóż filtr i przelej go gorącą wodą',
+        detail: 'Lej na środek, nie po ściankach: falowany filtr łatwo się zgniata. Wylej tę wodę.',
+        action: true,
+      },
+      {
+        text: 'Wsyp {coffee} g kawy i wyrównaj',
+        detail: 'Postaw całość na wadze i wytaruj ją.',
+        action: true,
+      },
+      {
+        text: 'Zalej {water*0.2} ml wody i odczekaj',
+        detail: 'Zwilż całą kawę: napęcznieje i uwolni dwutlenek węgla (bloom).',
+        durationSec: 30,
+        action: true,
+      },
+      {
+        text: 'Dolewaj małymi porcjami do {water} ml',
+        detail: 'Lej spokojnie w środek, małymi kółkami, co kilkanaście sekund kolejne ok. 50 ml.',
+        durationSec: 90,
+        action: true,
+      },
+      {
+        text: 'Poczekaj, aż woda przepłynie',
+        detail:
+          'Całość trwa ok. 3–3,5 minuty. Szybciej: następnym razem zmiel drobniej. Wolniej: grubiej.',
+        durationSec: 60,
+        action: false,
+      },
+      { text: 'Zdejmij Kalitę i zamieszaj kawę', action: true },
+    ],
+  },
+  {
     id: 'chemex',
     name: 'Chemex',
     brewName: 'kawa z Chemexu',
@@ -247,6 +405,12 @@ export const methods: BrewMethod[] = [
     equipment: ['Chemex', 'filtr do Chemexu', 'czajnik z wąską wylewką', 'waga kuchenna'],
     grind: 'medium-coarse',
     dose: { coffeeG: 30, waterMl: 500 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 300, max: 900 },
+      stepMl: 50,
+      note: 'Chemex na 6 filiżanek mieści ok. 900 ml. Poniżej 300 ml gruby filtr parzy za szybko.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 420,
     difficulty: 'medium',
@@ -261,15 +425,15 @@ export const methods: BrewMethod[] = [
         detail: 'Potrójna warstwa filtra od strony dzióbka. Wylej wodę dzióbkiem, nie wyjmując filtra.',
         action: true,
       },
-      { text: 'Wsyp 30 g kawy i wyrównaj', action: true },
-      { text: 'Zalej 60 ml wody i odczekaj', durationSec: 45, action: true },
+      { text: 'Wsyp {coffee} g kawy i wyrównaj', action: true },
+      { text: 'Zalej {water*0.12} ml wody i odczekaj', durationSec: 45, action: true },
       {
-        text: 'Dolewaj powoli do 300 ml',
+        text: 'Dolewaj powoli do {water*0.6} ml',
         detail: 'Lej spokojnie, ruchem okrężnym.',
         durationSec: 45,
         action: true,
       },
-      { text: 'Dolej resztę do 500 ml', durationSec: 45, action: true },
+      { text: 'Dolej resztę do {water} ml', durationSec: 45, action: true },
       {
         text: 'Poczekaj, aż woda przepłynie',
         detail:
@@ -278,6 +442,60 @@ export const methods: BrewMethod[] = [
         action: false,
       },
       { text: 'Wyjmij filtr i zakołysz dzbankiem', action: true },
+    ],
+  },
+  {
+    id: 'clever',
+    name: 'Clever Dripper',
+    brewName: 'kawa z Clevera',
+    inMethod: 'w Cleverze',
+    description:
+      'Drip z zaworem w dnie. Kawa najpierw parzy się zanurzona w wodzie jak w prasie, a potem spływa przez papierowy filtr. Smak czysty jak z przelewu, obsługa prosta jak w prasie: trudno tu coś zepsuć.',
+    equipment: ['Clever Dripper', 'filtr papierowy (rozmiar 4)', 'czajnik', 'młynek', 'kubek lub dzbanek'],
+    grind: 'medium',
+    dose: { coffeeG: 15, waterMl: 250 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 150, max: 450 },
+      stepMl: 50,
+      note: 'Duży Clever mieści ok. 500 ml, ale razem z kawą zmieści się ok. 450 ml wody.',
+    },
+    waterTempC: { min: 92, max: 96 },
+    totalTimeSec: 270,
+    difficulty: 'easy',
+    suits: {
+      roasts: ['light', 'medium'],
+      notes: ['fruity', 'caramel', 'floral'],
+      why: 'Zanurzenie wydobywa słodycz, a papierowy filtr daje czysty napar. Jasne i średnie palenie wychodzi owocowo i słodko, a parzenie wybacza nierówne mielenie.',
+    },
+    steps: [
+      {
+        text: 'Włóż filtr i przelej go gorącą wodą',
+        detail: 'Postaw Clevera na kubku: zawór się otworzy i woda spłynie. Wylej ją.',
+        action: true,
+      },
+      {
+        text: 'Postaw Clevera na blacie i wsyp {coffee} g kawy',
+        detail: 'Na płaskim blacie zawór jest zamknięty.',
+        action: true,
+      },
+      {
+        text: 'Zalej {water} ml wody i przykryj',
+        detail: 'Lej szybko, żeby zmoczyć całą kawę.',
+        action: true,
+      },
+      { text: 'Odczekaj 2 minuty', durationSec: 120, action: false },
+      {
+        text: 'Zamieszaj delikatnie',
+        detail: 'Kilka ruchów łyżką rozbije skorupkę z kawy na powierzchni.',
+        action: true,
+      },
+      {
+        text: 'Postaw Clevera na kubku i poczekaj, aż kawa spłynie',
+        detail: 'Ok. 1–1,5 minuty. Jeśli trwa dłużej, następnym razem zmiel grubiej.',
+        durationSec: 75,
+        action: false,
+      },
     ],
   },
   {
@@ -290,6 +508,12 @@ export const methods: BrewMethod[] = [
     equipment: ['AeroPress', 'filtr papierowy do AeroPressa', 'czajnik', 'młynek', 'mocny kubek'],
     grind: 'medium-fine',
     dose: { coffeeG: 15, waterMl: 200 },
+    scaling: {
+      servingMl: 200,
+      waterMl: { min: 100, max: 250 },
+      stepMl: 25,
+      note: 'AeroPress mieści ok. 250 ml. Mniej wody to mocniejszy napar, dobry do drinków.',
+    },
     waterTempC: { min: 85, max: 95 },
     totalTimeSec: 240,
     difficulty: 'easy',
@@ -300,9 +524,9 @@ export const methods: BrewMethod[] = [
     },
     steps: [
       { text: 'Włóż filtr do sitka i przelej go gorącą wodą', action: true },
-      { text: 'Postaw AeroPress na kubku i wsyp 15 g kawy', action: true },
+      { text: 'Postaw AeroPress na kubku i wsyp {coffee} g kawy', action: true },
       {
-        text: 'Zalej 200 ml wody i zamieszaj',
+        text: 'Zalej {water} ml wody i zamieszaj',
         detail: 'Kilka energicznych ruchów łyżką, żeby zmoczyć całą kawę.',
         action: true,
       },
@@ -321,6 +545,143 @@ export const methods: BrewMethod[] = [
     ],
   },
   {
+    id: 'phin',
+    name: 'Phin',
+    brewName: 'kawa z phin',
+    inMethod: 'w phin',
+    description:
+      'Wietnamski metalowy filtr stawiany prosto na szklance. Woda powoli przesącza się przez kawę dociśniętą sitkiem, więc napar jest mocny i gęsty. W Wietnamie kapie prosto na słodkie mleko skondensowane.',
+    equipment: ['phin (wietnamski filtr)', 'czajnik', 'szklanka lub kubek', 'młynek'],
+    grind: 'medium',
+    dose: { coffeeG: 20, waterMl: 100 },
+    scaling: {
+      servingMl: 100,
+      waterMl: { min: 80, max: 150 },
+      stepMl: 10,
+      note: 'Phin parzy jedną porcję. Na kilka osób parz po kolei, każdą prosto do szklanki.',
+    },
+    waterTempC: { min: 92, max: 96 },
+    totalTimeSec: 360,
+    difficulty: 'easy',
+    suits: {
+      roasts: ['medium', 'dark'],
+      notes: ['chocolate', 'nutty', 'caramel'],
+      why: 'Phin daje mocny, gęsty napar, który ma przebić się przez słodkie mleko skondensowane. Najlepiej wychodzą ciemniej palone, czekoladowe kawy; w Wietnamie często robusta.',
+    },
+    steps: [
+      {
+        text: 'Postaw phin na szklance i wsyp {coffee} g kawy',
+        detail: 'Potrząśnij lekko filtrem, żeby kawa ułożyła się równo.',
+        action: true,
+      },
+      {
+        text: 'Połóż sitko dociskowe na kawie',
+        detail: 'Wkręcane dociśnij lekko, a zwykłe tylko połóż.',
+        action: true,
+      },
+      {
+        text: 'Zalej ok. {water*0.2} ml wody i odczekaj',
+        detail: 'Kawa napęcznieje (bloom).',
+        durationSec: 30,
+        action: true,
+      },
+      {
+        text: 'Dolej wodę do pełna i przykryj',
+        detail: 'Razem {water} ml. Pokrywka trzyma ciepło.',
+        action: true,
+      },
+      {
+        text: 'Poczekaj, aż kawa przekapie',
+        detail:
+          'Kropla po kropli, ok. 4–5 minut. Jeśli leci strumieniem, następnym razem mocniej dociśnij sitko albo zmiel drobniej.',
+        durationSec: 270,
+        action: false,
+      },
+      {
+        text: 'Zdejmij phin i zamieszaj',
+        detail: 'Odwróć pokrywkę i odłóż na nią filtr, żeby nie kapało na stół.',
+        action: true,
+      },
+    ],
+    needsReview: true,
+    reviewNote:
+      'Mielenie (średnie) i proporcja 20 g na 100 ml do sprawdzenia. Część poradników każe nie dociskać sitka.',
+  },
+  {
+    id: 'syfon',
+    name: 'Syfon',
+    brewName: 'kawa z syfonu',
+    inMethod: 'w syfonie',
+    description:
+      'Szklany ekspres próżniowy jak z laboratorium. Para wypycha wodę do górnej bańki, gdzie parzy się kawa, a po zgaszeniu palnika napar spływa z powrotem przez filtr. Efektowny pokaz i bardzo czysty, aromatyczny napar.',
+    equipment: [
+      'syfon (ekspres próżniowy)',
+      'palnik: spirytusowy, gazowy albo halogenowy',
+      'filtr do syfonu',
+      'czajnik',
+      'drewniana łopatka lub łyżka',
+    ],
+    grind: 'medium',
+    dose: { coffeeG: 20, waterMl: 300 },
+    scaling: {
+      servingMl: 150,
+      waterMl: { min: 150, max: 600 },
+      stepMl: 50,
+      note: 'Syfon na 3 filiżanki mieści ok. 360 ml, na 5 filiżanek ok. 600 ml.',
+    },
+    waterTempC: { min: 90, max: 94 },
+    totalTimeSec: 480,
+    difficulty: 'hard',
+    suits: {
+      roasts: ['light', 'medium'],
+      notes: ['fruity', 'floral', 'citrus'],
+      why: 'Syfon parzy w równej, wysokiej temperaturze i daje czysty, herbaciany napar. Najlepiej pokazuje jasno palone kawy o kwiatowych, owocowych i cytrusowych nutach.',
+    },
+    steps: [
+      {
+        text: 'Wlej {water} ml gorącej wody do dolnej bańki',
+        detail:
+          'Woda z czajnika skraca czekanie. Wytrzyj bańkę z zewnątrz do sucha: mokre szkło może pęknąć nad ogniem.',
+        action: true,
+      },
+      {
+        text: 'Załóż filtr w górnej części i oprzyj ją luźno',
+        detail: 'Na razie nie dociskaj uszczelki.',
+        action: true,
+      },
+      {
+        text: 'Zapal palnik i poczekaj na pierwsze bąbelki',
+        detail: 'Wtedy dociśnij górną część: woda zacznie wędrować do góry.',
+        durationSec: 120,
+        action: false,
+      },
+      {
+        text: 'Gdy woda jest na górze, wsyp {coffee} g kawy i zamieszaj',
+        detail: 'Delikatnie, aż cała kawa będzie mokra. Zmniejsz płomień.',
+        action: true,
+      },
+      {
+        text: 'Parz minutę',
+        detail: 'Mały płomień utrzyma wodę na górze.',
+        durationSec: 60,
+        action: false,
+      },
+      {
+        text: 'Zgaś palnik i zamieszaj jeszcze raz',
+        detail: 'Napar zacznie spływać w dół. Na filtrze powinna zostać kopułka z kawy.',
+        action: true,
+      },
+      { text: 'Poczekaj, aż kawa spłynie', durationSec: 60, action: false },
+      {
+        text: 'Zdejmij górną bańkę i nalej',
+        detail: 'Uwaga: szkło jest gorące.',
+        action: true,
+      },
+    ],
+    needsReview: true,
+    reviewNote: 'Czasy kroków i kolejność (kawa dopiero po wypchnięciu wody do góry) do sprawdzenia.',
+  },
+  {
     id: 'cold-brew',
     name: 'Cold brew',
     brewName: 'koncentrat cold brew',
@@ -335,6 +696,12 @@ export const methods: BrewMethod[] = [
     ],
     grind: 'coarse',
     dose: { coffeeG: 100, waterMl: 800 },
+    scaling: {
+      servingMl: 125,
+      waterMl: { min: 400, max: 2000 },
+      stepMl: 100,
+      note: 'Porcja to ok. 100 ml koncentratu rozcieńczonego wodą lub mlekiem. Koncentrat postoi w lodówce do 7 dni.',
+    },
     waterTempC: { min: 4, max: 22 },
     totalTimeSec: 16 * 3600,
     difficulty: 'easy',
@@ -344,9 +711,9 @@ export const methods: BrewMethod[] = [
       why: 'Zimna woda wydobywa mało kwasów, więc cold brew jest słodkie i gładkie. Czekoladowe i orzechowe kawy średnio lub ciemno palone dają klasyczny smak; jasne palenie wyjdzie owocowo, ale mniej wyraziście.',
     },
     steps: [
-      { text: 'Zmiel 100 g kawy grubo', action: true },
+      { text: 'Zmiel {coffee} g kawy grubo', action: true },
       {
-        text: 'Wsyp kawę do słoika i zalej 800 ml zimnej wody',
+        text: 'Wsyp kawę do słoika i zalej {water} ml zimnej wody',
         detail: 'Najlepiej przefiltrowanej.',
         action: true,
       },

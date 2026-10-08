@@ -46,3 +46,7 @@ export const COLD_BREW_HOURS = [12, 16, 20, 24] as const;
 export const DEFAULT_COLD_BREW_HOURS = 16;
 
 export const getColdBrewVariant = (id: string) => coldBrewVariants.find((v) => v.id === id);
+
+/** „Cold brew z cynamonem”, a klasyczne po prostu „Cold brew”. */
+export const variantTitle = (variant: ColdBrewVariant) =>
+  variant.spice ? `Cold brew ${variant.name.toLowerCase()}` : 'Cold brew';
