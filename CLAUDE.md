@@ -49,9 +49,11 @@ src/
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
+    share/                karta napoju do udostępnienia: układ i kolory (czyste funkcje), SVG, eksport do PNG
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
-  lib/                    format (odmiana, czas), localStore, useDialogParam, useNow, useWakeLock
+  lib/                    format (odmiana, czas), color (kontrast, HSL), download, localStore,
+                          useDialogParam, useNow, useWakeLock
   pages/                  ekrany tras
   test/                   setup, renderApp, testy kontrastu i konfiguracji wdrożenia
 e2e/                      testy Playwright
@@ -65,7 +67,7 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
 | `/napoje` | katalog z filtrami w adresie (`?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
-| `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu |
+| `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |
@@ -89,7 +91,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 
 - **Język:** interfejs, treści i komentarze po polsku; nazwy w kodzie po angielsku. Polska odmiana liczebników: `count()`/`plural()` z `lib/format`.
 - **Najpierw telefon:** 360–430 px, bez poziomego przewijania, cele dotyku ≥ 44 px (przyciski `h-10`–`h-14`), bezpieczne obszary (`env(safe-area-inset-*)`).
-- **Kolory:** tylko tokeny semantyczne (`bg-canvas`, `bg-surface`, `bg-surface-muted`, `border-line`, `text-ink`, `text-ink-muted`, `text-accent`, `bg-accent`, `bg-accent-soft`, `text-on-accent`). Same przełączają motyw, nie dopisuj `dark:`. Paleta `coffee-*`/`caramel-*` tylko dla kolorów stałych. `src/test/contrast.test.ts` sprawdza WCAG AA par tekst/tło w obu motywach. Nowa para tokenów musi do niego trafić.
+- **Kolory:** tylko tokeny semantyczne (`bg-canvas`, `bg-surface`, `bg-surface-muted`, `border-line`, `text-ink`, `text-ink-muted`, `text-accent`, `bg-accent`, `bg-accent-soft`, `text-on-accent`). Same przełączają motyw, nie dopisuj `dark:`. Paleta `coffee-*`/`caramel-*` tylko dla kolorów stałych. `src/test/contrast.test.ts` sprawdza WCAG AA par tekst/tło w obu motywach. Nowa para tokenów musi do niego trafić. Wyjątek: karta do udostępnienia ma stałe kolory liczone z napoju (obrazek wychodzi poza aplikację), a ich kontrast sprawdza `features/share/card.test.ts`.
 - **Typografia:** `font-display` (szeryfowy) na nagłówki, `font-sans` na resztę; liczniki i liczby w `font-sans tabular-nums` (szeryfowa ma cyfry nautyczne). Fonty systemowe.
 - **Ekrany:** każdy zaczyna się od `<PageHeader>` (tytuł karty, h1 przyjmujący fokus po zmianie ekranu, opcjonalnie powrót i ikona). Sekcje przez `<Section>` (region z nagłówkiem h2). Puste stany przez `<EmptyState>`.
 - **Nawigacja:** główne linki mają `viewTransition` (płynne przejście; wyłączone przy ograniczeniu ruchu). Link z listy przekazuje `state={{ from }}`, a `<BackLink>` wtedy cofa w historii (zachowuje filtry i przewinięcie).

@@ -1,6 +1,8 @@
 // Plik kalendarza (.ics, RFC 5545) z przypomnieniem o gotowym cold brew.
 // Telefon otwiera go w aplikacji kalendarza i proponuje dodanie wydarzenia.
 
+import { downloadBlob } from '../../lib/download';
+
 export interface CalendarEvent {
   uid: string;
   start: number;
@@ -73,13 +75,5 @@ export function createIcs(event: CalendarEvent): string {
 
 /** Pobiera plik .ics: na telefonie otwiera się w kalendarzu. */
 export function downloadIcs(content: string, fileName: string): void {
-  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadBlob(new Blob([content], { type: 'text/calendar;charset=utf-8' }), fileName);
 }

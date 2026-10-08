@@ -2,8 +2,9 @@ import { useParams } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import { ReviewNote } from '../components/ReviewNote';
 import { Section } from '../components/Section';
+import { ShareIcon } from '../components/icons';
 import { Stepper } from '../components/Stepper';
-import { getDrink } from '../data';
+import { getDrink, type Drink } from '../data';
 import { MAX_SERVINGS, useServings } from '../features/drinks/amounts';
 import { BaseCard } from '../features/drinks/BaseCard';
 import { DrinkIngredients } from '../features/drinks/DrinkIngredients';
@@ -12,6 +13,7 @@ import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { DrinkSteps } from '../features/drinks/DrinkSteps';
 import { ServingSection } from '../features/drinks/ServingSection';
 import { FavoriteButton } from '../features/favorites/FavoriteButton';
+import { useShareCard } from '../features/share/ShareSheet';
 import { DrinkAvailability } from '../features/shelf/DrinkAvailability';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
 import { count } from '../lib/format';
@@ -34,6 +36,7 @@ export function DrinkPage() {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <FavoriteButton drinkId={drink.id} />
+          <ShareButton drink={drink} />
         </div>
         <ReviewNote item={drink} />
       </PageHeader>
@@ -84,5 +87,24 @@ export function DrinkPage() {
 
       {syrupDialog.sheet}
     </article>
+  );
+}
+
+/** Otwiera kartę napoju do udostępnienia (okno w adresie: ?karta=1). */
+function ShareButton({ drink }: { drink: Drink }) {
+  const card = useShareCard(drink);
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        onClick={card.open}
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 font-medium transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <ShareIcon className="size-5" />
+        Udostępnij
+      </button>
+      {card.sheet}
+    </>
   );
 }
