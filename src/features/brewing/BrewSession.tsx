@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { drinksForMethod, type BrewMethod } from '../../data';
 import { useWakeLock } from '../../lib/useWakeLock';
 import { DrinkCard } from '../drinks/DrinkCard';
+import { formatGrams } from './dose';
 import { formatClock } from './timer';
 import { useBrewSession } from './useBrewSession';
 
@@ -33,7 +34,11 @@ export function BrewSession({ method, header, onFinish }: BrewSessionProps) {
   return (
     <>
       {header ?? (
-        <PageHeader title={method.name} back={{ to: `/parzenie/${method.id}`, label: method.name }} />
+        <PageHeader
+          title={method.name}
+          lead={doseLine(method)}
+          back={{ to: `/parzenie/${method.id}`, label: method.name }}
+        />
       )}
       <div className="-mt-2 mb-4">
         <p className="text-sm font-medium text-ink-muted">
@@ -133,6 +138,10 @@ export function BrewSession({ method, header, onFinish }: BrewSessionProps) {
     </>
   );
 }
+
+/** „17 g kawy · 150 ml wody” */
+export const doseLine = (method: BrewMethod) =>
+  `${formatGrams(method.dose.coffeeG)} g kawy · ${method.dose.waterMl} ml wody`;
 
 function Finished({ method, onRestart }: { method: BrewMethod; onRestart: () => void }) {
   const location = useLocation();

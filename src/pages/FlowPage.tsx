@@ -20,7 +20,10 @@ import {
 import { BeanSummary } from '../features/beans/BeanSummary';
 import { MethodRanking } from '../features/beans/MethodRanking';
 import { useBeans } from '../features/beans/store';
-import { BrewSession } from '../features/brewing/BrewSession';
+import { BrewSession, doseLine } from '../features/brewing/BrewSession';
+import { DoseCalculator } from '../features/brewing/DoseCalculator';
+import { scaleMethod } from '../features/brewing/dose';
+import { useWaterMl } from '../features/brewing/doseStore';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
 import { GrindScale } from '../features/brewing/GrindScale';
 import { DrinkCard } from '../features/drinks/DrinkCard';
@@ -297,6 +300,9 @@ function MethodStep() {
         <span className="font-medium">Potrzebujesz: </span>
         {method.equipment.join(', ')}
       </p>
+      <Section title="Ile zaparzyć">
+        <DoseCalculator method={method} />
+      </Section>
       <NextLink to={stepPath('napoje')}>Dalej: co z tego zrobić</NextLink>
     </>
   );
@@ -353,13 +359,15 @@ function DrinksStep() {
 function BrewStep() {
   const flow = useFlow();
   const navigate = useNavigate();
-  const method = getMethod(flow.methodId!)!;
+  const base = getMethod(flow.methodId!)!;
+  const method = scaleMethod(base, useWaterMl(base));
   const drink = flow.drinkId ? getDrink(flow.drinkId) : undefined;
   const next = stepPath(afterBrewing(flow));
 
   const header = (
     <FlowHeader step="parzenie">
       <p className="mt-3 font-display text-2xl font-semibold">{method.name}</p>
+      <p className="mt-1 text-sm text-ink-muted">{doseLine(method)}</p>
       {drink?.base.note && (
         <p className="mt-2 rounded-2xl bg-accent-soft p-3 text-sm">
           <span className="font-semibold">Do napoju „{drink.name}”: </span>

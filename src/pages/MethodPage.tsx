@@ -14,6 +14,9 @@ import {
   ROASTS,
   type BrewMethod,
 } from '../data';
+import { DoseCalculator } from '../features/brewing/DoseCalculator';
+import { formatGrams, scaleMethod } from '../features/brewing/dose';
+import { useWaterMl } from '../features/brewing/doseStore';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
 import { GrindScale } from '../features/brewing/GrindScale';
 import { ColdBrewVariantsSection } from '../features/coldbrew/ColdBrewLinks';
@@ -24,10 +27,15 @@ import { NotFoundPage } from './NotFoundPage';
 
 export function MethodPage() {
   const { methodId } = useParams();
-  const location = useLocation();
   const method = methodId ? getMethod(methodId) : undefined;
   if (!method) return <NotFoundPage />;
+  return <MethodDetails key={method.id} method={method} />;
+}
 
+function MethodDetails({ method: base }: { method: BrewMethod }) {
+  const location = useLocation();
+  // Kroki z ilościami z kalkulatora (ostatnio wybranymi dla tej metody).
+  const method = scaleMethod(base, useWaterMl(base));
   const drinks = drinksForMethod(method.id);
   const from = location.pathname + location.search;
 
@@ -45,13 +53,17 @@ export function MethodPage() {
       <StartButton method={method} />
 
       <dl className="mt-6 grid grid-cols-2 gap-3">
-        <Fact label="Proporcja" value={formatRatio(method)}>
-          {method.dose.coffeeG} g kawy na {method.dose.waterMl} ml wody
+        <Fact label="Proporcja" value={formatRatio(base)}>
+          {formatGrams(method.dose.coffeeG)} g kawy na {method.dose.waterMl} ml wody
         </Fact>
         <Fact label="Woda" value={formatWaterTemp(method)} />
         <Fact label="Czas" value={formatSeconds(method.totalTimeSec)} />
         <Fact label="Trudność" value={DIFFICULTY_LABELS[method.difficulty]} />
       </dl>
+
+      <Section title="Ile zaparzyć">
+        <DoseCalculator method={base} />
+      </Section>
 
       <Section title="Mielenie">
         <GrindScale grind={method.grind} />

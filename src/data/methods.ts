@@ -11,6 +11,20 @@ export const methods: BrewMethod[] = [
     equipment: ['kawiarka (np. na 3 filiżanki)', 'młynek', 'czajnik', 'kuchenka'],
     grind: 'fine',
     dose: { coffeeG: 17, waterMl: 150 },
+    scaling: {
+      servingMl: 75,
+      waterMl: { min: 50, max: 450 },
+      stepMl: 50,
+      sizes: [
+        { label: 'na 1 filiżankę', waterMl: 50 },
+        { label: 'na 2 filiżanki', waterMl: 100 },
+        { label: 'na 3 filiżanki', waterMl: 150 },
+        { label: 'na 4 filiżanki', waterMl: 200 },
+        { label: 'na 6 filiżanek', waterMl: 300 },
+        { label: 'na 9 filiżanek', waterMl: 450 },
+      ],
+      note: 'Kawiarka parzy zawsze tyle, ile mieści: sitko napełniasz do pełna, a wodę wlewasz do zaworu. Wybierz rozmiar swojej kawiarki.',
+    },
     waterTempC: { min: 90, max: 100 },
     totalTimeSec: 480,
     difficulty: 'easy',
@@ -34,7 +48,7 @@ export const methods: BrewMethod[] = [
       {
         text: 'Wsyp kawę do sitka i wyrównaj',
         detail:
-          'Do pełna, ale bez ubijania. Przetrzyj brzeg sitka, żeby uszczelka dobrze przylegała.',
+          'Ok. {coffee} g: do pełna, ale bez ubijania. Przetrzyj brzeg sitka, żeby uszczelka dobrze przylegała.',
         action: true,
       },
       {
@@ -61,7 +75,7 @@ export const methods: BrewMethod[] = [
     ],
     needsReview: true,
     reviewNote:
-      'Woda gorąca czy zimna? Przyjęto gorącą z czajnika (krócej na ogniu, mniej goryczy); część poradników każe nalewać zimną.',
+      'Woda gorąca czy zimna? Przyjęto gorącą z czajnika (krócej na ogniu, mniej goryczy); część poradników każe nalewać zimną. Rozmiary kawiarek: przyjęto ok. 50 ml wody na filiżankę.',
   },
   {
     id: 'prasa-francuska',
@@ -73,6 +87,12 @@ export const methods: BrewMethod[] = [
     equipment: ['prasa francuska', 'młynek', 'czajnik', 'łyżka'],
     grind: 'coarse',
     dose: { coffeeG: 30, waterMl: 500 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 250, max: 1000 },
+      stepMl: 50,
+      note: 'Mała prasa mieści ok. 350 ml, duża ok. 1 litra. Wody nalej najwyżej do dolnej krawędzi metalowej obręczy.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 600,
     difficulty: 'easy',
@@ -88,9 +108,9 @@ export const methods: BrewMethod[] = [
         durationSec: 30,
         action: true,
       },
-      { text: 'Wsyp 30 g grubo zmielonej kawy do dzbanka', action: true },
+      { text: 'Wsyp {coffee} g grubo zmielonej kawy do dzbanka', action: true },
       {
-        text: 'Zalej 500 ml wody',
+        text: 'Zalej {water} ml wody',
         detail: 'Zalej całą kawę równomiernie. Nie wkładaj jeszcze tłoka.',
         action: true,
       },
@@ -137,6 +157,12 @@ export const methods: BrewMethod[] = [
     equipment: ['szklanka lub kubek', 'czajnik', 'spodek do przykrycia', 'łyżeczka'],
     grind: 'medium-fine',
     dose: { coffeeG: 12, waterMl: 200 },
+    scaling: {
+      servingMl: 200,
+      waterMl: { min: 150, max: 350 },
+      stepMl: 25,
+      note: 'Jedna szklanka albo kubek na osobę. Dla kilku osób przygotuj kilka szklanek.',
+    },
     waterTempC: { min: 90, max: 96 },
     totalTimeSec: 360,
     difficulty: 'easy',
@@ -147,12 +173,12 @@ export const methods: BrewMethod[] = [
     },
     steps: [
       {
-        text: 'Wsyp 2 płaskie łyżki kawy do szklanki',
-        detail: 'Ok. 12 g na 200 ml wody.',
+        text: 'Wsyp {coffee} g kawy do szklanki',
+        detail: 'Bez wagi: płaska łyżka to ok. 6 g.',
         action: true,
       },
       {
-        text: 'Zalej gorącą wodą, nie wrzątkiem',
+        text: 'Zalej {water} ml gorącej wody, nie wrzątku',
         detail: 'Odczekaj chwilę po zagotowaniu. Wrzątek parzy kawę zbyt gorzko.',
         action: true,
       },
@@ -190,6 +216,12 @@ export const methods: BrewMethod[] = [
     ],
     grind: 'medium-fine',
     dose: { coffeeG: 15, waterMl: 250 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 150, max: 500 },
+      stepMl: 50,
+      note: 'V60 01 mieści do ok. 300 ml, V60 02 do ok. 500 ml. Przy większej ilości parzenie trwa dłużej.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 300,
     difficulty: 'medium',
@@ -205,24 +237,24 @@ export const methods: BrewMethod[] = [
         action: true,
       },
       {
-        text: 'Wsyp 15 g kawy i wyrównaj',
+        text: 'Wsyp {coffee} g kawy i wyrównaj',
         detail: 'Postaw całość na wadze i wytaruj ją.',
         action: true,
       },
       {
-        text: 'Zalej 40 ml wody i odczekaj',
+        text: 'Zalej {water*0.16} ml wody i odczekaj',
         detail: 'Zwilż całą kawę. Napęcznieje i uwolni dwutlenek węgla (to tzw. bloom).',
         durationSec: 40,
         action: true,
       },
       {
-        text: 'Dolewaj powoli wodę do 150 ml',
+        text: 'Dolewaj powoli wodę do {water*0.6} ml',
         detail: 'Lej ruchem okrężnym, od środka na zewnątrz, omijając ścianki filtra.',
         durationSec: 30,
         action: true,
       },
       {
-        text: 'Dolej resztę do 250 ml',
+        text: 'Dolej resztę do {water} ml',
         detail: 'Na koniec delikatnie zakręć dripem, żeby wyrównać kawę.',
         durationSec: 30,
         action: true,
@@ -247,6 +279,12 @@ export const methods: BrewMethod[] = [
     equipment: ['Chemex', 'filtr do Chemexu', 'czajnik z wąską wylewką', 'waga kuchenna'],
     grind: 'medium-coarse',
     dose: { coffeeG: 30, waterMl: 500 },
+    scaling: {
+      servingMl: 250,
+      waterMl: { min: 300, max: 900 },
+      stepMl: 50,
+      note: 'Chemex na 6 filiżanek mieści ok. 900 ml. Poniżej 300 ml gruby filtr parzy za szybko.',
+    },
     waterTempC: { min: 92, max: 96 },
     totalTimeSec: 420,
     difficulty: 'medium',
@@ -261,15 +299,15 @@ export const methods: BrewMethod[] = [
         detail: 'Potrójna warstwa filtra od strony dzióbka. Wylej wodę dzióbkiem, nie wyjmując filtra.',
         action: true,
       },
-      { text: 'Wsyp 30 g kawy i wyrównaj', action: true },
-      { text: 'Zalej 60 ml wody i odczekaj', durationSec: 45, action: true },
+      { text: 'Wsyp {coffee} g kawy i wyrównaj', action: true },
+      { text: 'Zalej {water*0.12} ml wody i odczekaj', durationSec: 45, action: true },
       {
-        text: 'Dolewaj powoli do 300 ml',
+        text: 'Dolewaj powoli do {water*0.6} ml',
         detail: 'Lej spokojnie, ruchem okrężnym.',
         durationSec: 45,
         action: true,
       },
-      { text: 'Dolej resztę do 500 ml', durationSec: 45, action: true },
+      { text: 'Dolej resztę do {water} ml', durationSec: 45, action: true },
       {
         text: 'Poczekaj, aż woda przepłynie',
         detail:
@@ -290,6 +328,12 @@ export const methods: BrewMethod[] = [
     equipment: ['AeroPress', 'filtr papierowy do AeroPressa', 'czajnik', 'młynek', 'mocny kubek'],
     grind: 'medium-fine',
     dose: { coffeeG: 15, waterMl: 200 },
+    scaling: {
+      servingMl: 200,
+      waterMl: { min: 100, max: 250 },
+      stepMl: 25,
+      note: 'AeroPress mieści ok. 250 ml. Mniej wody to mocniejszy napar, dobry do drinków.',
+    },
     waterTempC: { min: 85, max: 95 },
     totalTimeSec: 240,
     difficulty: 'easy',
@@ -300,9 +344,9 @@ export const methods: BrewMethod[] = [
     },
     steps: [
       { text: 'Włóż filtr do sitka i przelej go gorącą wodą', action: true },
-      { text: 'Postaw AeroPress na kubku i wsyp 15 g kawy', action: true },
+      { text: 'Postaw AeroPress na kubku i wsyp {coffee} g kawy', action: true },
       {
-        text: 'Zalej 200 ml wody i zamieszaj',
+        text: 'Zalej {water} ml wody i zamieszaj',
         detail: 'Kilka energicznych ruchów łyżką, żeby zmoczyć całą kawę.',
         action: true,
       },
@@ -335,6 +379,12 @@ export const methods: BrewMethod[] = [
     ],
     grind: 'coarse',
     dose: { coffeeG: 100, waterMl: 800 },
+    scaling: {
+      servingMl: 125,
+      waterMl: { min: 400, max: 2000 },
+      stepMl: 100,
+      note: 'Porcja to ok. 100 ml koncentratu rozcieńczonego wodą lub mlekiem. Koncentrat postoi w lodówce do 7 dni.',
+    },
     waterTempC: { min: 4, max: 22 },
     totalTimeSec: 16 * 3600,
     difficulty: 'easy',
@@ -344,9 +394,9 @@ export const methods: BrewMethod[] = [
       why: 'Zimna woda wydobywa mało kwasów, więc cold brew jest słodkie i gładkie. Czekoladowe i orzechowe kawy średnio lub ciemno palone dają klasyczny smak; jasne palenie wyjdzie owocowo, ale mniej wyraziście.',
     },
     steps: [
-      { text: 'Zmiel 100 g kawy grubo', action: true },
+      { text: 'Zmiel {coffee} g kawy grubo', action: true },
       {
-        text: 'Wsyp kawę do słoika i zalej 800 ml zimnej wody',
+        text: 'Wsyp kawę do słoika i zalej {water} ml zimnej wody',
         detail: 'Najlepiej przefiltrowanej.',
         action: true,
       },

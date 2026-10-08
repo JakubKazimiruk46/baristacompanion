@@ -22,8 +22,8 @@ export const drinks: Drink[] = [
       note: 'Kawa z kawiarki zamiast espresso. Pasują owocowe, średnio palone ziarna.',
     },
     extras: [
-      { kind: 'mixer', name: 'tonik, dobrze schłodzony', amount: '150 ml' },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      { kind: 'mixer', name: 'tonik, dobrze schłodzony', amount: { value: 150, unit: 'ml' } },
+      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -71,9 +71,9 @@ export const drinks: Drink[] = [
       {
         kind: 'mixer',
         name: 'sok pomarańczowy, najlepiej świeżo wyciśnięty',
-        amount: '100 ml',
+        amount: { value: 100, unit: 'ml' },
       },
-      { kind: 'ice', name: 'lód', amount: '3–4 kostki' },
+      { kind: 'ice', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['niska szklanka', 'łyżka', 'talerzyk na cukier'],
     layers: [
@@ -194,9 +194,14 @@ export const drinks: Drink[] = [
     },
     milk: { options: ['krowie', 'owsiane-barista', 'migdalowe'], amountMl: 150, prep: 'blend' },
     extras: [
-      { kind: 'fruit', name: 'maliny (mogą być mrożone)', amount: '60 g', blended: true },
+      {
+        kind: 'fruit',
+        name: 'maliny (mogą być mrożone)',
+        amount: { value: 60, unit: 'g' },
+        blended: true,
+      },
       { kind: 'syrup', syrupId: 'malinowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: '3–4 kostki' },
+      { kind: 'ice', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'blender'],
     layers: [
@@ -246,7 +251,7 @@ export const drinks: Drink[] = [
       {
         kind: 'ice-cream',
         name: 'lody waniliowe (mogą być roślinne)',
-        amount: '2 gałki',
+        amount: { value: 2, unit: 'scoop' },
         blended: true,
       },
     ],
@@ -394,9 +399,9 @@ export const drinks: Drink[] = [
     },
     extras: [
       { kind: 'spice', name: 'laska cynamonu do maceracji', amount: '1 laska na 800 ml wody' },
-      { kind: 'mixer', name: 'zimna woda', amount: '100 ml' },
+      { kind: 'mixer', name: 'zimna woda', amount: { value: 100, unit: 'ml' } },
       { kind: 'syrup', syrupId: 'cynamonowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['niska szklanka'],
     layers: [{ name: 'cold brew', volumeMl: 200, color: '#3d2416', kind: 'liquid' }],
@@ -442,7 +447,7 @@ export const drinks: Drink[] = [
         name: 'zielony kardamon, lekko zgnieciony, do maceracji',
         amount: '4–5 strąków na 800 ml wody',
       },
-      { kind: 'ice', name: 'lód', amount: '4–5 kostek' },
+      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -578,7 +583,11 @@ export const drinks: Drink[] = [
       note: 'Kawa z kawiarki zamiast espresso, podana gorąca.',
     },
     extras: [
-      { kind: 'ice-cream', name: 'lody waniliowe (mogą być roślinne)', amount: '1–2 gałki' },
+      {
+        kind: 'ice-cream',
+        name: 'lody waniliowe (mogą być roślinne)',
+        amount: { value: 1, max: 2, unit: 'scoop' },
+      },
     ],
     equipment: ['pucharek lub niska szklanka', 'łyżeczka'],
     layers: [
@@ -617,7 +626,7 @@ export const drinks: Drink[] = [
     temperature: 'hot',
     prepTimeMin: 10,
     base: { methodId: 'kawiarka', amountMl: 60, alternativeMethodIds: ['aeropress'] },
-    extras: [{ kind: 'mixer', name: 'gorąca woda', amount: '120 ml' }],
+    extras: [{ kind: 'mixer', name: 'gorąca woda', amount: { value: 120, unit: 'ml' } }],
     equipment: ['filiżanka lub kubek', 'czajnik'],
     layers: [{ name: 'kawa', volumeMl: 180, color: '#3f2416', kind: 'liquid' }],
     steps: [
@@ -646,8 +655,8 @@ export const drinks: Drink[] = [
       note: 'Zaparz mocniej niż zwykle: 15 g kawy na 150 ml gorącej wody i 100 g lodu w dzbanku.',
     },
     extras: [
-      { kind: 'ice', name: 'lód do dzbanka', amount: '100 g' },
-      { kind: 'ice', name: 'lód do szklanki', amount: '3–4 kostki' },
+      { kind: 'ice', name: 'lód do dzbanka', amount: { value: 100, unit: 'g' } },
+      { kind: 'ice', name: 'lód do szklanki', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['dzbanek', 'niska szklanka'],
     layers: [{ name: 'kawa mrożona', volumeMl: 220, color: '#6b3a1f', kind: 'liquid' }],
@@ -715,8 +724,13 @@ export const drinks: Drink[] = [
       note: 'Mocna kawa z kawiarki. Jeśli wolisz łagodniej, dolej trochę gorącej wody.',
     },
     extras: [
-      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: '100 ml', dairy: true },
-      { kind: 'other', name: 'cukier puder', amount: '1 łyżeczka' },
+      {
+        kind: 'cream',
+        name: 'śmietanka 30%, ubita',
+        amount: { value: 100, unit: 'ml' },
+        dairy: true,
+      },
+      { kind: 'other', name: 'cukier puder', amount: { value: 1, unit: 'tsp' } },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka'],
     layers: [
@@ -759,8 +773,13 @@ export const drinks: Drink[] = [
     },
     milk: { options: ['krowie'], amountMl: 50, prep: 'warm' },
     extras: [
-      { kind: 'other', name: 'gorzka czekolada', amount: '30 g' },
-      { kind: 'cream', name: 'śmietanka 30%, lekko ubita', amount: '40 ml', dairy: true },
+      { kind: 'other', name: 'gorzka czekolada', amount: { value: 30, unit: 'g' } },
+      {
+        kind: 'cream',
+        name: 'śmietanka 30%, lekko ubita',
+        amount: { value: 40, unit: 'ml' },
+        dairy: true,
+      },
     ],
     equipment: ['mała szklanka', 'rondelek', 'trzepaczka', 'łyżeczka'],
     layers: [
@@ -795,8 +814,8 @@ export const drinks: Drink[] = [
       note: 'Mocna kawa z kawiarki, schłodzona przed dodaniem.',
     },
     extras: [
-      { kind: 'ice-cream', name: 'lody waniliowe', amount: '2 gałki' },
-      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: '80 ml', dairy: true },
+      { kind: 'ice-cream', name: 'lody waniliowe', amount: { value: 2, unit: 'scoop' } },
+      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: { value: 80, unit: 'ml' }, dairy: true },
       { kind: 'syrup', syrupId: 'czekoladowy', amountMl: 10, optional: true },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka', 'długa łyżeczka', 'słomka'],

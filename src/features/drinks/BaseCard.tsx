@@ -5,7 +5,7 @@ import { capitalize } from '../../lib/format';
 import { ColdBrewDrinkLink } from '../coldbrew/ColdBrewLinks';
 
 /** Baza kawowa napoju: czym ją zaparzyć, z linkiem do metody i alternatywami. */
-export function BaseCard({ drink }: { drink: Drink }) {
+export function BaseCard({ drink, servings = 1 }: { drink: Drink; servings?: number }) {
   const method = getMethod(drink.base.methodId)!;
   const alternatives = (drink.base.alternativeMethodIds ?? []).map((id) => getMethod(id)!);
 
@@ -14,7 +14,7 @@ export function BaseCard({ drink }: { drink: Drink }) {
       <p className="text-xs font-semibold tracking-wide text-accent uppercase">Baza kawowa</p>
       <p className="mt-1 flex items-baseline justify-between gap-4">
         <span className="font-semibold">{capitalize(method.brewName)}</span>
-        <span className="text-sm font-medium tabular-nums">{drink.base.amountMl} ml</span>
+        <span className="text-sm font-medium tabular-nums">{drink.base.amountMl * servings} ml</span>
       </p>
       {drink.base.note && <p className="mt-1 text-sm text-ink-muted">{drink.base.note}</p>}
       <ColdBrewDrinkLink drinkId={drink.id} />

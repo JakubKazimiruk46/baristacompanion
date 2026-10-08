@@ -1,4 +1,5 @@
 import type {
+  AmountUnit,
   BeanProfile,
   DecorationKind,
   Difficulty,
@@ -80,6 +81,15 @@ export const MILK_PREP_LABELS: Record<MilkPrep, string> = {
   warm: 'podgrzane',
   blend: 'zmiksowane',
   plain: 'prosto z lodówki',
+};
+
+/** Jednostki ilości w trzech formach: 1 kostka, 2 kostki, 5 kostek. */
+export const UNIT_FORMS: Record<AmountUnit, [string, string, string]> = {
+  ml: ['ml', 'ml', 'ml'],
+  g: ['g', 'g', 'g'],
+  cube: ['kostka', 'kostki', 'kostek'],
+  scoop: ['gałka', 'gałki', 'gałek'],
+  tsp: ['łyżeczka', 'łyżeczki', 'łyżeczek'],
 };
 
 export const DECORATION_LABELS: Record<DecorationKind, string> = {

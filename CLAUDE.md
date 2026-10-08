@@ -37,11 +37,12 @@ src/
   data/                   treści i model danych: metody, napoje, mleko, spienianie, syropy,
                           naczynia, warianty cold brew, etykiety PL, typy; index.ts = wyszukiwanie
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
-                          Chip, ChoiceChip, EmptyState, BackLink, ReviewNote, ikony
+                          Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
   features/
     drinks/               filtry, karty, składniki, kroki, sekcja „Jak podać”
     glass/                <DrinkGlass>: geometria naczyń (czyste funkcje) i rysunek SVG z dekoracjami
-    brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia
+    brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia,
+                          kalkulator ilości (dose.ts: przeliczanie kroków, doseStore: wybrana ilość)
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja)
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
@@ -61,7 +62,7 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
 | `/napoje` | katalog z filtrami w adresie (`?ulubione=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
-| `/napoje/:id` | napój; `?syrop=id` otwiera okno syropu |
+| `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
@@ -72,6 +73,8 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 
 - Wszystkie treści po polsku, id jako slugi (`kawa-pomaranczowa`), bo trafiają do adresów.
 - Napój: baza kawowa (`methodId` + alternatywy), mleko (opcje, pierwsza polecana), dodatki (`syrupId` dla syropów, `dairy` dla nabiału bez zamiennika), warstwy **od dołu** (`liquid`/`foam`/`solid`, kolor, ml), kroki, podanie (naczynie + dekoracje z instrukcją i `look`).
+- Ilość dodatku: `{ value, max?, unit }` mnoży się z porcjami i odmienia (`formatAmount`). Tekst („pełna szklanka”) zostaje bez zmian.
+- Metoda: `dose` to przepis, a `scaling` to granice kalkulatora (osoba w ml, zakres sprzętu, krok, w kawiarce rozmiary). W krokach ilości zapisuj jako znaczniki `{coffee}`, `{water}`, `{water*0.6}`. Ekrany pokazują metodę przeliczoną przez `scaleMethod()` (`features/brewing/dose`) na ilość z `useWaterMl()`. Nigdy nie wyświetlaj surowych kroków.
 - Espresso nie ma: bazą drinków „na espresso” jest kawiarka.
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.
 - `data.test.ts` pilnuje spójności (odwołania, objętości, czasy, kolory). Nowy napój albo metoda muszą przez nie przejść.

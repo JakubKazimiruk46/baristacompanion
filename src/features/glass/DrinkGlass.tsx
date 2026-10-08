@@ -197,7 +197,9 @@ function drinkSurface(
 }
 
 function iceCount(extras: Extra[]): number {
-  return extras.some((e) => e.kind === 'ice' && e.amount.includes('pełna')) ? 6 : 4;
+  return extras.some((e) => e.kind === 'ice' && typeof e.amount === 'string' && e.amount.includes('pełna'))
+    ? 6
+    : 4;
 }
 
 function Band({

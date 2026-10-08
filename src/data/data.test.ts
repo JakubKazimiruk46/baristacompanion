@@ -77,6 +77,31 @@ describe('metody parzenia', () => {
     expect(method.suits.roasts.length).toBeGreaterThan(0);
   });
 
+  it.each(methods.map((m) => [m.id, m] as const))('%s: kalkulator obejmuje ilość z przepisu', (_, method) => {
+    const { waterMl, stepMl, servingMl, sizes } = method.scaling;
+    expect(waterMl.min).toBeLessThanOrEqual(method.dose.waterMl);
+    expect(waterMl.max).toBeGreaterThanOrEqual(method.dose.waterMl);
+    expect(stepMl).toBeGreaterThan(0);
+    expect(servingMl).toBeGreaterThan(0);
+    if (sizes) {
+      expect(sizes.map((s) => s.waterMl)).toContain(method.dose.waterMl);
+      for (const size of sizes) {
+        expect(size.waterMl).toBeGreaterThanOrEqual(waterMl.min);
+        expect(size.waterMl).toBeLessThanOrEqual(waterMl.max);
+      }
+    }
+  });
+
+  it.each(methods.map((m) => [m.id, m] as const))('%s: znaczniki ilości są poprawne', (_, method) => {
+    for (const step of method.steps) {
+      for (const text of [step.text, step.detail ?? '']) {
+        // Każdy nawias klamrowy to znacznik {coffee}, {water} albo {water*ułamek}.
+        const rest = text.replace(/\{(coffee|water)(\*\d+(\.\d+)?)?\}/g, '');
+        expect(rest, text).not.toMatch(/[{}]/);
+      }
+    }
+  });
+
   it('jest 7 metod, w tym kawiarka i cold brew', () => {
     expect(methods).toHaveLength(7);
     expect(getMethod('kawiarka')).toBeDefined();
@@ -110,6 +135,19 @@ describe('napoje', () => {
     for (const decoration of drink.serving.decorations) {
       expect(decoration.instruction.length).toBeGreaterThan(0);
       expect(decoration.color).toMatch(HEX);
+    }
+  });
+
+  it.each(drinks.map((d) => [d.id, d] as const))('%s: ilości dodatków są dodatnie', (_, drink) => {
+    for (const extra of drink.extras) {
+      if (extra.kind === 'syrup') {
+        expect(extra.amountMl).toBeGreaterThan(0);
+      } else if (typeof extra.amount === 'string') {
+        expect(extra.amount.length, extra.name).toBeGreaterThan(0);
+      } else {
+        expect(extra.amount.value, extra.name).toBeGreaterThan(0);
+        if (extra.amount.max !== undefined) expect(extra.amount.max).toBeGreaterThan(extra.amount.value);
+      }
     }
   });
 
