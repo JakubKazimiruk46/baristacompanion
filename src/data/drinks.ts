@@ -156,7 +156,7 @@ export const drinks: Drink[] = [
     base: {
       methodId: 'kawiarka',
       amountMl: 40,
-      alternativeMethodIds: ['aeropress'],
+      alternativeMethodIds: ['aeropress', 'phin'],
       note: 'Kawa z kawiarki zamiast espresso.',
     },
     milk: { options: ['skondensowane', 'skondensowane-kokosowe'], amountMl: 30, prep: 'plain' },
@@ -844,5 +844,77 @@ export const drinks: Drink[] = [
         },
       ],
     },
+  },
+  {
+    id: 'kawa-po-turecku',
+    name: 'Kawa po turecku',
+    tagline: 'Gęsta kawa z tygielka, z pianką i kardamonem',
+    description:
+      'Mocna, gęsta kawa parzona w tygielku, często z cukrem i szczyptą kardamonu. Podawana w małej filiżance ze szklanką zimnej wody i czymś słodkim. Fusy zostają na dnie.',
+    temperature: 'hot',
+    prepTimeMin: 8,
+    base: {
+      methodId: 'tygielek',
+      amountMl: 60,
+      note: 'Cukier i kardamon wsypuje się do tygielka razem z kawą, przed podgrzewaniem.',
+    },
+    extras: [
+      { kind: 'other', name: 'cukier, do tygielka', amount: { value: 1, unit: 'tsp' }, optional: true },
+      { kind: 'spice', name: 'mielony kardamon, do tygielka', amount: 'szczypta', optional: true },
+      { kind: 'mixer', name: 'zimna woda do popicia', amount: { value: 150, unit: 'ml' } },
+    ],
+    equipment: ['tygielek (cezve)', 'mała filiżanka', 'szklanka na wodę'],
+    layers: [
+      { name: 'kawa z fusami', volumeMl: 50, color: '#3a2014', kind: 'liquid' },
+      { name: 'pianka', volumeMl: 10, color: '#8a5a3a', kind: 'foam' },
+    ],
+    steps: [
+      'Wsyp do tygielka kawę, a jeśli lubisz, także cukier i szczyptę kardamonu.',
+      'Zaparz kawę w tygielku (przepis w metodzie).',
+      'Rozłóż piankę łyżeczką do filiżanki, a potem powoli dolej kawę.',
+      'Podaj ze szklanką zimnej wody i odczekaj minutę, aż fusy opadną.',
+    ],
+    serving: {
+      vessel: 'espresso-cup',
+      why: 'Mała filiżanka, bo kawa jest gęsta i mocna. Obok szklanka zimnej wody i coś słodkiego, np. lokum.',
+      decorations: [],
+    },
+    needsReview: true,
+    reviewNote: 'Ilość cukru i kardamonu do sprawdzenia.',
+  },
+  {
+    id: 'kawa-po-wietnamsku',
+    name: 'Kawa po wietnamsku',
+    tagline: 'Kawa z phin na mleku skondensowanym, z lodem',
+    description:
+      'Cà phê sữa đá: mocna kawa kapie z phin prosto na słodkie mleko skondensowane, a po zamieszaniu trafia na lód. Słodka, gęsta i bardzo orzeźwiająca.',
+    temperature: 'cold',
+    prepTimeMin: 10,
+    base: {
+      methodId: 'phin',
+      amountMl: 70,
+      alternativeMethodIds: ['kawiarka', 'aeropress'],
+      note: 'Bez phin zrób mocną kawę w kawiarce albo w AeroPressie.',
+    },
+    milk: { options: ['skondensowane', 'skondensowane-kokosowe'], amountMl: 30, prep: 'plain' },
+    extras: [{ kind: 'ice', name: 'lód', amount: { value: 5, max: 6, unit: 'cube' } }],
+    equipment: ['phin', 'niska szklanka', 'długa łyżeczka'],
+    layers: [
+      { name: 'mleko skondensowane', volumeMl: 30, color: '#f1e2bd', kind: 'liquid' },
+      { name: 'kawa', volumeMl: 70, color: '#2f1a10', kind: 'liquid' },
+    ],
+    steps: [
+      'Wlej mleko skondensowane na dno szklanki.',
+      'Postaw phin na szklance i zaparz kawę prosto na mleko. Zanim zamieszasz, pokaż gościom dwie warstwy.',
+      'Zamieszaj, aż kawa połączy się z mlekiem i nabierze karmelowego koloru.',
+      'Wsyp lód i zamieszaj jeszcze raz.',
+    ],
+    serving: {
+      vessel: 'low-glass',
+      why: 'Niska szklanka mieści lód. Przed zamieszaniem widać białą i czarną warstwę, a potem karmelowy kolor.',
+      decorations: [],
+    },
+    needsReview: true,
+    reviewNote: 'Proporcja mleka skondensowanego do kawy do sprawdzenia: w Wietnamie bywa nawet 1:2.',
   },
 ];

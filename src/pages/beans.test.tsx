@@ -1,6 +1,7 @@
 import { cleanup, screen, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { methods } from '../data';
 import { beansStore } from '../features/beans/store';
 import { renderApp } from '../test/renderApp';
 
@@ -69,7 +70,7 @@ describe('Moje ziarna', () => {
     await user.click(screen.getByRole('button', { name: 'Jak zaparzyć?' }));
     const ranking = screen.getByRole('list', { name: 'Ranking metod' });
     const items = within(ranking).getAllByRole('listitem').filter((li) => li.parentElement === ranking);
-    expect(items).toHaveLength(7);
+    expect(items).toHaveLength(methods.length);
     // Jasne, kwiatowe, owocowe, single origin: na górze przelew.
     expect(within(items[0]!).getByRole('link')).toHaveTextContent(/^1\.(Drip \(V60\)|Chemex)$/);
     expect(within(ranking).getByText('Jasne palenie jest kwaśniejsze: w kawiarce może wyjść kwaśno i ostro.')).toBeInTheDocument();

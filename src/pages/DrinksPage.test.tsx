@@ -55,7 +55,7 @@ describe('lista napojów', () => {
 
   it('czyta filtry z adresu i pozwala je wyczyścić', async () => {
     const { user } = renderApp('/napoje?temp=cieple&mleko=bez');
-    expect(listedNames()).toEqual(['Americano z kawiarki']);
+    expect(listedNames()).toEqual(['Americano z kawiarki', 'Kawa po turecku']);
     expect(screen.getByRole('button', { name: 'Bez mleka' })).toHaveAttribute('aria-pressed', 'true');
 
     await user.click(screen.getByRole('button', { name: 'Wyczyść filtry' }));

@@ -102,8 +102,8 @@ describe('metody parzenia', () => {
     }
   });
 
-  it('jest 7 metod, w tym kawiarka i cold brew', () => {
-    expect(methods).toHaveLength(7);
+  it('jest 12 metod, w tym kawiarka i cold brew', () => {
+    expect(methods).toHaveLength(12);
     expect(getMethod('kawiarka')).toBeDefined();
     expect(getMethod('cold-brew')).toBeDefined();
   });

@@ -13,6 +13,9 @@ const top = (p: BeanProfile, n: number) => ids(p).slice(0, n);
 const last = (p: BeanProfile, n: number) => ids(p).slice(-n);
 const reasonsFor = (p: BeanProfile, methodId: string) =>
   rankMethods(p).find((m) => m.method.id === methodId)!.reasons.join(' ');
+/** Metody, które nie pasują do palenia: powinny zamykać ranking. */
+const notFor = (roast: Roast) =>
+  methods.filter((m) => !m.suits.roasts.includes(roast)).map((m) => m.id).sort();
 
 describe('jasne palenie', () => {
   it.each<[string, FlavorNote[]]>([
@@ -22,7 +25,8 @@ describe('jasne palenie', () => {
   ])('%s: wygrywa przelew, kawiarka na końcu', (_, notes) => {
     const p = profile('light', notes, 'single-origin');
     expect(top(p, 3)).toEqual(expect.arrayContaining(['drip', 'chemex']));
-    expect(last(p, 4)).toContain('kawiarka');
+    expect(notFor('light')).toContain('kawiarka');
+    expect(last(p, notFor('light').length).sort()).toEqual(notFor('light'));
   });
 
   it('w kawiarce ostrzega przed kwaśnym smakiem', () => {
@@ -72,7 +76,8 @@ describe('ciemne palenie', () => {
   ])('%s: kawiarka i prasa wysoko, przelew na końcu', (_, notes) => {
     const p = profile('dark', notes);
     expect(top(p, 4)).toEqual(expect.arrayContaining(['kawiarka', 'prasa-francuska']));
-    expect(last(p, 2)).toEqual(expect.arrayContaining(['drip', 'chemex']));
+    expect(notFor('dark')).toEqual(expect.arrayContaining(['drip', 'chemex']));
+    expect(last(p, notFor('dark').length).sort()).toEqual(notFor('dark'));
   });
 
   it('w dripie ostrzega przed goryczą', () => {
