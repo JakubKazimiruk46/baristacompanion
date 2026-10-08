@@ -1,0 +1,173 @@
+import type { ReactNode } from 'react';
+import { Link, useLocation, useParams } from 'react-router';
+import { ClockIcon } from '../components/icons';
+import { MethodIcon } from '../components/MethodIcon';
+import { PageHeader } from '../components/PageHeader';
+import { ReviewNote } from '../components/ReviewNote';
+import { Section } from '../components/Section';
+import {
+  DIFFICULTY_LABELS,
+  drinksForMethod,
+  getMethod,
+  NOTE_LABELS,
+  ROAST_LABELS,
+  ROASTS,
+  type BrewMethod,
+} from '../data';
+import { formatRatio, formatWaterTemp } from '../features/brewing/format';
+import { GrindScale } from '../features/brewing/GrindScale';
+import { ColdBrewVariantsSection } from '../features/coldbrew/ColdBrewLinks';
+import { useColdBrew } from '../features/coldbrew/store';
+import { DrinkCard } from '../features/drinks/DrinkCard';
+import { formatSeconds } from '../lib/format';
+import { NotFoundPage } from './NotFoundPage';
+
+export function MethodPage() {
+  const { methodId } = useParams();
+  const location = useLocation();
+  const method = methodId ? getMethod(methodId) : undefined;
+  if (!method) return <NotFoundPage />;
+
+  const drinks = drinksForMethod(method.id);
+  const from = location.pathname + location.search;
+
+  return (
+    <article>
+      <PageHeader
+        title={method.name}
+        lead={method.description}
+        back={{ to: '/parzenie', label: 'Parzenie' }}
+        icon={<MethodIcon methodId={method.id} className="size-9" />}
+      >
+        <ReviewNote item={method} />
+      </PageHeader>
+
+      <StartButton method={method} />
+
+      <dl className="mt-6 grid grid-cols-2 gap-3">
+        <Fact label="Proporcja" value={formatRatio(method)}>
+          {method.dose.coffeeG} g kawy na {method.dose.waterMl} ml wody
+        </Fact>
+        <Fact label="Woda" value={formatWaterTemp(method)} />
+        <Fact label="Czas" value={formatSeconds(method.totalTimeSec)} />
+        <Fact label="Trudność" value={DIFFICULTY_LABELS[method.difficulty]} />
+      </dl>
+
+      <Section title="Mielenie">
+        <GrindScale grind={method.grind} />
+      </Section>
+
+      <Section title="Sprzęt">
+        <ul className="flex flex-wrap gap-2">
+          {method.equipment.map((item) => (
+            <li key={item} className="rounded-full bg-surface-muted px-3 py-1.5 text-sm">
+              {item}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Do jakich ziaren">
+        <div className="rounded-2xl border border-line bg-surface p-4">
+          <ul aria-label="Palenie" className="flex gap-2">
+            {ROASTS.map((roast) => {
+              const fits = method.suits.roasts.includes(roast);
+              return (
+                <li
+                  key={roast}
+                  className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    fits ? 'bg-accent text-on-accent' : 'bg-surface-muted text-ink-muted line-through'
+                  }`}
+                >
+                  {ROAST_LABELS[roast]}
+                  <span className="sr-only">{fits ? ' (pasuje)' : ' (nie pasuje)'}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-3 text-sm text-ink-muted">
+            Nuty: {method.suits.notes.map((note) => NOTE_LABELS[note]).join(', ')}
+          </p>
+          <p className="mt-2">{method.suits.why}</p>
+        </div>
+      </Section>
+
+      <Section title="Kroki">
+        <ol className="space-y-4">
+          {method.steps.map((step, index) => (
+            <li key={step.text} className="flex gap-3">
+              <span
+                aria-hidden="true"
+                className={`flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                  step.action ? 'bg-accent text-on-accent' : 'bg-accent-soft text-accent'
+                }`}
+              >
+                {index + 1}
+              </span>
+              <div className="pt-0.5">
+                <p className="font-medium">
+                  {step.text}
+                  {step.durationSec && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-surface-muted px-2 py-0.5 align-middle text-xs font-medium text-ink-muted">
+                      <ClockIcon className="size-3.5" />
+                      {formatSeconds(step.durationSec)}
+                    </span>
+                  )}
+                </p>
+                {step.detail && <p className="mt-0.5 text-sm text-ink-muted">{step.detail}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {isLongBrew(method) && <ColdBrewVariantsSection methodId={method.id} />}
+
+      <Section title="Co z tego zrobić">
+        {drinks.length > 0 ? (
+          <ul className="space-y-3">
+            {drinks.map((drink) => (
+              <li key={drink.id}>
+                <DrinkCard drink={drink} from={from} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-ink-muted">
+            Tę kawę pije się po prostu tak, jak wyjdzie. Do drinków lepsza jest kawiarka albo
+            AeroPress.
+          </p>
+        )}
+      </Section>
+
+      <div className="mt-8">
+        <StartButton method={method} />
+      </div>
+    </article>
+  );
+}
+
+const isLongBrew = (method: BrewMethod) => method.steps.some((step) => (step.durationSec ?? 0) >= 3600);
+
+function StartButton({ method }: { method: BrewMethod }) {
+  const coldBrew = useColdBrew();
+  const running = isLongBrew(method) && coldBrew !== null;
+  return (
+    <Link
+      to={`/parzenie/${method.id}/start`}
+      className="flex h-12 items-center justify-center rounded-full bg-accent px-6 font-semibold text-on-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
+      {running ? 'Zobacz macerację' : 'Zacznij parzenie'}
+    </Link>
+  );
+}
+
+function Fact({ label, value, children }: { label: string; value: string; children?: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-3">
+      <dt className="text-xs font-medium text-ink-muted">{label}</dt>
+      <dd className="mt-0.5 text-lg font-semibold">{value}</dd>
+      {children && <dd className="text-xs text-ink-muted">{children}</dd>}
+    </div>
+  );
+}

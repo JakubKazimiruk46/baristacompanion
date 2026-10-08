@@ -1,0 +1,138 @@
+import type { Syrup } from './types';
+
+export const syrups: Syrup[] = [
+  {
+    id: 'pomaranczowy',
+    name: 'Syrop pomarańczowy',
+    color: '#f08a24',
+    easyToBuy: false,
+    buyNote: 'Bywa w sklepach z kawą i w internecie, rzadko w supermarkecie.',
+    recipe: {
+      timeMin: 20,
+      yieldMl: 200,
+      ingredients: [
+        '100 g cukru',
+        '100 ml wody',
+        'skórka otarta z 1 pomarańczy (bez białej części)',
+        '50 ml soku z pomarańczy',
+      ],
+      steps: [
+        'Zagotuj wodę z cukrem i mieszaj, aż cukier się rozpuści.',
+        'Dodaj skórkę i sok, gotuj na małym ogniu 5 minut.',
+        'Zdejmij z ognia i odstaw na 10 minut, żeby skórka oddała aromat.',
+        'Przecedź do czystej butelki lub słoika.',
+      ],
+      storage: 'W lodówce do 2 tygodni.',
+    },
+  },
+  {
+    id: 'waniliowy',
+    name: 'Syrop waniliowy',
+    color: '#e3c88f',
+    easyToBuy: true,
+    buyNote: 'W większości supermarketów, przy kawie albo przy deserach.',
+    recipe: {
+      timeMin: 15,
+      yieldMl: 200,
+      ingredients: [
+        '100 g cukru',
+        '100 ml wody',
+        '1 laska wanilii albo 1 łyżeczka ekstraktu waniliowego',
+      ],
+      steps: [
+        'Zagotuj wodę z cukrem, mieszając, aż cukier się rozpuści.',
+        'Przekrój laskę wanilii, wyskrob ziarenka i wrzuć razem z laską. Ekstrakt dodaj dopiero po zdjęciu z ognia.',
+        'Gotuj na małym ogniu 3 minuty i odstaw do ostygnięcia.',
+        'Przelej do butelki razem z laską.',
+      ],
+      storage: 'W lodówce do 3 tygodni.',
+    },
+  },
+  {
+    id: 'karmelowy',
+    name: 'Syrop karmelowy',
+    color: '#b8692a',
+    easyToBuy: true,
+    buyNote: 'W większości supermarketów, przy kawie albo przy deserach.',
+    recipe: {
+      timeMin: 15,
+      yieldMl: 200,
+      ingredients: ['150 g cukru', '120 ml gorącej wody', 'szczypta soli'],
+      steps: [
+        'Rozpuść cukier w rondelku na średnim ogniu. Nie mieszaj, tylko kołysz naczyniem.',
+        'Gdy karmel ma kolor bursztynu, zdejmij go z ognia.',
+        'Ostrożnie wlej gorącą wodę: będzie mocno pryskać i parować.',
+        'Wróć na ogień i mieszaj, aż grudki się rozpuszczą. Dodaj sól i ostudź.',
+      ],
+      storage: 'W lodówce do 4 tygodni.',
+    },
+  },
+  {
+    id: 'cynamonowy',
+    name: 'Syrop cynamonowy',
+    color: '#a35a2c',
+    easyToBuy: false,
+    buyNote: 'W sklepach z kawą i w internecie, w supermarkecie rzadko.',
+    recipe: {
+      timeMin: 20,
+      yieldMl: 200,
+      ingredients: ['100 g cukru (najlepiej brązowego)', '100 ml wody', '2 laski cynamonu'],
+      steps: [
+        'Połam laski cynamonu i zagotuj je z wodą i cukrem.',
+        'Gotuj na małym ogniu 5 minut.',
+        'Odstaw pod przykryciem na 10 minut. Im dłużej, tym mocniej.',
+        'Przecedź do butelki.',
+      ],
+      storage: 'W lodówce do 3 tygodni.',
+    },
+  },
+  {
+    id: 'malinowy',
+    name: 'Syrop malinowy',
+    color: '#c2304a',
+    easyToBuy: true,
+    buyNote: 'Syrop malinowy kupisz w każdym sklepie. Do kawy wybierz gęsty, bez aromatów.',
+    recipe: {
+      timeMin: 15,
+      yieldMl: 250,
+      ingredients: [
+        '200 g malin (mogą być mrożone)',
+        '100 g cukru',
+        '100 ml wody',
+        'łyżeczka soku z cytryny',
+      ],
+      steps: [
+        'Zagotuj maliny z wodą i cukrem.',
+        'Gotuj na małym ogniu 5 minut, rozgniatając owoce.',
+        'Przecedź przez sitko, dociskając łyżką. Dodaj sok z cytryny.',
+        'Ostudź i przelej do słoika.',
+      ],
+      storage: 'W lodówce do tygodnia.',
+    },
+  },
+  {
+    id: 'czekoladowy',
+    name: 'Sos czekoladowy',
+    color: '#3b1f14',
+    easyToBuy: true,
+    buyNote: 'W supermarketach, przy deserach i lodach.',
+    recipe: {
+      timeMin: 10,
+      yieldMl: 200,
+      ingredients: [
+        '50 g kakao',
+        '100 g cukru',
+        '120 ml wody',
+        'szczypta soli',
+        'opcjonalnie 30 g gorzkiej czekolady',
+      ],
+      steps: [
+        'Wymieszaj kakao z cukrem i solą w rondelku.',
+        'Dolewaj wodę, mieszając, żeby nie było grudek.',
+        'Gotuj na małym ogniu 3–4 minuty, aż zgęstnieje. Zdejmij z ognia i rozpuść w nim czekoladę.',
+        'Ostudź: sos zgęstnieje jeszcze bardziej.',
+      ],
+      storage: 'W lodówce do 2 tygodni.',
+    },
+  },
+];

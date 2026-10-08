@@ -1,0 +1,66 @@
+import { drinks } from './drinks';
+import { methods } from './methods';
+import { frothingMethods, frothingSummary, milks } from './milks';
+import { syrups } from './syrups';
+import type { BrewMethod, Drink, Milk, Syrup } from './types';
+import { vessels } from './vessels';
+
+export { drinks, frothingMethods, frothingSummary, methods, milks, syrups, vessels };
+export * from './coldBrew';
+export * from './labels';
+export * from './types';
+
+const byId = <T extends { id: string }>(items: T[]) => new Map(items.map((item) => [item.id, item]));
+
+const methodsById = byId(methods);
+const drinksById = byId(drinks);
+const milksById = byId(milks);
+const syrupsById = byId(syrups);
+
+export const getMethod = (id: string): BrewMethod | undefined => methodsById.get(id);
+export const getDrink = (id: string): Drink | undefined => drinksById.get(id);
+export const getMilk = (id: string): Milk | undefined => milksById.get(id);
+export const getSyrup = (id: string): Syrup | undefined => syrupsById.get(id);
+
+/** Metody, którymi da się zrobić bazę napoju: główna i alternatywne. */
+export function baseMethodIds(drink: Drink): string[] {
+  return [drink.base.methodId, ...(drink.base.alternativeMethodIds ?? [])];
+}
+
+/** Napoje, których bazę da się zaparzyć tą metodą. Najpierw te, dla których metoda jest główna. */
+export function drinksForMethod(methodId: string): Drink[] {
+  const main = drinks.filter((d) => d.base.methodId === methodId);
+  const alternative = drinks.filter((d) => d.base.alternativeMethodIds?.includes(methodId));
+  return [...main, ...alternative];
+}
+
+/** Czy napój jest „z mlekiem”: ma mleko albo nabiał w dodatkach (śmietankę, lody). */
+export function hasMilk(drink: Drink): boolean {
+  return (
+    drink.milk !== undefined ||
+    drink.extras.some((extra) => extra.kind === 'cream' || extra.kind === 'ice-cream')
+  );
+}
+
+/**
+ * Czy napój da się zrobić w wersji roślinnej: mleko (jeśli jest) ma roślinny wariant,
+ * a w dodatkach nie ma nabiału bez zamiennika (np. bitej śmietany).
+ */
+export function isPlantBasedPossible(drink: Drink): boolean {
+  const milkOk = !drink.milk || drink.milk.options.some((id) => getMilk(id)?.plantBased);
+  const extrasOk = drink.extras.every((extra) => extra.kind === 'syrup' || !extra.dairy);
+  return milkOk && extrasOk;
+}
+
+/** Syropy użyte w napoju (bez powtórzeń). */
+export function drinkSyrups(drink: Drink): Syrup[] {
+  return drink.extras.flatMap((extra) => {
+    if (extra.kind !== 'syrup') return [];
+    const syrup = getSyrup(extra.syrupId);
+    return syrup ? [syrup] : [];
+  });
+}
+
+export function hasIce(drink: Drink): boolean {
+  return drink.extras.some((extra) => extra.kind === 'ice');
+}

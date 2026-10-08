@@ -1,0 +1,163 @@
+import type { ComponentType, SVGProps } from 'react';
+
+export type IconProps = SVGProps<SVGSVGElement>;
+export type IconComponent = ComponentType<IconProps>;
+
+function Icon({ children, ...props }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+/** Dom (zakładka Start). */
+export function HomeIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5Z" />
+    </Icon>
+  );
+}
+
+/** Wysoka szklanka z warstwami (zakładka Napoje). */
+export function DrinkIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5.5 3h13l-1.6 16.2a2 2 0 0 1-2 1.8H9.1a2 2 0 0 1-2-1.8L5.5 3Z" />
+      <path d="M6.2 10h11.6" />
+      <path d="M6.7 15h10.6" />
+    </Icon>
+  );
+}
+
+/** Drip z uchwytem na kubku (zakładka Parzenie). */
+export function BrewIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 4h15l-4.5 8h-6L3 4Z" />
+      <path d="M17.2 5.5h1.8a1.75 1.75 0 0 1 0 3.5h-3.6" />
+      <path d="M8.5 14h4" />
+      <path d="M4.5 16h12v1a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-1Z" />
+      <path d="M16.5 16.5h1a1.75 1.75 0 0 1 0 3.5h-1.6" />
+    </Icon>
+  );
+}
+
+/** Parujący kubek (napój na ciepło). */
+export function HotIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 10h11v4.5a5.5 5.5 0 0 1-5.5 5.5A5.5 5.5 0 0 1 5 14.5V10Z" />
+      <path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16" />
+      <path d="M8 3.5c-.8 1 .8 2 0 3M11 3.5c-.8 1 .8 2 0 3M14 3.5c-.8 1 .8 2 0 3" />
+    </Icon>
+  );
+}
+
+/** Płatek śniegu (napój na zimno). */
+export function ColdIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
+      <path d="m9.5 4.5 2.5 2 2.5-2M9.5 19.5l2.5-2 2.5 2" />
+    </Icon>
+  );
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </Icon>
+  );
+}
+
+/** Liść (wersja roślinna). */
+export function LeafIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15Z" />
+      <path d="M5 19c3-4 6-7 9-9" />
+    </Icon>
+  );
+}
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m15 18-6-6 6-6" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m9 18 6-6-6-6" />
+    </Icon>
+  );
+}
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Icon>
+  );
+}
+
+/** Karton mleka. */
+export function MilkIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8 3h8v3l2 3.5V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9.5L8 6V3Z" />
+      <path d="M6 10h12M8 6h8" />
+    </Icon>
+  );
+}
+
+/** Trzepaczka (spienianie). */
+export function FrothIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 2v6" />
+      <path d="M12 8c-3 0-4.5 4-4.5 7.5a4.5 4.5 0 0 0 9 0C16.5 12 15 8 12 8Z" />
+      <path d="M12 8v12M9.5 9.5c.8 3 .8 7 0 10M14.5 9.5c-.8 3-.8 7 0 10" />
+    </Icon>
+  );
+}
+
+/** Butelka syropu. */
+export function SyrupIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M10 2h4v4l2 3v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9l2-3V2Z" />
+      <path d="M8 12h8v5H8z" />
+    </Icon>
+  );
+}
+
+/** Ziarno kawy (zakładka Moje ziarna). */
+export function BeanIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <g transform="rotate(-35 12 12)">
+        <ellipse cx="12" cy="12" rx="6.5" ry="9" />
+        <path d="M12 3.5C9.5 6.5 9.5 9 12 12s2.5 5.5 0 8.5" />
+      </g>
+    </Icon>
+  );
+}

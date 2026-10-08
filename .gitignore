@@ -1,0 +1,26 @@
+# Zależności
+node_modules/
+
+# Wyniki builda
+dist/
+dev-dist/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# Lokalne pliki środowiska
+*.local
+.env
+.env.*
+
+# Logi
+*.log
+npm-debug.log*
+
+# Edytory i system
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

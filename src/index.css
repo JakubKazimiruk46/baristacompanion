@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/*
+ * Tokeny wyglądu.
+ *
+ * 1. Paleta bazowa (coffee, caramel) i typografia. Stałe wartości, w komponentach
+ *    używaj ich tylko wtedy, gdy kolor ma być taki sam w obu motywach.
+ * 2. Kolory semantyczne (canvas, surface, ink, accent…). Tych używaj w komponentach:
+ *    same przełączają się między jasnym a ciemnym motywem.
+ */
+
+@theme static {
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial,
+    sans-serif;
+  --font-display:
+    ui-serif, "Iowan Old Style", "New York", "Noto Serif", Georgia, Cambria, serif;
+
+  /* Ciepłe brązy: od pianki mlecznej do espresso. */
+  --color-coffee-50: #faf6f1;
+  --color-coffee-100: #f3ebe1;
+  --color-coffee-200: #e6d6c3;
+  --color-coffee-300: #d3bb9e;
+  --color-coffee-400: #b99676;
+  --color-coffee-500: #9b7657;
+  --color-coffee-600: #7d5b42;
+  --color-coffee-700: #614634;
+  --color-coffee-800: #463328;
+  --color-coffee-900: #2f221b;
+  --color-coffee-950: #1c1411;
+
+  /* Akcent: karmel. */
+  --color-caramel-100: #fbead6;
+  --color-caramel-200: #f5d2a9;
+  --color-caramel-300: #edb575;
+  --color-caramel-400: #e2984a;
+  --color-caramel-500: #cf7d2f;
+  --color-caramel-600: #ad6424;
+  --color-caramel-700: #884e1e;
+  --color-caramel-800: #5f3816;
+  --color-caramel-900: #3d240e;
+}
+
+:root {
+  --canvas: var(--color-coffee-50);
+  --surface: #ffffff;
+  --surface-muted: var(--color-coffee-100);
+  --line: var(--color-coffee-200);
+  --ink: var(--color-coffee-900);
+  --ink-muted: var(--color-coffee-600);
+  --accent: var(--color-caramel-700);
+  --accent-soft: var(--color-caramel-100);
+  --on-accent: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: var(--color-coffee-950);
+    --surface: var(--color-coffee-900);
+    --surface-muted: var(--color-coffee-800);
+    --line: var(--color-coffee-800);
+    --ink: var(--color-coffee-50);
+    --ink-muted: var(--color-coffee-300);
+    --accent: var(--color-caramel-300);
+    --accent-soft: var(--color-caramel-800);
+    --on-accent: var(--color-coffee-950);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+}
+
+/* Nalewanie warstw w <DrinkGlass>. Przy ograniczeniu animacji rysunek jest od razu gotowy. */
+@keyframes pour-in {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pour-layer {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: pour-in 650ms cubic-bezier(0.25, 0.7, 0.3, 1) both;
+  }
+
+  .pour-fade {
+    animation: fade-in 450ms ease-out both;
+  }
+}
+
+/* Przejścia między ekranami (View Transitions, linki z `viewTransition`). Dolna nawigacja
+   ma własną nazwę, więc stoi w miejscu, a zmienia się tylko treść. */
+@keyframes screen-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+::view-transition-old(root) {
+  animation: 120ms ease-out both screen-out;
+}
+
+::view-transition-new(root) {
+  animation: 220ms cubic-bezier(0.2, 0.7, 0.3, 1) both screen-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Widoczny fokus przy obsłudze klawiaturą (komponenty mogą go nadpisać). */
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  body {
+    @apply min-h-dvh bg-canvas font-sans text-ink antialiased;
+  }
+}

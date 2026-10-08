@@ -1,0 +1,120 @@
+import { describe, expect, it } from 'vitest';
+import { drinks, type Drink } from '../../data';
+import { filterDrinks, filtersFromParams, filtersToParams, hasActiveFilters } from './filters';
+
+function drink(overrides: Partial<Drink> & Pick<Drink, 'id'>): Drink {
+  return {
+    name: overrides.id,
+    tagline: '',
+    description: '',
+    temperature: 'hot',
+    prepTimeMin: 10,
+    base: { methodId: 'kawiarka', amountMl: 40 },
+    extras: [],
+    equipment: [],
+    layers: [{ name: 'kawa', volumeMl: 40, color: '#000000', kind: 'liquid' }],
+    steps: ['krok'],
+    serving: { vessel: 'cup', why: '', decorations: [] },
+    ...overrides,
+  };
+}
+
+const fixtures = [
+  drink({ id: 'goraca-czarna', temperature: 'hot', prepTimeMin: 8 }),
+  drink({
+    id: 'goraca-z-krowim',
+    temperature: 'hot',
+    milk: { options: ['krowie'], amountMl: 100, prep: 'froth' },
+  }),
+  drink({
+    id: 'zimna-z-owsianym',
+    temperature: 'cold',
+    prepTimeMin: 15,
+    milk: { options: ['krowie', 'owsiane-barista'], amountMl: 100, prep: 'plain' },
+  }),
+  drink({
+    id: 'zimna-ze-smietana',
+    temperature: 'cold',
+    prepTimeMin: 25,
+    extras: [{ kind: 'cream', name: 'śmietana', amount: '50 ml', dairy: true }],
+  }),
+  drink({ id: 'zimna-czarna', temperature: 'cold', prepTimeMin: 960 }),
+];
+
+const ids = (list: Drink[]) => list.map((d) => d.id);
+
+describe('filterDrinks', () => {
+  it('bez filtrów zwraca wszystko', () => {
+    expect(filterDrinks(fixtures, {})).toEqual(fixtures);
+  });
+
+  it('zimne + roślinne', () => {
+    expect(ids(filterDrinks(fixtures, { temperature: 'cold', plantBased: true }))).toEqual([
+      'zimna-z-owsianym',
+      'zimna-czarna',
+    ]);
+  });
+
+  it('ciepłe + bez mleka', () => {
+    expect(ids(filterDrinks(fixtures, { temperature: 'hot', milk: 'without' }))).toEqual([
+      'goraca-czarna',
+    ]);
+  });
+
+  it('śmietanka liczy się jako mleko', () => {
+    expect(ids(filterDrinks(fixtures, { milk: 'without' }))).toEqual(['goraca-czarna', 'zimna-czarna']);
+  });
+
+  it('z mlekiem + roślinne odrzuca napoje tylko z mlekiem krowim', () => {
+    expect(ids(filterDrinks(fixtures, { milk: 'with', plantBased: true }))).toEqual([
+      'zimna-z-owsianym',
+    ]);
+  });
+
+  it('czas przygotowania: do 15 min', () => {
+    expect(ids(filterDrinks(fixtures, { maxTimeMin: 15 }))).toEqual([
+      'goraca-czarna',
+      'goraca-z-krowim',
+      'zimna-z-owsianym',
+    ]);
+  });
+
+  it('wszystkie filtry naraz', () => {
+    expect(
+      ids(
+        filterDrinks(fixtures, {
+          temperature: 'cold',
+          milk: 'with',
+          plantBased: true,
+          maxTimeMin: 15,
+        }),
+      ),
+    ).toEqual(['zimna-z-owsianym']);
+  });
+
+  it('na prawdziwych danych: zimne + roślinne wyklucza kawę mrożoną z bitą śmietaną', () => {
+    const result = ids(filterDrinks(drinks, { temperature: 'cold', plantBased: true }));
+    expect(result).toContain('espresso-tonic');
+    expect(result).not.toContain('kawa-mrozona-z-lodami');
+    expect(result).not.toContain('latte-macchiato');
+  });
+});
+
+describe('filtry w adresie', () => {
+  it('zapis i odczyt dają te same filtry', () => {
+    const filters = { temperature: 'cold', milk: 'without', plantBased: true, maxTimeMin: 10 } as const;
+    const params = filtersToParams(filters);
+    expect(params.toString()).toBe('temp=zimne&mleko=bez&roslinne=1&czas=10');
+    expect(filtersFromParams(params)).toEqual(filters);
+  });
+
+  it('ignoruje błędne wartości', () => {
+    expect(filtersFromParams(new URLSearchParams('temp=letnie&czas=7&mleko=tak'))).toEqual({});
+  });
+
+  it('hasActiveFilters', () => {
+    expect(hasActiveFilters({})).toBe(false);
+    expect(hasActiveFilters({ plantBased: false })).toBe(false);
+    expect(hasActiveFilters({ maxTimeMin: 10 })).toBe(true);
+  });
+});
