@@ -2,6 +2,8 @@
 
 Data: 2026-10-08 · Źródło: porównanie z Filtru, Brew Timer, Timer.Coffee, Beanconqueror, Mixel, Highball i Bar Assistant. Autor wybrał osiem funkcji.
 
+**Stan:** wszystkie kroki zrobione 2026-10-08 na gałęzi `feature/post-mvp` (jeden commit na krok). Do sprawdzenia przez autora: treści z `needsReview` w nowych metodach i napojach oraz sekcja 7 listy [test-na-telefonie.md](../docs/test-na-telefonie.md) (udostępnianie, aparat).
+
 ## Cel
 
 Uzupełnić MVP o to, co konkurencja ma, a nam brakuje, bez backendu i kont. Kolejność: najpierw rzeczy, z których korzystają kolejne kroki (kalkulator przed dziennikiem, katalog składników przed półką).
