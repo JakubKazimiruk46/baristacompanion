@@ -46,6 +46,7 @@ src/
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja)
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
+    journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), localStore, useDialogParam, useNow, useWakeLock
@@ -65,6 +66,7 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |
+| `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
 
 Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę” należy do Startu.
@@ -88,7 +90,8 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - **Ekrany:** każdy zaczyna się od `<PageHeader>` (tytuł karty, h1 przyjmujący fokus po zmianie ekranu, opcjonalnie powrót i ikona). Sekcje przez `<Section>` (region z nagłówkiem h2). Puste stany przez `<EmptyState>`.
 - **Nawigacja:** główne linki mają `viewTransition` (płynne przejście; wyłączone przy ograniczeniu ruchu). Link z listy przekazuje `state={{ from }}`, a `<BackLink>` wtedy cofa w historii (zachowuje filtry i przewinięcie).
 - **Okna:** `<Sheet>` (natywny `<dialog>`). Stan okna w adresie przez `useDialogParam`, żeby gest „wstecz” je zamykał.
-- **Zapis w przeglądarce:** zawsze przez `createLocalStore` (`lib/localStore`): odporny na brak localStorage, wspólny stan przez `useSyncExternalStore`. Klucze z prefiksem `barista-companion.` i wersją (`.v1`).
+- **Zapis w przeglądarce:** zawsze przez `createLocalStore` (`lib/localStore`): odporny na brak localStorage, wspólny stan przez `useSyncExternalStore`. Klucze z prefiksem `barista-companion.` i wersją (`.v1`). Parser odrzuca uszkodzone wpisy i odwołania do nieistniejących danych, zamiast tracić cały zapis.
+- **Dziennik:** prowadzone parzenie tworzy wpis samo przy „Zakończ” (`BrewSession`), cold brew przy zakończeniu maceracji. Nie twórz wpisów w innych miejscach.
 - **Czas:** stopery liczą z `Date.now()` od znacznika startu (czyste funkcje w `features/brewing/timer.ts`, `features/coldbrew/time.ts`), nigdy przez sumowanie interwałów.
 - **Ikony:** inline SVG (`components/icons.tsx`, `MethodIcon.tsx`), bez bibliotek ikon. **Zależności:** bez backendu i ciężkich bibliotek UI.
 

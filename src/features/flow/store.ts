@@ -24,6 +24,7 @@ function parseFlow(value: unknown): FlowState {
   if (described) state.described = described;
   if (typeof v.methodId === 'string') state.methodId = v.methodId;
   if (typeof v.drinkId === 'string' || v.drinkId === null) state.drinkId = v.drinkId;
+  if (typeof v.entryId === 'string') state.entryId = v.entryId;
   return state;
 }
 

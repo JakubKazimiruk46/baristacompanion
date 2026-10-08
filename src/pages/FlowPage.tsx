@@ -44,6 +44,8 @@ import {
   type FlowStep,
 } from '../features/flow/flow';
 import { flowStore, updateFlow, useFlow } from '../features/flow/store';
+import { StarRating } from '../features/journal/StarRating';
+import { journalStore, useJournal } from '../features/journal/store';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
 import { formatSeconds } from '../lib/format';
 import { isLongBrew } from './BrewSessionPage';
@@ -394,7 +396,18 @@ function BrewStep() {
     );
   }
 
-  return <BrewSession key={method.id} method={method} header={header} onFinish={() => navigate(next)} />;
+  return (
+    <BrewSession
+      key={method.id}
+      method={method}
+      header={header}
+      journal={{ beanId: flow.beanId, drinkId: flow.drinkId ?? undefined }}
+      onFinish={(entryId) => {
+        updateFlow({ entryId });
+        navigate(next);
+      }}
+    />
+  );
 }
 
 // ── 6. Złóż napój ───────────────────────────────────────────────────────
@@ -454,6 +467,7 @@ function ServeStep() {
         <p className="font-display text-2xl font-semibold">Smacznego!</p>
         <p className="mt-1 text-ink-muted">Od ziaren do filiżanki. Następnym razem spróbuj czegoś nowego.</p>
       </div>
+      <FlowRating entryId={flow.entryId} />
       <div className="mt-4 space-y-3">
         <button
           type="button"
@@ -470,5 +484,27 @@ function ServeStep() {
         </Link>
       </div>
     </>
+  );
+}
+
+/** Ocena parzenia z tej ścieżki. Wpis powstał sam po „Zakończ”; notatkę dopisuje się w dzienniku. */
+function FlowRating({ entryId }: { entryId?: string }) {
+  const entry = useJournal().find((e) => e.id === entryId);
+  if (!entry) return null;
+  return (
+    <div className="mt-4 rounded-3xl bg-surface p-5">
+      <StarRating
+        legend="Jak wyszła kawa?"
+        value={entry.rating}
+        onChange={(rating) => journalStore.update(entry.id, { rating })}
+      />
+      <Link
+        to={`/parzenie/dziennik/${entry.id}`}
+        className="mt-2 inline-flex h-10 items-center gap-1 text-sm font-medium text-accent"
+      >
+        Dopisz notatkę w dzienniku
+        <ChevronRightIcon className="size-4" />
+      </Link>
+    </div>
   );
 }

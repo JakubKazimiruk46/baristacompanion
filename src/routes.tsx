@@ -9,6 +9,8 @@ import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
 import { FlowPage } from './pages/FlowPage';
 import { FrothingPage } from './pages/FrothingPage';
+import { JournalEntryPage } from './pages/JournalEntryPage';
+import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
 import { MilkPage } from './pages/MilkPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -30,6 +32,8 @@ export const routes: RouteObject[] = [
       { path: 'napoje/syropy', element: <SyrupsPage /> },
       { path: 'napoje/:drinkId', element: <DrinkPage /> },
       { path: 'parzenie', element: <BrewingPage /> },
+      { path: 'parzenie/dziennik', element: <JournalPage /> },
+      { path: 'parzenie/dziennik/:entryId', element: <JournalEntryPage /> },
       { path: 'parzenie/:methodId', element: <MethodPage /> },
       { path: 'parzenie/:methodId/start', element: <BrewSessionPage /> },
       { path: 'ziarna', element: <BeansPage /> },

@@ -1,9 +1,13 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
+import { ChevronRightIcon } from '../../components/icons';
 import { PageHeader } from '../../components/PageHeader';
 import { drinksForMethod, type BrewMethod } from '../../data';
 import { useWakeLock } from '../../lib/useWakeLock';
+import { useBeans } from '../beans/store';
 import { DrinkCard } from '../drinks/DrinkCard';
+import { EntryEditor } from '../journal/EntryEditor';
+import { journalStore, useJournal } from '../journal/store';
 import { formatGrams } from './dose';
 import { formatClock } from './timer';
 import { useBrewSession } from './useBrewSession';
@@ -17,16 +21,43 @@ type BrewSessionProps = {
   method: BrewMethod;
   /** Własny nagłówek (np. w ścieżce „Mam kawę”). Domyślnie: nazwa metody z powrotem do niej. */
   header?: ReactNode;
-  /** Co po ostatnim kroku. Domyślnie: ekran „Gotowe” z propozycjami napojów. */
-  onFinish?: () => void;
+  /** Ziarna i napój do wpisu w dzienniku (ścieżka „Mam kawę”). */
+  journal?: { beanId?: string; drinkId?: string };
+  /** Co po ostatnim kroku. Domyślnie: ekran „Gotowe” z oceną i propozycjami napojów. */
+  onFinish?: (entryId: string) => void;
 };
 
-export function BrewSession({ method, header, onFinish }: BrewSessionProps) {
+export function BrewSession({ method, header, journal, onFinish }: BrewSessionProps) {
   const session = useBrewSession(method);
   const { state, step, nextStep } = session;
+  const beans = useBeans();
+  // Wpis z tego parzenia. „Wstecz” z ekranu końcowego i ponowne „Zakończ” nie tworzą drugiego.
+  const [entryId, setEntryId] = useState<string | null>(null);
   useWakeLock(!state.finished);
 
-  if (state.finished) return <Finished method={method} onRestart={session.restart} />;
+  const finish = () => {
+    let id = entryId;
+    if (!id || !journalStore.get(id)) {
+      const bean = beans.find((b) => b.id === journal?.beanId);
+      id = journalStore.add({
+        methodId: method.id,
+        coffeeG: method.dose.coffeeG,
+        waterMl: method.dose.waterMl,
+        ...(bean && { beanId: bean.id, beanName: bean.name }),
+        ...(journal?.drinkId && { drinkId: journal.drinkId }),
+      }).id;
+      setEntryId(id);
+    }
+    if (onFinish) onFinish(id);
+    else session.next();
+  };
+
+  const restart = () => {
+    setEntryId(null);
+    session.restart();
+  };
+
+  if (state.finished) return <Finished method={method} entryId={entryId} onRestart={restart} />;
 
   const total = method.steps.length;
   const isLast = state.stepIndex === total - 1;
@@ -131,7 +162,7 @@ export function BrewSession({ method, header, onFinish }: BrewSessionProps) {
         >
           Wstecz
         </button>
-        <button type="button" className={primary} onClick={isLast && onFinish ? onFinish : session.next}>
+        <button type="button" className={primary} onClick={isLast ? finish : session.next}>
           {isLast ? 'Zakończ' : 'Dalej'}
         </button>
       </div>
@@ -143,9 +174,18 @@ export function BrewSession({ method, header, onFinish }: BrewSessionProps) {
 export const doseLine = (method: BrewMethod) =>
   `${formatGrams(method.dose.coffeeG)} g kawy · ${method.dose.waterMl} ml wody`;
 
-function Finished({ method, onRestart }: { method: BrewMethod; onRestart: () => void }) {
+function Finished({
+  method,
+  entryId,
+  onRestart,
+}: {
+  method: BrewMethod;
+  entryId: string | null;
+  onRestart: () => void;
+}) {
   const location = useLocation();
   const drinks = drinksForMethod(method.id);
+  const entry = useJournal().find((e) => e.id === entryId);
   return (
     <>
       <PageHeader
@@ -153,6 +193,21 @@ function Finished({ method, onRestart }: { method: BrewMethod; onRestart: () => 
         lead={`Kawa z metody ${method.name} czeka. Pij ją tak albo zrób z niej coś więcej.`}
         back={{ to: `/parzenie/${method.id}`, label: method.name }}
       />
+      {entry && (
+        <section aria-labelledby="dziennik" className="mb-8 rounded-3xl bg-surface p-5">
+          <h2 id="dziennik" className="font-display text-xl font-semibold">
+            Zapisano w dzienniku
+          </h2>
+          <p className="mt-1 mb-4 text-sm text-ink-muted">
+            {doseLine(method)}. Oceń i dopisz, co zmienić następnym razem.
+          </p>
+          <EntryEditor entry={entry} />
+          <Link to="/parzenie/dziennik" className="mt-3 inline-flex h-10 items-center gap-1 font-medium text-accent">
+            Cały dziennik parzeń
+            <ChevronRightIcon className="size-5" />
+          </Link>
+        </section>
+      )}
       {drinks.length > 0 && (
         <section aria-labelledby="napoje">
           <h2 id="napoje" className="mb-3 font-display text-xl font-semibold">

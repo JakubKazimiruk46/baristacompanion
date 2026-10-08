@@ -186,3 +186,22 @@ export function PlusIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Gwiazdka oceny. Wypełniona: fill="currentColor". */
+export function StarIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8L12 3.8Z" />
+    </Icon>
+  );
+}
+
+/** Notes z zakładką (dziennik parzeń). */
+export function JournalIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1.5 1.5 0 0 1-1.5-1.5v-14A1.5 1.5 0 0 1 6 3.5Z" />
+      <path d="M8.5 8h6M8.5 11.5h6M8.5 15h3.5" />
+    </Icon>
+  );
+}
