@@ -51,9 +51,18 @@ describe('dziennik parzeń', () => {
         { id: 'b', methodId: 'ekspres', brewedAt: 1, coffeeG: 15, waterMl: 250 },
         { id: 'c', methodId: 'drip', brewedAt: 1, coffeeG: 15, waterMl: 250, rating: 7 },
         { id: 'd', methodId: 'cold-brew', brewedAt: 1, coffeeG: 100, waterMl: 800, variantId: 'wanilia' },
+        {
+          id: 'e',
+          methodId: 'drip',
+          brewedAt: 1,
+          coffeeG: 15,
+          waterMl: 250,
+          grind: { grinderId: 'g', grinderName: 'Comandante', unit: 'click', setting: 22 },
+        },
+        { id: 'f', methodId: 'drip', brewedAt: 1, coffeeG: 15, waterMl: 250, grind: { setting: 22 } },
         'śmieci',
       ]),
     );
-    expect(journalStore.getSnapshot().map((e) => e.id)).toEqual(['a']);
+    expect(journalStore.getSnapshot().map((e) => e.id)).toEqual(['a', 'e']);
   });
 });

@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { MethodIcon } from '../../components/MethodIcon';
 import { capitalize } from '../../lib/format';
 import { dayAndTime } from '../coldbrew/time';
-import { entryDose, entryTitle } from './format';
+import { entryDose, entryGrind, entryTitle } from './format';
 import { Stars } from './StarRating';
 import type { JournalEntry } from './store';
 
@@ -33,6 +33,7 @@ export function EntryCard({ entry, now, heading: Heading = 'h2' }: EntryCardProp
           {capitalize(dayAndTime(entry.brewedAt, now))} · {entryDose(entry)}
         </p>
         {entry.beanName && <p className="mt-0.5 text-sm">{entry.beanName}</p>}
+        {entry.grind && <p className="mt-0.5 text-sm text-ink-muted">{entryGrind(entry)}</p>}
         {entry.note && <p className="mt-1 line-clamp-2 text-sm">{entry.note}</p>}
       </div>
     </Link>

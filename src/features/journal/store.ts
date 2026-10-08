@@ -1,5 +1,6 @@
 import { getColdBrewVariant, getMethod } from '../../data';
 import { createLocalStore, useLocalStore } from '../../lib/localStore';
+import { isGrindRecord, type GrindRecord } from '../grinder/store';
 
 export const RATINGS = [1, 2, 3, 4, 5] as const;
 export type Rating = (typeof RATINGS)[number];
@@ -19,6 +20,8 @@ export interface JournalEntry {
   beanName?: string;
   /** Napój wybrany w ścieżce „Mam kawę”. */
   drinkId?: string;
+  /** Młynek i jego ustawienie w chwili parzenia. */
+  grind?: GrindRecord;
   rating?: Rating;
   note?: string;
 }
@@ -49,6 +52,7 @@ function isEntry(value: unknown): value is JournalEntry {
     optionalString(e.beanId) &&
     optionalString(e.beanName) &&
     optionalString(e.drinkId) &&
+    (e.grind === undefined || isGrindRecord(e.grind)) &&
     optionalString(e.note)
   );
 }

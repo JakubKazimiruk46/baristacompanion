@@ -6,7 +6,10 @@ import { drinksForMethod, type BrewMethod } from '../../data';
 import { useWakeLock } from '../../lib/useWakeLock';
 import { useBeans } from '../beans/store';
 import { DrinkCard } from '../drinks/DrinkCard';
+import { GrinderLine } from '../grinder/GrinderSetting';
+import { grindersStore, grindRecordFor } from '../grinder/store';
 import { EntryEditor } from '../journal/EntryEditor';
+import { entryGrind } from '../journal/format';
 import { journalStore, useJournal } from '../journal/store';
 import { formatGrams } from './dose';
 import { formatClock } from './timer';
@@ -39,11 +42,13 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
     let id = entryId;
     if (!id || !journalStore.get(id)) {
       const bean = beans.find((b) => b.id === journal?.beanId);
+      const grind = grindRecordFor(grindersStore.getSnapshot(), method.id);
       id = journalStore.add({
         methodId: method.id,
         coffeeG: method.dose.coffeeG,
         waterMl: method.dose.waterMl,
         ...(bean && { beanId: bean.id, beanName: bean.name }),
+        ...(grind && { grind }),
         ...(journal?.drinkId && { drinkId: journal.drinkId }),
       }).id;
       setEntryId(id);
@@ -84,6 +89,13 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
           ))}
         </div>
       </div>
+
+      {/* Mieli się na początku, więc ustawienie młynka widać przy pierwszym kroku. */}
+      {state.stepIndex === 0 && (
+        <div className="mb-4">
+          <GrinderLine method={method} />
+        </div>
+      )}
 
       <section aria-labelledby="krok" className="rounded-3xl bg-surface p-6">
         <h2 id="krok" className="font-display text-3xl leading-tight font-semibold text-balance">
@@ -199,7 +211,8 @@ function Finished({
             Zapisano w dzienniku
           </h2>
           <p className="mt-1 mb-4 text-sm text-ink-muted">
-            {doseLine(method)}. Oceń i dopisz, co zmienić następnym razem.
+            {doseLine(method)}
+            {entry.grind && ` · ${entryGrind(entry)}`}. Oceń i dopisz, co zmienić następnym razem.
           </p>
           <EntryEditor entry={entry} />
           <Link to="/parzenie/dziennik" className="mt-3 inline-flex h-10 items-center gap-1 font-medium text-accent">

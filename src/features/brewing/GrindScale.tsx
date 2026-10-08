@@ -1,8 +1,13 @@
-import { GRIND_HINTS, GRIND_LABELS, GRIND_SIZES, type GrindSize } from '../../data';
+import { GRIND_HINTS, GRIND_LABELS, GRIND_SIZES, type BrewMethod } from '../../data';
 import { capitalize } from '../../lib/format';
+import { GrinderPanel } from '../grinder/GrinderSetting';
 
-/** Skala mielenia od bardzo drobnego do grubego: ziarenka rosną, wybrany stopień jest wyróżniony. */
-export function GrindScale({ grind }: { grind: GrindSize }) {
+/**
+ * Skala mielenia od bardzo drobnego do grubego: ziarenka rosną, wybrany stopień jest wyróżniony.
+ * Pod skalą ustawienie Twojego młynka dla tej metody.
+ */
+export function GrindScale({ method }: { method: BrewMethod }) {
+  const { grind } = method;
   const active = GRIND_SIZES.indexOf(grind);
 
   return (
@@ -31,6 +36,8 @@ export function GrindScale({ grind }: { grind: GrindSize }) {
         <span>bardzo drobno</span>
         <span>grubo</span>
       </div>
+
+      <GrinderPanel method={method} />
     </div>
   );
 }

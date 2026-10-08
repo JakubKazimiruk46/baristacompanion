@@ -71,7 +71,7 @@ function MethodDetails({ method: base }: { method: BrewMethod }) {
       <LastBrew methodId={method.id} />
 
       <Section title="Mielenie">
-        <GrindScale grind={method.grind} />
+        <GrindScale method={method} />
       </Section>
 
       <Section title="Sprzęt">

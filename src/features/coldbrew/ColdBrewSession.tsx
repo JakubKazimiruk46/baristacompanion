@@ -20,6 +20,8 @@ import { useNow } from '../../lib/useNow';
 import { formatGrams } from '../brewing/dose';
 import { formatRatio } from '../brewing/format';
 import { DrinkCard } from '../drinks/DrinkCard';
+import { GrinderLine } from '../grinder/GrinderSetting';
+import { grindersStore, grindRecordFor } from '../grinder/store';
 import { journalStore } from '../journal/store';
 import { createIcs, downloadIcs } from './ics';
 import { coldBrewStore, useColdBrew, type ColdBrewRun } from './store';
@@ -71,6 +73,9 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
         <Fact label="Koncentrat" value={formatRatio(method)} />
         <Fact label="Do picia" value="rozcieńcz 1:1" />
       </dl>
+      <div className="mt-3">
+        <GrinderLine method={method} />
+      </div>
 
       <fieldset className="mt-6">
         <legend className="font-display text-xl font-semibold">Wariant</legend>
@@ -131,15 +136,17 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
       <button
         type="button"
         className={`mt-3 ${primary}`}
-        onClick={() =>
+        onClick={() => {
+          const grind = grindRecordFor(grindersStore.getSnapshot(), method.id);
           coldBrewStore.set({
             startedAt: Date.now(),
             hours,
             variantId,
             coffeeG: method.dose.coffeeG,
             waterMl: method.dose.waterMl,
-          })
-        }
+            ...(grind && { grind }),
+          });
+        }}
       >
         Zalane, zaczynam macerację
       </button>
@@ -170,6 +177,7 @@ function ColdBrewStatus({ method, run }: { method: BrewMethod; run: ColdBrewRun 
       coffeeG: run.coffeeG ?? method.dose.coffeeG,
       waterMl: run.waterMl ?? method.dose.waterMl,
       variantId: run.variantId,
+      ...(run.grind && { grind: run.grind }),
     });
     coldBrewStore.set(null);
     navigate(`/parzenie/dziennik/${entry.id}`, { replace: true });

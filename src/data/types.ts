@@ -48,6 +48,28 @@ export type GrindSize = (typeof GRIND_SIZES)[number];
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
+// ── Młynki ──────────────────────────────────────────────────────────────
+
+/** Jak młynek liczy ustawienie: kliknięcia od zera, działki na skali albo obroty pokrętła. */
+export const GRINDER_UNITS = ['click', 'mark', 'turn'] as const;
+export type GrinderUnit = (typeof GRINDER_UNITS)[number];
+
+/** Popularny model młynka z podpowiedzią ustawień. */
+export interface GrinderModel extends Reviewable {
+  id: string;
+  name: string;
+  kind: 'manual' | 'electric';
+  unit: GrinderUnit;
+  /** Najdrobniejsze i najgrubsze ustawienie na skali młynka. */
+  scale: Range;
+  /** Najmniejsza zmiana ustawienia (kliknięcie: 1, kreska na pokrętle: 0,1). */
+  step: number;
+  /** Jak odczytać ustawienie, np. skąd liczyć kliknięcia. */
+  howTo: string;
+  /** Zakres dla każdego stopnia mielenia. null: tak drobno ten młynek nie zmieli. */
+  grind: Record<GrindSize, Range | null>;
+}
+
 export interface BrewStep {
   /**
    * Krótkie polecenie, czytelne z daleka. Ilości jako znaczniki, które kalkulator zamienia

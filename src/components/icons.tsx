@@ -162,6 +162,16 @@ export function BeanIcon(props: IconProps) {
   );
 }
 
+/** Ręczny młynek z korbką (Mój młynek). */
+export function GrinderIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8 10h8v9.5a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 8 19.5V10Z" />
+      <path d="M6.5 10h11M8 15h8M12 10V5.5h6V3" />
+    </Icon>
+  );
+}
+
 /** Serce (ulubione). Wypełnione: fill="currentColor". */
 export function HeartIcon(props: IconProps) {
   return (

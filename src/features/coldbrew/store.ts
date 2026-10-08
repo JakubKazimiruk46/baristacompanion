@@ -1,5 +1,6 @@
 import { COLD_BREW_HOURS, getColdBrewVariant } from '../../data/coldBrew';
 import { createLocalStore, useLocalStore } from '../../lib/localStore';
+import { isGrindRecord, type GrindRecord } from '../grinder/store';
 
 /** Rozpoczęte cold brew. Zapisane w localStorage, więc przetrwa zamknięcie aplikacji. */
 export interface ColdBrewRun {
@@ -9,6 +10,8 @@ export interface ColdBrewRun {
   /** Ilości z kalkulatora w chwili zalania (do dziennika). Starsze zapisy ich nie mają. */
   coffeeG?: number;
   waterMl?: number;
+  /** Ustawienie młynka w chwili zalania (do dziennika). */
+  grind?: GrindRecord;
 }
 
 export const COLD_BREW_KEY = 'barista-companion.cold-brew.v1';
@@ -26,7 +29,8 @@ function parseRun(value: unknown): ColdBrewRun | null {
     typeof run.variantId === 'string' &&
     getColdBrewVariant(run.variantId) !== undefined &&
     optionalNumber(run.coffeeG) &&
-    optionalNumber(run.waterMl);
+    optionalNumber(run.waterMl) &&
+    (run.grind === undefined || isGrindRecord(run.grind));
   return valid ? (run as ColdBrewRun) : null;
 }
 

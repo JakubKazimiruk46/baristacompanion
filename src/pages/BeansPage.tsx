@@ -1,9 +1,11 @@
 import { Link } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
-import { BeanIcon, ChevronRightIcon } from '../components/icons';
+import { BeanIcon, ChevronRightIcon, GrinderIcon } from '../components/icons';
 import { PageHeader } from '../components/PageHeader';
 import { BeanSummary } from '../features/beans/BeanSummary';
 import { useBeans, useBeansPersistent } from '../features/beans/store';
+import { activeGrinder, useGrinders } from '../features/grinder/store';
+import { count } from '../lib/format';
 
 export const addButtonClass =
   'flex h-12 items-center justify-center rounded-full bg-accent px-6 font-semibold text-on-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
@@ -55,7 +57,44 @@ export function BeansPage() {
           </ul>
         </>
       )}
+
+      <GrinderLink />
     </>
+  );
+}
+
+/** Wejście do „Mojego młynka”: używany młynek i liczba zapisanych ustawień. */
+function GrinderLink() {
+  const state = useGrinders();
+  const grinder = activeGrinder(state);
+  const settings = grinder ? Object.keys(grinder.settings).length : 0;
+
+  return (
+    <Link
+      to="/ziarna/mlynek"
+      viewTransition
+      className="mt-8 flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    >
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+        <GrinderIcon className="size-6" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-display text-lg leading-tight font-semibold">
+          {state.grinders.length > 1 ? 'Moje młynki' : 'Mój młynek'}
+        </span>
+        <span className="block text-sm text-ink-muted">
+          {grinder ? (
+            <>
+              {grinder.name} ·{' '}
+              <span className="whitespace-nowrap">{count(settings, ['ustawienie', 'ustawienia', 'ustawień'])}</span>
+            </>
+          ) : (
+            'Zapisz ustawienie mielenia dla każdej metody'
+          )}
+        </span>
+      </span>
+      <ChevronRightIcon className="size-5 shrink-0 text-ink-muted" />
+    </Link>
   );
 }
 

@@ -6,6 +6,7 @@ import type {
   FlavorNote,
   FrothingKind,
   FrothQuality,
+  GrinderUnit,
   GrindSize,
   IngredientGroup,
   MilkPrep,
@@ -51,6 +52,19 @@ export const GRIND_HINTS: Record<GrindSize, string> = {
   medium: 'jak piasek na plaży',
   'medium-coarse': 'jak cukier trzcinowy',
   coarse: 'jak gruba sól',
+};
+
+export const GRINDER_UNIT_LABELS: Record<GrinderUnit, string> = {
+  click: 'kliknięcia',
+  mark: 'działki na skali',
+  turn: 'obroty pokrętła',
+};
+
+/** Odmiana jednostki młynka: 1 kliknięcie, 2 kliknięcia, 5 kliknięć, 2,5 kliknięcia (ułamek). */
+export const GRINDER_UNIT_FORMS: Record<GrinderUnit, [string, string, string, string]> = {
+  click: ['kliknięcie', 'kliknięcia', 'kliknięć', 'kliknięcia'],
+  mark: ['działka', 'działki', 'działek', 'działki'],
+  turn: ['obrót', 'obroty', 'obrotów', 'obrotu'],
 };
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {

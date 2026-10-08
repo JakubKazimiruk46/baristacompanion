@@ -9,6 +9,8 @@ import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
 import { FlowPage } from './pages/FlowPage';
 import { FrothingPage } from './pages/FrothingPage';
+import { GrinderFormPage } from './pages/GrinderFormPage';
+import { GrindersPage } from './pages/GrindersPage';
 import { JournalEntryPage } from './pages/JournalEntryPage';
 import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
@@ -42,6 +44,8 @@ export const routes: RouteObject[] = [
       { path: 'parzenie/:methodId/start', element: <BrewSessionPage /> },
       { path: 'ziarna', element: <BeansPage /> },
       { path: 'ziarna/nowe', element: <BeanFormPage /> },
+      { path: 'ziarna/mlynek', element: <GrindersPage /> },
+      { path: 'ziarna/mlynek/nowy', element: <GrinderFormPage /> },
       { path: 'ziarna/:beanId', element: <BeanPage /> },
       { path: 'ziarna/:beanId/edycja', element: <BeanFormPage /> },
       { path: '*', element: <NotFoundPage /> },

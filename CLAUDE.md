@@ -36,7 +36,7 @@ src/
   main.tsx, routes.tsx    punkt wejścia i wszystkie trasy (wspólne dla aplikacji i testów)
   index.css               Tailwind, tokeny wyglądu, animacje (nalewanie, przejścia ekranów)
   data/                   treści i model danych: metody, napoje, mleko, spienianie, syropy, składniki
-                          z zamiennikami, naczynia, warianty cold brew, etykiety PL, typy;
+                          z zamiennikami, naczynia, warianty cold brew, młynki, etykiety PL, typy;
                           index.ts = katalog składników i wyszukiwanie
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
                           Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
@@ -48,6 +48,8 @@ src/
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
                           scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
+    grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
+                          panel przy skali mielenia i wiersz w parzeniu, odmiana jednostek
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
@@ -75,6 +77,7 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
+| `/ziarna/mlynek`, `/ziarna/mlynek/nowy` | Mój młynek: ustawienia dla metod, wybór używanego młynka, nowy młynek; `?mielenie=id-metody` otwiera okno ustawienia (też na ekranie metody, w „Mam kawę” i w parzeniu) |
 
 Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę” należy do Startu.
 
@@ -86,6 +89,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Składniki: katalog `ingredients` (index.ts) składa się z mlek, syropów i `extraIngredients` (`ingredients.ts`). Każdy dodatek napoju ma `ingredientId`, a nazwę w napoju osobno (`name`). Zamiennik to `{ id, note }`: inny składnik z katalogu i co się zmieni. Zamienniki syropów są w `syrups.ts`. `staple` = na półce od początku (lód, cukier), `always` = zawsze jest (woda).
 - Metoda: `dose` to przepis, a `scaling` to granice kalkulatora (osoba w ml, zakres sprzętu, krok, w kawiarce rozmiary). W krokach ilości zapisuj jako znaczniki `{coffee}`, `{water}`, `{water*0.6}`. Ekrany pokazują metodę przeliczoną przez `scaleMethod()` (`features/brewing/dose`) na ilość z `useWaterMl()`. Nigdy nie wyświetlaj surowych kroków.
 - Espresso nie ma: bazą drinków „na espresso” jest kawiarka.
+- Młynek (`grinders.ts`): jednostka (`click`/`mark`/`turn`), skala, krok i zakres dla każdego stopnia z `GRIND_SIZES`; `null` = tak drobno nie zmieli (tylko na drobnym końcu skali). Liczby odmieniaj przez `formatSetting()` (`features/grinder/format`), także ułamki („2,5 obrotu”).
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.
 - `data.test.ts` pilnuje spójności (odwołania, objętości, czasy, kolory). Nowy napój albo metoda muszą przez nie przejść.
 
@@ -99,7 +103,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - **Nawigacja:** główne linki mają `viewTransition` (płynne przejście; wyłączone przy ograniczeniu ruchu). Link z listy przekazuje `state={{ from }}`, a `<BackLink>` wtedy cofa w historii (zachowuje filtry i przewinięcie).
 - **Okna:** `<Sheet>` (natywny `<dialog>`). Stan okna w adresie przez `useDialogParam`, żeby gest „wstecz” je zamykał.
 - **Zapis w przeglądarce:** zawsze przez `createLocalStore` (`lib/localStore`): odporny na brak localStorage, wspólny stan przez `useSyncExternalStore`. Klucze z prefiksem `barista-companion.` i wersją (`.v1`). Parser odrzuca uszkodzone wpisy i odwołania do nieistniejących danych, zamiast tracić cały zapis.
-- **Dziennik:** prowadzone parzenie tworzy wpis samo przy „Zakończ” (`BrewSession`), cold brew przy zakończeniu maceracji. Nie twórz wpisów w innych miejscach.
+- **Dziennik:** prowadzone parzenie tworzy wpis samo przy „Zakończ” (`BrewSession`), cold brew przy zakończeniu maceracji. Nie twórz wpisów w innych miejscach. Wpis zapisuje ustawienie używanego młynka (`grindRecordFor`, cold brew już przy zalaniu), a „Zaparz tak samo” przywraca je razem z ilością (`grindersStore.restore`).
 - **Czas:** stopery liczą z `Date.now()` od znacznika startu (czyste funkcje w `features/brewing/timer.ts`, `features/coldbrew/time.ts`), nigdy przez sumowanie interwałów.
 - **Ikony:** inline SVG (`components/icons.tsx`, `MethodIcon.tsx`), bez bibliotek ikon. **Zależności:** bez backendu i ciężkich bibliotek UI. Jedyna duża biblioteka, tesseract.js (skan etykiety), ładuje się dynamicznie (`import()`) dopiero przy pierwszym skanie; nie importuj jej statycznie.
 

@@ -294,7 +294,7 @@ function MethodStep() {
       <FlowHeader step="metoda">
         <p className="mt-3 font-display text-2xl font-semibold">{method.name}</p>
       </FlowHeader>
-      <GrindScale grind={method.grind} />
+      <GrindScale method={method} />
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-2xl border border-line bg-surface p-3">
           <dt className="text-xs text-ink-muted">Proporcja</dt>

@@ -7,6 +7,8 @@ import {
   getMethod,
   getMilk,
   getSyrup,
+  grinderModels,
+  GRIND_SIZES,
   ingredients,
   isPlantBasedPossible,
   methods,
@@ -29,6 +31,7 @@ describe('identyfikatory', () => {
     ['mleka', milks],
     ['syropy', syrups],
     ['spienianie', frothingMethods],
+    ['młynki', grinderModels],
     ['składniki (z mlekami i syropami)', ingredients],
   ])('%s mają unikalne id w formacie slug', (_, items) => {
     expectUniqueIds(items);
@@ -146,6 +149,49 @@ describe('metody parzenia', () => {
     expect(methods).toHaveLength(12);
     expect(getMethod('kawiarka')).toBeDefined();
     expect(getMethod('cold-brew')).toBeDefined();
+  });
+});
+
+describe('młynki', () => {
+  const onStep = (value: number, step: number) => Math.abs(value / step - Math.round(value / step)) < 1e-9;
+
+  it('jest co najmniej 8 popularnych modeli, ręcznych i elektrycznych', () => {
+    expect(grinderModels.length).toBeGreaterThanOrEqual(8);
+    expect(grinderModels.some((g) => g.kind === 'manual')).toBe(true);
+    expect(grinderModels.some((g) => g.kind === 'electric')).toBe(true);
+  });
+
+  it.each(grinderModels.map((g) => [g.id, g] as const))('%s: ma zakres dla każdego stopnia mielenia', (_, model) => {
+    expect(Object.keys(model.grind).sort()).toEqual([...GRIND_SIZES].sort());
+    expect(model.scale.min).toBeLessThan(model.scale.max);
+    expect(model.step).toBeGreaterThan(0);
+    expect(model.howTo.length).toBeGreaterThan(0);
+    for (const size of GRIND_SIZES) {
+      const range = model.grind[size];
+      if (!range) continue;
+      expect(range.min, size).toBeLessThanOrEqual(range.max);
+      expect(range.min, size).toBeGreaterThanOrEqual(model.scale.min);
+      expect(range.max, size).toBeLessThanOrEqual(model.scale.max);
+      expect(onStep(range.min, model.step) && onStep(range.max, model.step), size).toBe(true);
+    }
+  });
+
+  it.each(grinderModels.map((g) => [g.id, g] as const))('%s: grubsze mielenie to wyższe ustawienie', (_, model) => {
+    const ranges = GRIND_SIZES.map((size) => model.grind[size]);
+    // Brak zakresu („tak drobno nie zmieli”) tylko na drobnym końcu skali.
+    const firstRange = ranges.findIndex((range) => range !== null);
+    expect(firstRange).toBeGreaterThanOrEqual(0);
+    expect(ranges.slice(firstRange)).not.toContain(null);
+    const defined = ranges.filter((range) => range !== null);
+    for (let i = 1; i < defined.length; i++) {
+      expect(defined[i]!.min).toBeGreaterThanOrEqual(defined[i - 1]!.min);
+      expect(defined[i]!.max).toBeGreaterThanOrEqual(defined[i - 1]!.max);
+    }
+  });
+
+  it.each(grinderModels.map((g) => [g.id, g] as const))('%s: podpowiedzi czekają na sprawdzenie', (_, model) => {
+    expect(model.needsReview).toBe(true);
+    expect(model.reviewNote?.length).toBeGreaterThan(0);
   });
 });
 

@@ -71,7 +71,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 
 | Krok | Stan |
 | :- | :- |
-| 1. Ustawienie młynka | do zrobienia |
+| 1. Ustawienie młynka | zrobione (gałąź `feature/mlynek`), czeka na akceptację autora |
 | 2. Własne przepisy | do zrobienia |
 | 3. Szerszy katalog drinków | do zrobienia |
 | 4. Powiadomienia w aplikacji na Androida | do zrobienia |
@@ -89,6 +89,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - ekran metody i prowadzone parzenie pokazują ustawienie przy skali mielenia,
    - wpis w dzienniku zapisuje ustawienie, a „Zaparz tak samo” je pokazuje,
    - tabela podpowiedzi ma `needsReview` i testy spójności (każdy stopień mielenia z `GRIND_SIZES` ma zakres).
+
+   Wykonanie (2026-10-09): 10 modeli w `src/data/grinders.ts` (zakresy z honestcoffeeguide.com i baristalife.co, zawężone do naszych stopni mielenia, wszystkie `needsReview`). Odstępstwa od planu: młynek, który tak drobno nie zmieli (Timemore do tygielka, Baratza, Wilfa, Fellow), ma `null` zamiast zakresu i komunikat zamiast zmyślonej podpowiedzi. Można mieć kilka młynków i wybrać używany. W prowadzonym parzeniu ustawienie widać przy pierwszym kroku (wtedy się mieli), a cold brew zapisuje je już przy zalaniu.
 2. **Własne przepisy.** „Zrób własną wersję” na ekranie metody kopiuje jej przepis do edytora: nazwa, dawka, temperatura, mielenie, kroki (tekst, szczegóły, czas, działanie czy czekanie). Kroki dodaje się, usuwa i przesuwa przyciskami. Gotowe, gdy:
    - przepisy zapisują się i są na liście „Twoje przepisy” na ekranie metody,
    - prowadzone parzenie i kalkulator działają z własnym przepisem,

@@ -7,8 +7,9 @@ import { getDrink, getMethod } from '../data';
 import { clampWater } from '../features/brewing/dose';
 import { dosesStore } from '../features/brewing/doseStore';
 import { dayAndTime } from '../features/coldbrew/time';
+import { grindersStore } from '../features/grinder/store';
 import { EntryEditor } from '../features/journal/EntryEditor';
-import { entryDose, entryTitle } from '../features/journal/format';
+import { entryDose, entryGrind, entryTitle } from '../features/journal/format';
 import { journalStore, useJournal } from '../features/journal/store';
 import { capitalize } from '../lib/format';
 import { useNow } from '../lib/useNow';
@@ -42,6 +43,11 @@ export function JournalEntryPage() {
         back={{ to: '/parzenie/dziennik', label: 'Dziennik' }}
         icon={<MethodIcon methodId={method.id} className="size-9" />}
       >
+        {entry.grind && (
+          <p className="mt-2 text-sm">
+            Młynek: <span className="font-medium">{entryGrind(entry)}</span>
+          </p>
+        )}
         {drink && (
           <p className="mt-2 text-sm">
             Do napoju:{' '}
@@ -55,11 +61,14 @@ export function JournalEntryPage() {
       <EntryEditor key={entry.id} entry={entry} />
 
       <div className="mt-8 flex flex-col gap-3">
-        {/* Te same ilości trafiają do kalkulatora, więc parzenie zaczyna się od nich. */}
+        {/* Te same ilości i ustawienie młynka wracają do kalkulatora i młynka, więc parzenie zaczyna się od nich. */}
         <Link
           to={start}
           className={primary}
-          onClick={() => dosesStore.set(method.id, clampWater(method, entry.waterMl))}
+          onClick={() => {
+            dosesStore.set(method.id, clampWater(method, entry.waterMl));
+            if (entry.grind) grindersStore.restore(entry.grind, method.id);
+          }}
         >
           Zaparz tak samo
         </Link>
