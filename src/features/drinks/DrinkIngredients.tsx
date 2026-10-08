@@ -2,9 +2,10 @@ import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 import type { FromState } from '../../components/BackLink';
 import { ChevronRightIcon } from '../../components/icons';
-import { getMilk, getSyrup, MILK_PREP_LABELS, type Drink, type Extra } from '../../data';
+import { getIngredient, getMilk, getSyrup, MILK_PREP_LABELS, type Drink, type Extra } from '../../data';
 import { capitalize } from '../../lib/format';
 import { formatAmount } from './amounts';
+import { Substitutes } from './Substitutes';
 
 type DrinkIngredientsProps = {
   drink: Drink;
@@ -36,7 +37,9 @@ export function DrinkIngredients({ drink, onSyrupClick, servings = 1 }: DrinkIng
             key={`${extra.kind}-${index}`}
             name={capitalize(extra.name) + (extra.blended ? ', do zmiksowania' : '') + optional(extra)}
             amount={formatAmount(extra.amount, servings)}
-          />
+          >
+            <Substitutes substitutes={getIngredient(extra.ingredientId)?.substitutes} />
+          </Row>
         ),
       )}
     </ul>

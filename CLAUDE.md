@@ -34,8 +34,9 @@ Przed zakończeniem zmian: `npm run typecheck` i `npm test` muszą przechodzić.
 src/
   main.tsx, routes.tsx    punkt wejścia i wszystkie trasy (wspólne dla aplikacji i testów)
   index.css               Tailwind, tokeny wyglądu, animacje (nalewanie, przejścia ekranów)
-  data/                   treści i model danych: metody, napoje, mleko, spienianie, syropy,
-                          naczynia, warianty cold brew, etykiety PL, typy; index.ts = wyszukiwanie
+  data/                   treści i model danych: metody, napoje, mleko, spienianie, syropy, składniki
+                          z zamiennikami, naczynia, warianty cold brew, etykiety PL, typy;
+                          index.ts = katalog składników i wyszukiwanie
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
                           Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
   features/
@@ -76,6 +77,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Wszystkie treści po polsku, id jako slugi (`kawa-pomaranczowa`), bo trafiają do adresów.
 - Napój: baza kawowa (`methodId` + alternatywy), mleko (opcje, pierwsza polecana), dodatki (`syrupId` dla syropów, `dairy` dla nabiału bez zamiennika), warstwy **od dołu** (`liquid`/`foam`/`solid`, kolor, ml), kroki, podanie (naczynie + dekoracje z instrukcją i `look`).
 - Ilość dodatku: `{ value, max?, unit }` mnoży się z porcjami i odmienia (`formatAmount`). Tekst („pełna szklanka”) zostaje bez zmian.
+- Składniki: katalog `ingredients` (index.ts) składa się z mlek, syropów i `extraIngredients` (`ingredients.ts`). Każdy dodatek napoju ma `ingredientId`, a nazwę w napoju osobno (`name`). Zamiennik to `{ id, note }`: inny składnik z katalogu i co się zmieni. Zamienniki syropów są w `syrups.ts`. `staple` = na półce od początku (lód, cukier), `always` = zawsze jest (woda).
 - Metoda: `dose` to przepis, a `scaling` to granice kalkulatora (osoba w ml, zakres sprzętu, krok, w kawiarce rozmiary). W krokach ilości zapisuj jako znaczniki `{coffee}`, `{water}`, `{water*0.6}`. Ekrany pokazują metodę przeliczoną przez `scaleMethod()` (`features/brewing/dose`) na ilość z `useWaterMl()`. Nigdy nie wyświetlaj surowych kroków.
 - Espresso nie ma: bazą drinków „na espresso” jest kawiarka.
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.

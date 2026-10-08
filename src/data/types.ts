@@ -128,6 +128,32 @@ export interface FrothingMethod extends Reviewable {
   tip?: string;
 }
 
+// ── Składniki ───────────────────────────────────────────────────────────
+
+/** Zamiennik: inny składnik z katalogu i co się zmieni po zamianie. */
+export interface Substitute {
+  id: string;
+  note: string;
+}
+
+export const INGREDIENT_GROUPS = ['milk', 'syrup', 'dairy', 'fruit', 'mixer', 'spice', 'sweet', 'basic'] as const;
+export type IngredientGroup = (typeof INGREDIENT_GROUPS)[number];
+
+/**
+ * Składnik z katalogu (półka „Co mam w domu”, lista zakupów, zamienniki). Mleka i syropy
+ * są w katalogu pod swoimi id.
+ */
+export interface Ingredient {
+  id: string;
+  name: string;
+  group: IngredientGroup;
+  /** Prawie każdy ma go w domu (lód, cukier): na półce od początku. */
+  staple?: boolean;
+  /** Jest zawsze (woda): nie ma go na półce i nigdy nie brakuje. */
+  always?: boolean;
+  substitutes?: Substitute[];
+}
+
 // ── Syropy ──────────────────────────────────────────────────────────────
 
 export interface Syrup extends Reviewable {
@@ -136,6 +162,8 @@ export interface Syrup extends Reviewable {
   color: string;
   easyToBuy: boolean;
   buyNote: string;
+  /** Czym zastąpić syrop, gdy nie ma go w domu i nie chcesz robić. */
+  substitutes?: Substitute[];
   recipe: {
     timeMin: number;
     yieldMl: number;
@@ -226,6 +254,9 @@ export type Extra =
   | { kind: 'syrup'; syrupId: string; amountMl: number; optional?: boolean }
   | {
       kind: ExtraKind;
+      /** Składnik z katalogu (półka, lista zakupów, zamienniki). */
+      ingredientId: string;
+      /** Nazwa w tym napoju, np. „tonik, dobrze schłodzony”. */
       name: string;
       amount: Amount;
       optional?: boolean;

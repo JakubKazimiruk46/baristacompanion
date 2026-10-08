@@ -7,6 +7,7 @@ import type {
   FrothingKind,
   FrothQuality,
   GrindSize,
+  IngredientGroup,
   MilkPrep,
   Roast,
   Temperature,
@@ -81,6 +82,17 @@ export const MILK_PREP_LABELS: Record<MilkPrep, string> = {
   warm: 'podgrzane',
   blend: 'zmiksowane',
   plain: 'prosto z lodówki',
+};
+
+export const INGREDIENT_GROUP_LABELS: Record<IngredientGroup, string> = {
+  milk: 'Mleko',
+  syrup: 'Syropy',
+  dairy: 'Śmietanka i lody',
+  fruit: 'Owoce i soki',
+  mixer: 'Napoje',
+  spice: 'Przyprawy',
+  sweet: 'Słodkie',
+  basic: 'Podstawy',
 };
 
 /** Jednostki ilości w trzech formach: 1 kostka, 2 kostki, 5 kostek. */

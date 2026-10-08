@@ -7,6 +7,9 @@ export const syrups: Syrup[] = [
     color: '#f08a24',
     easyToBuy: false,
     buyNote: 'Bywa w sklepach z kawą i w internecie, rzadko w supermarkecie.',
+    substitutes: [
+      { id: 'sok-pomaranczowy', note: 'Łyżka soku i łyżeczka cukru: mniej intensywnie, ale z pomarańczą.' },
+    ],
     recipe: {
       timeMin: 20,
       yieldMl: 200,
@@ -31,6 +34,9 @@ export const syrups: Syrup[] = [
     color: '#e3c88f',
     easyToBuy: true,
     buyNote: 'W większości supermarketów, przy kawie albo przy deserach.',
+    substitutes: [
+      { id: 'cukier', note: 'Łyżeczka cukru, najlepiej waniliowego. Będzie słodko, ale bez aromatu wanilii.' },
+    ],
     recipe: {
       timeMin: 15,
       yieldMl: 200,
@@ -54,6 +60,9 @@ export const syrups: Syrup[] = [
     color: '#b8692a',
     easyToBuy: true,
     buyNote: 'W większości supermarketów, przy kawie albo przy deserach.',
+    substitutes: [
+      { id: 'cukier', note: 'Łyżeczka cukru, najlepiej trzcinowego. Będzie słodko, ale bez nuty karmelu.' },
+    ],
     recipe: {
       timeMin: 15,
       yieldMl: 200,
@@ -73,6 +82,9 @@ export const syrups: Syrup[] = [
     color: '#a35a2c',
     easyToBuy: false,
     buyNote: 'W sklepach z kawą i w internecie, w supermarkecie rzadko.',
+    substitutes: [
+      { id: 'cynamon-mielony', note: 'Szczypta cynamonu i łyżeczka cukru, rozmieszane w kawie.' },
+    ],
     recipe: {
       timeMin: 20,
       yieldMl: 200,
@@ -92,6 +104,9 @@ export const syrups: Syrup[] = [
     color: '#c2304a',
     easyToBuy: true,
     buyNote: 'Syrop malinowy kupisz w każdym sklepie. Do kawy wybierz gęsty, bez aromatów.',
+    substitutes: [
+      { id: 'maliny', note: 'Garść malin zmiksowana z łyżeczką cukru.' },
+    ],
     recipe: {
       timeMin: 15,
       yieldMl: 250,
@@ -116,6 +131,10 @@ export const syrups: Syrup[] = [
     color: '#3b1f14',
     easyToBuy: true,
     buyNote: 'W supermarketach, przy deserach i lodach.',
+    substitutes: [
+      { id: 'kakao', note: 'Łyżka kakao i łyżeczka cukru rozpuszczone w odrobinie gorącej kawy.' },
+      { id: 'gorzka-czekolada', note: 'Rozpuść 20 g czekolady w gorącej kawie.' },
+    ],
     recipe: {
       timeMin: 10,
       yieldMl: 200,

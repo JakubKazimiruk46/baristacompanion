@@ -22,8 +22,13 @@ export const drinks: Drink[] = [
       note: 'Kawa z kawiarki zamiast espresso. Pasują owocowe, średnio palone ziarna.',
     },
     extras: [
-      { kind: 'mixer', name: 'tonik, dobrze schłodzony', amount: { value: 150, unit: 'ml' } },
-      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
+      {
+        kind: 'mixer',
+        ingredientId: 'tonik',
+        name: 'tonik, dobrze schłodzony',
+        amount: { value: 150, unit: 'ml' },
+      },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -70,10 +75,11 @@ export const drinks: Drink[] = [
       { kind: 'syrup', syrupId: 'pomaranczowy', amountMl: 15 },
       {
         kind: 'mixer',
+        ingredientId: 'sok-pomaranczowy',
         name: 'sok pomarańczowy, najlepiej świeżo wyciśnięty',
         amount: { value: 100, unit: 'ml' },
       },
-      { kind: 'ice', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['niska szklanka', 'łyżka', 'talerzyk na cukier'],
     layers: [
@@ -196,12 +202,13 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'fruit',
+        ingredientId: 'maliny',
         name: 'maliny (mogą być mrożone)',
         amount: { value: 60, unit: 'g' },
         blended: true,
       },
       { kind: 'syrup', syrupId: 'malinowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 3, max: 4, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'blender'],
     layers: [
@@ -250,6 +257,7 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
         name: 'lody waniliowe (mogą być roślinne)',
         amount: { value: 2, unit: 'scoop' },
         blended: true,
@@ -398,10 +406,20 @@ export const drinks: Drink[] = [
       note: 'Koncentrat cold brew, w którym macerował się cynamon.',
     },
     extras: [
-      { kind: 'spice', name: 'laska cynamonu do maceracji', amount: '1 laska na 800 ml wody' },
-      { kind: 'mixer', name: 'zimna woda', amount: { value: 100, unit: 'ml' } },
+      {
+        kind: 'spice',
+        ingredientId: 'laska-cynamonu',
+        name: 'laska cynamonu do maceracji',
+        amount: '1 laska na 800 ml wody',
+      },
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'zimna woda',
+        amount: { value: 100, unit: 'ml' },
+      },
       { kind: 'syrup', syrupId: 'cynamonowy', amountMl: 10, optional: true },
-      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['niska szklanka'],
     layers: [{ name: 'cold brew', volumeMl: 200, color: '#3d2416', kind: 'liquid' }],
@@ -444,10 +462,11 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'spice',
+        ingredientId: 'kardamon',
         name: 'zielony kardamon, lekko zgnieciony, do maceracji',
         amount: '4–5 strąków na 800 ml wody',
       },
-      { kind: 'ice', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: { value: 4, max: 5, unit: 'cube' } },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -540,7 +559,7 @@ export const drinks: Drink[] = [
     },
     extras: [
       { kind: 'syrup', syrupId: 'karmelowy', amountMl: 20 },
-      { kind: 'ice', name: 'lód', amount: 'pełna szklanka' },
+      { kind: 'ice', ingredientId: 'lod', name: 'lód', amount: 'pełna szklanka' },
     ],
     equipment: ['wysoka szklanka', 'łyżka'],
     layers: [
@@ -585,6 +604,7 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
         name: 'lody waniliowe (mogą być roślinne)',
         amount: { value: 1, max: 2, unit: 'scoop' },
       },
@@ -626,7 +646,14 @@ export const drinks: Drink[] = [
     temperature: 'hot',
     prepTimeMin: 10,
     base: { methodId: 'kawiarka', amountMl: 60, alternativeMethodIds: ['aeropress'] },
-    extras: [{ kind: 'mixer', name: 'gorąca woda', amount: { value: 120, unit: 'ml' } }],
+    extras: [
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'gorąca woda',
+        amount: { value: 120, unit: 'ml' },
+      },
+    ],
     equipment: ['filiżanka lub kubek', 'czajnik'],
     layers: [{ name: 'kawa', volumeMl: 180, color: '#3f2416', kind: 'liquid' }],
     steps: [
@@ -655,8 +682,18 @@ export const drinks: Drink[] = [
       note: 'Zaparz mocniej niż zwykle: 15 g kawy na 150 ml gorącej wody i 100 g lodu w dzbanku.',
     },
     extras: [
-      { kind: 'ice', name: 'lód do dzbanka', amount: { value: 100, unit: 'g' } },
-      { kind: 'ice', name: 'lód do szklanki', amount: { value: 3, max: 4, unit: 'cube' } },
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód do dzbanka',
+        amount: { value: 100, unit: 'g' },
+      },
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód do szklanki',
+        amount: { value: 3, max: 4, unit: 'cube' },
+      },
     ],
     equipment: ['dzbanek', 'niska szklanka'],
     layers: [{ name: 'kawa mrożona', volumeMl: 220, color: '#6b3a1f', kind: 'liquid' }],
@@ -726,11 +763,17 @@ export const drinks: Drink[] = [
     extras: [
       {
         kind: 'cream',
+        ingredientId: 'smietanka-30',
         name: 'śmietanka 30%, ubita',
         amount: { value: 100, unit: 'ml' },
         dairy: true,
       },
-      { kind: 'other', name: 'cukier puder', amount: { value: 1, unit: 'tsp' } },
+      {
+        kind: 'other',
+        ingredientId: 'cukier-puder',
+        name: 'cukier puder',
+        amount: { value: 1, unit: 'tsp' },
+      },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka'],
     layers: [
@@ -773,9 +816,15 @@ export const drinks: Drink[] = [
     },
     milk: { options: ['krowie'], amountMl: 50, prep: 'warm' },
     extras: [
-      { kind: 'other', name: 'gorzka czekolada', amount: { value: 30, unit: 'g' } },
+      {
+        kind: 'other',
+        ingredientId: 'gorzka-czekolada',
+        name: 'gorzka czekolada',
+        amount: { value: 30, unit: 'g' },
+      },
       {
         kind: 'cream',
+        ingredientId: 'smietanka-30',
         name: 'śmietanka 30%, lekko ubita',
         amount: { value: 40, unit: 'ml' },
         dairy: true,
@@ -814,8 +863,19 @@ export const drinks: Drink[] = [
       note: 'Mocna kawa z kawiarki, schłodzona przed dodaniem.',
     },
     extras: [
-      { kind: 'ice-cream', name: 'lody waniliowe', amount: { value: 2, unit: 'scoop' } },
-      { kind: 'cream', name: 'śmietanka 30%, ubita', amount: { value: 80, unit: 'ml' }, dairy: true },
+      {
+        kind: 'ice-cream',
+        ingredientId: 'lody-waniliowe',
+        name: 'lody waniliowe',
+        amount: { value: 2, unit: 'scoop' },
+      },
+      {
+        kind: 'cream',
+        ingredientId: 'smietanka-30',
+        name: 'śmietanka 30%, ubita',
+        amount: { value: 80, unit: 'ml' },
+        dairy: true,
+      },
       { kind: 'syrup', syrupId: 'czekoladowy', amountMl: 10, optional: true },
     ],
     equipment: ['wysoka szklanka', 'mikser lub trzepaczka', 'długa łyżeczka', 'słomka'],
@@ -859,9 +919,26 @@ export const drinks: Drink[] = [
       note: 'Cukier i kardamon wsypuje się do tygielka razem z kawą, przed podgrzewaniem.',
     },
     extras: [
-      { kind: 'other', name: 'cukier, do tygielka', amount: { value: 1, unit: 'tsp' }, optional: true },
-      { kind: 'spice', name: 'mielony kardamon, do tygielka', amount: 'szczypta', optional: true },
-      { kind: 'mixer', name: 'zimna woda do popicia', amount: { value: 150, unit: 'ml' } },
+      {
+        kind: 'other',
+        ingredientId: 'cukier',
+        name: 'cukier, do tygielka',
+        amount: { value: 1, unit: 'tsp' },
+        optional: true,
+      },
+      {
+        kind: 'spice',
+        ingredientId: 'kardamon-mielony',
+        name: 'mielony kardamon, do tygielka',
+        amount: 'szczypta',
+        optional: true,
+      },
+      {
+        kind: 'mixer',
+        ingredientId: 'woda',
+        name: 'zimna woda do popicia',
+        amount: { value: 150, unit: 'ml' },
+      },
     ],
     equipment: ['tygielek (cezve)', 'mała filiżanka', 'szklanka na wodę'],
     layers: [
@@ -897,7 +974,14 @@ export const drinks: Drink[] = [
       note: 'Bez phin zrób mocną kawę w kawiarce albo w AeroPressie.',
     },
     milk: { options: ['skondensowane', 'skondensowane-kokosowe'], amountMl: 30, prep: 'plain' },
-    extras: [{ kind: 'ice', name: 'lód', amount: { value: 5, max: 6, unit: 'cube' } }],
+    extras: [
+      {
+        kind: 'ice',
+        ingredientId: 'lod',
+        name: 'lód',
+        amount: { value: 5, max: 6, unit: 'cube' },
+      },
+    ],
     equipment: ['phin', 'niska szklanka', 'długa łyżeczka'],
     layers: [
       { name: 'mleko skondensowane', volumeMl: 30, color: '#f1e2bd', kind: 'liquid' },

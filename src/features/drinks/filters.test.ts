@@ -36,7 +36,9 @@ const fixtures = [
     id: 'zimna-ze-smietana',
     temperature: 'cold',
     prepTimeMin: 25,
-    extras: [{ kind: 'cream', name: 'śmietana', amount: '50 ml', dairy: true }],
+    extras: [
+      { kind: 'cream', ingredientId: 'smietanka-30', name: 'śmietana', amount: '50 ml', dairy: true },
+    ],
   }),
   drink({ id: 'zimna-czarna', temperature: 'cold', prepTimeMin: 960 }),
 ];
