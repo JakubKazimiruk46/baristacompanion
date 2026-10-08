@@ -12,6 +12,21 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Precache: domyślnie js/css/html + ikony z manifestu + pliki poniżej.
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
+      workbox: {
+        runtimeCaching: [
+          {
+            // Skan etykiety: worker, rdzeń WASM i modele językowe tesseract.js z CDN. Po pierwszym
+            // skanie działają też bez internetu.
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/(tesseract\.js|tesseract\.js-core|@tesseract\.js-data)[@/]/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ocr',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 180 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         id: '/',
         name: 'Barista Companion',

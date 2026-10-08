@@ -70,6 +70,19 @@ Uwaga: przy zablokowanym ekranie system może wstrzymać dźwięk (zwłaszcza iO
 | Powiększ tekst w ustawieniach systemu | Nic nie wychodzi poza ekran | [ ] | [ ] |
 | TalkBack / VoiceOver: przejdź z Napojów do napoju | Czytnik ogłasza tytuł nowego ekranu i opis rysunku szklanki | [ ] | [ ] |
 
+## 7. Udostępnianie, aparat i dziennik
+
+| Krok | Oczekiwany wynik | Android | iPhone |
+| :- | :- | :-: | :-: |
+| Napoje → Espresso tonic → **Udostępnij** | Okno z kartą: pomarańczowo-brązowe tło, szklanka, nazwa i składniki | [ ] | [ ] |
+| W oknie karty **Udostępnij** | Systemowe okno udostępniania z obrazkiem PNG (np. do Instagrama, Messengera) | [ ] | [ ] |
+| **Zapisz obrazek** | Obrazek trafia do pobranych / galerii, polskie znaki i czcionki jak w aplikacji | [ ] | [ ] |
+| Moje ziarna → Dodaj ziarna → **Zeskanuj etykietę** | Otwiera się aparat (albo wybór: aparat / zdjęcia) | [ ] | [ ] |
+| Zdjęcie prawdziwego opakowania, z bliska i przy dobrym świetle | Po kilku sekundach podsumowanie „Z etykiety: …” i wypełnione pola | [ ] | [ ] |
+| Drugi skan w trybie samolotowym | Działa (rozpoznawanie jest już w pamięci telefonu) | [ ] | [ ] |
+| Parzenie → AeroPress → kalkulator na 250 ml → parzenie do końca | Kroki pokazują 19 g i 250 ml; po „Zakończ” ocena i notatka zapisują się w dzienniku | [ ] | [ ] |
+| Napoje → Lista zakupów → **Wyślij listę** | Systemowe okno udostępniania z tekstem listy | [ ] | [ ] |
+
 ## Uwagi
 
 | Nr | Platforma | Co się stało | Zrzut ekranu |

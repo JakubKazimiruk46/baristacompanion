@@ -13,6 +13,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 - React Router 8 w trybie data router. Wszystko importuj z `react-router` (pakiet `react-router-dom` już nie istnieje), tylko `RouterProvider` z `react-router/dom`
 - Vitest 5 + jsdom + Testing Library (react, user-event, jest-dom); Playwright do E2E (w systemowym Edge)
 - vite-plugin-pwa 2 (`generateSW`, `autoUpdate`); wdrożenie na Vercel (`vercel.json`)
+- tesseract.js 7: rozpoznawanie tekstu na etykietach ziaren, w przeglądarce (bez backendu)
 
 ## Komendy
 
@@ -45,7 +46,8 @@ src/
     brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia,
                           kalkulator ilości (dose.ts: przeliczanie kroków, doseStore: wybrana ilość)
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
-    beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja)
+    beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
+                          scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
@@ -99,7 +101,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - **Zapis w przeglądarce:** zawsze przez `createLocalStore` (`lib/localStore`): odporny na brak localStorage, wspólny stan przez `useSyncExternalStore`. Klucze z prefiksem `barista-companion.` i wersją (`.v1`). Parser odrzuca uszkodzone wpisy i odwołania do nieistniejących danych, zamiast tracić cały zapis.
 - **Dziennik:** prowadzone parzenie tworzy wpis samo przy „Zakończ” (`BrewSession`), cold brew przy zakończeniu maceracji. Nie twórz wpisów w innych miejscach.
 - **Czas:** stopery liczą z `Date.now()` od znacznika startu (czyste funkcje w `features/brewing/timer.ts`, `features/coldbrew/time.ts`), nigdy przez sumowanie interwałów.
-- **Ikony:** inline SVG (`components/icons.tsx`, `MethodIcon.tsx`), bez bibliotek ikon. **Zależności:** bez backendu i ciężkich bibliotek UI.
+- **Ikony:** inline SVG (`components/icons.tsx`, `MethodIcon.tsx`), bez bibliotek ikon. **Zależności:** bez backendu i ciężkich bibliotek UI. Jedyna duża biblioteka, tesseract.js (skan etykiety), ładuje się dynamicznie (`import()`) dopiero przy pierwszym skanie; nie importuj jej statycznie.
 
 ## Testy
 
@@ -107,13 +109,14 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Ekrany testuj przez `renderApp(adres)` z `src/test/renderApp.tsx` (cała aplikacja na `createMemoryRouter`).
 - Stan zapisany w przeglądarce czyść w `beforeEach`: `localStorage.clear()`/`sessionStorage.clear()` i `…Store.reset()`.
 - **Fałszywe timery:** user-event z `vi.useFakeTimers()` zawiesza test (Testing Library czeka na `setTimeout(0)`). Albo fałszuj tylko `Date` (`toFake: ['Date']`), albo używaj `fireEvent`. Powrót na kartę symuluje `document.dispatchEvent(new Event('visibilitychange'))`.
-- jsdom nie ma `showModal()`, `scrollTo()` ani `URL.createObjectURL`: pierwsze dwa uzupełnia `src/test/setup.ts`, trzecie podmieniaj w teście.
+- jsdom nie ma `showModal()`, `scrollTo()` ani `URL.createObjectURL`: pierwsze dwa uzupełnia `src/test/setup.ts`, trzecie podmieniaj w teście. Nie rysuje też na kanwie: eksport karty (`share/exportCard`) i OCR podmieniaj przez `vi.mock`.
 - Vitest podmienia importy CSS na pusty tekst: plik CSS w teście czytaj przez `fs` (patrz `contrast.test.ts`).
 
 ## PWA, telefon i publikacja
 
 - Service worker działa tylko w buildzie (`npm run build` + `npm run preview`); w `npm run dev` jest wyłączony.
 - Precache: js/css/html, ikony z manifestu i `includeAssets` w `vite.config.ts`. Nowy plik z `public/` potrzebny offline dopisz do `includeAssets`.
+- Skan etykiety pobiera przy pierwszym użyciu worker, rdzeń WASM i modele `pol`+`eng` z cdn.jsdelivr.net (kilka MB). Service worker trzyma je w pamięci podręcznej `ocr` (`workbox.runtimeCaching`), a modele zostają też w IndexedDB. W testach `ocr.ts` podmieniaj przez `vi.mock`.
 - Ikony w `public/` są tymczasowe (PNG wygenerowane z `favicon.svg`).
 - Telefon w tej samej sieci otwiera adres „Network” z `npm run dev`, ale przez `http://` nie działa service worker, instalacja ani Wake Lock. Pełny test: wersja na Vercelu (HTTPS) albo Android przez USB z przekierowaniem portu w `chrome://inspect`.
 - Windows przy pierwszym uruchomieniu może zapytać o dostęp Node.js do sieci: zezwól dla sieci prywatnej.

@@ -10,6 +10,8 @@ import {
   type FlavorNote,
   type Roast,
 } from '../../data';
+import { LabelScan } from './scan/LabelScan';
+import type { LabelGuess } from './scan/parseLabel';
 import type { BeanInput } from './store';
 
 type BeanFormProps = {
@@ -56,8 +58,21 @@ export function BeanForm({ initial, submitLabel, onSubmit }: BeanFormProps) {
   const toggleNote = (note: FlavorNote) =>
     setNotes((current) => (current.includes(note) ? current.filter((n) => n !== note) : [...current, note]));
 
+  // Skan uzupełnia tylko puste pola (nuty dokłada), żeby nie nadpisać tego, co już wpisano.
+  const applyScan = (guess: LabelGuess) => {
+    const fill = (value: string | undefined) => (current: string) => (current.trim() || !value ? current : value);
+    setName(fill(guess.name));
+    setRoaster(fill(guess.roaster));
+    setOrigin(fill(guess.origin));
+    if (guess.roast) setRoast((current) => current || guess.roast!);
+    if (guess.notes.length > 0) setNotes((current) => [...new Set([...current, ...guess.notes])]);
+    if (guess.kind) setKind(guess.kind);
+  };
+
   return (
     <form onSubmit={submit} noValidate className="space-y-6">
+      <LabelScan onResult={applyScan} />
+
       <div>
         <label htmlFor={ids.name} className="font-medium">
           Nazwa
