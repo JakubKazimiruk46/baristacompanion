@@ -48,6 +48,7 @@ src/
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja)
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
+    shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), localStore, useDialogParam, useNow, useWakeLock
@@ -63,9 +64,10 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | :- | :- |
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
-| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
+| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
 | `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
+| `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |

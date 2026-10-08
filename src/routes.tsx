@@ -14,6 +14,8 @@ import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
 import { MilkPage } from './pages/MilkPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ShelfPage } from './pages/ShelfPage';
+import { ShoppingListPage } from './pages/ShoppingListPage';
 import { StartPage } from './pages/StartPage';
 import { SyrupsPage } from './pages/SyrupsPage';
 
@@ -30,6 +32,8 @@ export const routes: RouteObject[] = [
       { path: 'napoje/mleko', element: <MilkPage /> },
       { path: 'napoje/spienianie', element: <FrothingPage /> },
       { path: 'napoje/syropy', element: <SyrupsPage /> },
+      { path: 'napoje/co-mam', element: <ShelfPage /> },
+      { path: 'napoje/zakupy', element: <ShoppingListPage /> },
       { path: 'napoje/:drinkId', element: <DrinkPage /> },
       { path: 'parzenie', element: <BrewingPage /> },
       { path: 'parzenie/dziennik', element: <JournalPage /> },

@@ -115,13 +115,14 @@ describe('filtry w adresie', () => {
   it('zapis i odczyt dają te same filtry', () => {
     const filters = {
       favorites: true,
+      available: true,
       temperature: 'cold',
       milk: 'without',
       plantBased: true,
       maxTimeMin: 10,
     } as const;
     const params = filtersToParams(filters);
-    expect(params.toString()).toBe('ulubione=1&temp=zimne&mleko=bez&roslinne=1&czas=10');
+    expect(params.toString()).toBe('ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10');
     expect(filtersFromParams(params)).toEqual(filters);
   });
 

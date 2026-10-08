@@ -12,6 +12,7 @@ import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { DrinkSteps } from '../features/drinks/DrinkSteps';
 import { ServingSection } from '../features/drinks/ServingSection';
 import { FavoriteButton } from '../features/favorites/FavoriteButton';
+import { DrinkAvailability } from '../features/shelf/DrinkAvailability';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
 import { count } from '../lib/format';
 import { NotFoundPage } from './NotFoundPage';
@@ -53,6 +54,7 @@ export function DrinkPage() {
             incrementLabel="Więcej porcji"
           />
         </div>
+        <DrinkAvailability drink={drink} />
         <BaseCard drink={drink} servings={servings} />
         <div className="mt-3">
           <DrinkIngredients drink={drink} servings={servings} onSyrupClick={syrupDialog.open} />

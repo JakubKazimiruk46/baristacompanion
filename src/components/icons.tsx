@@ -205,3 +205,44 @@ export function JournalIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Półka ze słoikami (co mam w domu). */
+export function PantryIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 20.5h18M3 11h18" />
+      <path d="M5.5 11V6.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V11M7 5.5V4h2v1.5" />
+      <path d="M13.5 11V8a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3" />
+      <path d="M5 20.5V16a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4.5M14 20.5v-6l2-1.5 2 1.5v6" />
+    </Icon>
+  );
+}
+
+/** Koszyk (lista zakupów). */
+export function CartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 4h2.2l2.3 11h10.2l2-8H6.3" />
+      <circle cx="9" cy="19" r="1.4" />
+      <circle cx="16.5" cy="19" r="1.4" />
+    </Icon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </Icon>
+  );
+}
+
+/** Strzałka z pudełka (udostępnij). */
+export function ShareIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 15V3.5M8 7.5l4-4 4 4" />
+      <path d="M7 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7.5A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5h-1" />
+    </Icon>
+  );
+}
