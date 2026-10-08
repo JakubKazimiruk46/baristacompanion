@@ -1,6 +1,6 @@
 import { Link, useLocation, useSearchParams } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
-import { DrinkIcon, FrothIcon, MilkIcon, SyrupIcon } from '../components/icons';
+import { DrinkIcon, FrothIcon, HeartIcon, MilkIcon, SyrupIcon } from '../components/icons';
 import { PageHeader } from '../components/PageHeader';
 import { drinks } from '../data';
 import { DrinkCard } from '../features/drinks/DrinkCard';
@@ -12,6 +12,7 @@ import {
   hasActiveFilters,
   type DrinkFilters,
 } from '../features/drinks/filters';
+import { useFavorites } from '../features/favorites/store';
 import { count } from '../lib/format';
 
 const GUIDES = [
@@ -23,8 +24,9 @@ const GUIDES = [
 export function DrinksPage() {
   const location = useLocation();
   const [params, setParams] = useSearchParams();
+  const favoriteIds = useFavorites();
   const filters = filtersFromParams(params);
-  const results = filterDrinks(drinks, filters);
+  const results = filterDrinks(drinks, filters, { favoriteIds });
   const active = hasActiveFilters(filters);
 
   // replace: zmiana filtra nie dokłada wpisu w historii, więc „wstecz” wychodzi z listy.
@@ -78,6 +80,10 @@ export function DrinksPage() {
             </li>
           ))}
         </ul>
+      ) : filters.favorites && favoriteIds.length === 0 ? (
+        <EmptyState icon={HeartIcon} title="Nie masz jeszcze ulubionych">
+          Na ekranie napoju tapnij „Ulubiony”, a napój pojawi się tutaj i na ekranie startowym.
+        </EmptyState>
       ) : (
         <EmptyState icon={DrinkIcon} title="Żaden napój nie pasuje">
           Spróbuj wyłączyć któryś filtr.

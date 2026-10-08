@@ -44,6 +44,7 @@ src/
     brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja)
+    favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), localStore, useDialogParam, useNow, useWakeLock
@@ -57,9 +58,9 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 
 | Adres | Ekran |
 | :- | :- |
-| `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” |
+| `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
-| `/napoje` | katalog z filtrami w adresie (`?temp=zimne&mleko=bez&roslinne=1&czas=10`) |
+| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
 | `/napoje/:id` | napój; `?syrop=id` otwiera okno syropu |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`) |

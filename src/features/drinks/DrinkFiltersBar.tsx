@@ -1,5 +1,5 @@
 import { Chip } from '../../components/Chip';
-import { ColdIcon, HotIcon, LeafIcon } from '../../components/icons';
+import { ColdIcon, HeartIcon, HotIcon, LeafIcon } from '../../components/icons';
 import { TIME_LIMITS, type DrinkFilters } from './filters';
 
 type DrinkFiltersBarProps = {
@@ -14,6 +14,10 @@ export function DrinkFiltersBar({ filters, onChange }: DrinkFiltersBarProps) {
 
   return (
     <div className="flex flex-wrap gap-x-4 gap-y-2">
+      <Chip pressed={filters.favorites === true} onClick={() => toggle('favorites', true)}>
+        <HeartIcon className="size-4" fill={filters.favorites ? 'currentColor' : 'none'} />
+        Ulubione
+      </Chip>
       <div role="group" aria-label="Temperatura" className="flex gap-2">
         <Chip pressed={filters.temperature === 'hot'} onClick={() => toggle('temperature', 'hot')}>
           <HotIcon className="size-4" />

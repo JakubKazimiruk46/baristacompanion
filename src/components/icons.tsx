@@ -161,3 +161,12 @@ export function BeanIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Serce (ulubione). Wypełnione: fill="currentColor". */
+export function HeartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 20.5s-7.5-4.6-7.5-10.3A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.6c0 5.7-7.5 10.3-7.5 10.3Z" />
+    </Icon>
+  );
+}

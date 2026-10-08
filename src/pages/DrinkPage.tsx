@@ -9,6 +9,7 @@ import { DrinkFigure } from '../features/drinks/DrinkFigure';
 import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { DrinkSteps } from '../features/drinks/DrinkSteps';
 import { ServingSection } from '../features/drinks/ServingSection';
+import { FavoriteButton } from '../features/favorites/FavoriteButton';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -23,6 +24,9 @@ export function DrinkPage() {
       <PageHeader title={drink.name} lead={drink.description} back={{ to: '/napoje', label: 'Napoje' }}>
         <div className="mt-3">
           <DrinkMeta drink={drink} />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <FavoriteButton drinkId={drink.id} />
         </div>
         <ReviewNote item={drink} />
       </PageHeader>
