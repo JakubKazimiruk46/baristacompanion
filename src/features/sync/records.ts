@@ -14,6 +14,7 @@ export const COLLECTIONS = [
   'grinders',
   'recipes',
   'drinks',
+  'wishlist',
 ] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
 
@@ -27,6 +28,7 @@ export const COLLECTION_LABELS: Record<CollectionName, string> = {
   grinders: 'młynki',
   recipes: 'własne przepisy',
   drinks: 'moje napoje',
+  wishlist: 'do spróbowania',
 };
 
 export interface SyncRecord {

@@ -8,7 +8,6 @@ import {
   BEAN_KIND_LABELS,
   drinksForMethod,
   FLAVOR_NOTES,
-  getDrink,
   getMethod,
   NOTE_LABELS,
   ROAST_LABELS,
@@ -17,6 +16,7 @@ import {
   type FlavorNote,
   type Roast,
 } from '../data';
+import { findDrink } from '../features/assistant/myDrinks';
 import { BeanSummary } from '../features/beans/BeanSummary';
 import { LabelScan } from '../features/beans/scan/LabelScan';
 import type { LabelGuess } from '../features/beans/scan/parseLabel';
@@ -35,20 +35,26 @@ import { DrinkSteps } from '../features/drinks/DrinkSteps';
 import { ServingSection } from '../features/drinks/ServingSection';
 import {
   afterBrewing,
+  baseMethodsFor,
   chooseMethod,
   FLOW_STEPS,
+  flowEntryPath,
   flowProfile,
-  missingStep,
+  flowRedirect,
+  flowSteps,
+  isDrinkFirst,
+  MENU_PATH,
   previousStep,
   STEP_TITLES,
   stepNumber,
   stepPath,
   type FlowStep,
 } from '../features/flow/flow';
-import { flowStore, updateFlow, useFlow } from '../features/flow/store';
+import { updateFlow, useFlow } from '../features/flow/store';
 import { StarRating } from '../features/journal/StarRating';
 import { journalStore, useJournal } from '../features/journal/store';
 import { useSyrupDialog } from '../features/syrups/SyrupSheet';
+import { useWishlist, wishlistStore } from '../features/wishlist/store';
 import { formatSeconds } from '../lib/format';
 import { isLongBrew } from './BrewSessionPage';
 import { NotFoundPage } from './NotFoundPage';
@@ -58,23 +64,21 @@ const primary =
 const secondary =
   'flex h-12 w-full items-center justify-center rounded-full border border-line bg-surface px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
-/** Ścieżka „Mam kawę”: /mam-kawe (ziarna), /mam-kawe/metody … /mam-kawe/podanie. */
+/**
+ * Ścieżka „Mam kawę”: /mam-kawe/ziarna … /mam-kawe/podanie („Wybiorę sam”, 7 kroków) albo od
+ * napoju z menu: /mam-kawe/metoda … /mam-kawe/podanie (4 kroki).
+ */
 export function FlowPage() {
   const { step: param } = useParams();
   const flow = useFlow();
   const beans = useBeans();
 
-  const step: FlowStep | null =
-    param === undefined
-      ? 'ziarna'
-      : (FLOW_STEPS as readonly string[]).includes(param) && param !== 'ziarna'
-        ? (param as FlowStep)
-        : null;
+  const step = param && (FLOW_STEPS as readonly string[]).includes(param) ? (param as FlowStep) : null;
   if (!step) return <NotFoundPage />;
 
   // Ktoś wszedł prosto na dalszy krok: cofamy do pierwszego, w którym czegoś brakuje.
-  const missing = missingStep(step, flow, beans);
-  if (missing) return <Navigate to={stepPath(missing)} replace />;
+  const redirect = flowRedirect(step, flow, beans);
+  if (redirect) return <Navigate to={redirect} replace />;
 
   switch (step) {
     case 'ziarna':
@@ -97,17 +101,19 @@ export function FlowPage() {
 function FlowHeader({ step, children }: { step: FlowStep; children?: ReactNode }) {
   const flow = useFlow();
   const prev = previousStep(step, flow);
+  const steps = flowSteps(flow);
+  const number = stepNumber(step, flow);
   return (
     <PageHeader
       title={STEP_TITLES[step]}
-      back={prev ? { to: stepPath(prev), label: 'Wstecz' } : { to: '/', label: 'Start' }}
+      back={prev ? { to: stepPath(prev), label: 'Wstecz' } : { to: flowEntryPath(flow), label: 'Mam kawę' }}
     >
       <p className="mt-2 text-sm font-medium text-ink-muted">
-        Mam kawę · krok {stepNumber(step)} z {FLOW_STEPS.length}
+        Mam kawę · krok {number} z {steps.length}
       </p>
       <div aria-hidden="true" className="mt-2 flex gap-1">
-        {FLOW_STEPS.map((s, i) => (
-          <span key={s} className={`h-1.5 flex-1 rounded-full ${i < stepNumber(step) ? 'bg-accent' : 'bg-line'}`} />
+        {steps.map((s, i) => (
+          <span key={s} className={`h-1.5 flex-1 rounded-full ${i < number ? 'bg-accent' : 'bg-line'}`} />
         ))}
       </div>
       {children}
@@ -288,13 +294,34 @@ function MethodsStep() {
 function MethodStep() {
   const flow = useFlow();
   const method = getMethod(flow.methodId!)!;
+  const drink = isDrinkFirst(flow) && flow.drinkId ? findDrink(flow.drinkId) : undefined;
+  const choices = drink ? baseMethodsFor(drink) : [];
 
   return (
     <>
       <FlowHeader step="metoda">
-        <p className="mt-3 font-display text-2xl font-semibold">{method.name}</p>
+        {drink && <p className="mt-3 text-ink-muted">Baza do napoju „{drink.name}”</p>}
+        <p className={`${drink ? 'mt-1' : 'mt-3'} font-display text-2xl font-semibold`}>{method.name}</p>
       </FlowHeader>
-      <GrindScale method={method} />
+      {choices.length > 1 && (
+        <fieldset className="mb-6">
+          <legend className="font-medium">Czym zaparzysz bazę?</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {choices.map((choice) => (
+              <ChoiceChip
+                key={choice.id}
+                type="radio"
+                name="flow-base-method"
+                checked={choice.id === method.id}
+                onChange={() => updateFlow({ methodId: choice.id })}
+              >
+                {choice.name}
+              </ChoiceChip>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {!method.instant && <GrindScale method={method} />}
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-2xl border border-line bg-surface p-3">
           <dt className="text-xs text-ink-muted">Proporcja</dt>
@@ -316,7 +343,11 @@ function MethodStep() {
       <Section title="Ile zaparzyć">
         <DoseCalculator method={method} />
       </Section>
-      <NextLink to={stepPath('napoje')}>Dalej: co z tego zrobić</NextLink>
+      {drink ? (
+        <NextLink to={stepPath('parzenie')}>Dalej: parzenie</NextLink>
+      ) : (
+        <NextLink to={stepPath('napoje')}>Dalej: co z tego zrobić</NextLink>
+      )}
     </>
   );
 }
@@ -374,7 +405,7 @@ function BrewStep() {
   const navigate = useNavigate();
   const base = getMethod(flow.methodId!)!;
   const method = scaleMethod(base, useWaterMl(base));
-  const drink = flow.drinkId ? getDrink(flow.drinkId) : undefined;
+  const drink = flow.drinkId ? findDrink(flow.drinkId) : undefined;
   const next = stepPath(afterBrewing(flow));
 
   const header = (
@@ -425,7 +456,7 @@ function BrewStep() {
 
 function AssembleStep() {
   const flow = useFlow();
-  const drink = getDrink(flow.drinkId!)!;
+  const drink = findDrink(flow.drinkId!)!;
   const syrupDialog = useSyrupDialog();
 
   return (
@@ -450,8 +481,7 @@ function AssembleStep() {
 
 function ServeStep() {
   const flow = useFlow();
-  const navigate = useNavigate();
-  const drink = flow.drinkId ? getDrink(flow.drinkId) : undefined;
+  const drink = flow.drinkId ? findDrink(flow.drinkId) : undefined;
 
   return (
     <>
@@ -479,22 +509,46 @@ function ServeStep() {
         <p className="mt-1 text-ink-muted">Od ziaren do filiżanki. Następnym razem spróbuj czegoś nowego.</p>
       </div>
       <FlowRating entryId={flow.entryId} />
+      {drink && <TriedIt drinkId={drink.id} />}
       <div className="mt-4 space-y-3">
-        <button
-          type="button"
-          className={primary}
-          onClick={() => {
-            flowStore.set({});
-            navigate(stepPath('ziarna'));
-          }}
-        >
+        {/* Stan ścieżki zostaje: każda droga z menu ustawia go od nowa. */}
+        <Link to={MENU_PATH} viewTransition className={primary}>
           Zacznij od nowa
-        </button>
+        </Link>
         <Link to="/" className={secondary}>
           Wróć na start
         </Link>
       </div>
     </>
+  );
+}
+
+/** Napój z listy „Do spróbowania” właśnie wyszedł: można go z niej zdjąć. */
+function TriedIt({ drinkId }: { drinkId: string }) {
+  const wanted = useWishlist().includes(drinkId);
+  const [removed, setRemoved] = useState(false);
+  if (removed) {
+    return (
+      <p role="status" className="mt-4 rounded-2xl bg-accent-soft p-4 text-sm font-medium">
+        Usunięto z listy „Do spróbowania”.
+      </p>
+    );
+  }
+  if (!wanted) return null;
+  return (
+    <div className="mt-4 rounded-3xl bg-surface p-5">
+      <p className="font-semibold">Ten napój był na Twojej liście „Do spróbowania”.</p>
+      <button
+        type="button"
+        className={`mt-3 ${secondary}`}
+        onClick={() => {
+          wishlistStore.remove(drinkId);
+          setRemoved(true);
+        }}
+      >
+        Spróbowane: usuń z listy
+      </button>
+    </div>
   );
 }
 

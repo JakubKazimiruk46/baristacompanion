@@ -10,6 +10,7 @@ import { BrewSessionPage } from './pages/BrewSessionPage';
 import { CommunityRecipePage } from './pages/CommunityRecipePage';
 import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
+import { FlowMenuPage, WishlistFlowPage } from './pages/FlowMenuPage';
 import { FlowPage } from './pages/FlowPage';
 import { FrothingPage } from './pages/FrothingPage';
 import { GrinderFormPage } from './pages/GrinderFormPage';
@@ -27,6 +28,7 @@ import { SharedRecipePage } from './pages/SharedRecipePage';
 import { ShelfPage } from './pages/ShelfPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { StartPage } from './pages/StartPage';
+import { SurprisePage } from './pages/SurprisePage';
 import { SyrupsPage } from './pages/SyrupsPage';
 
 /** Wspólna definicja tras: createBrowserRouter w aplikacji, createMemoryRouter w testach. */
@@ -36,7 +38,9 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <StartPage /> },
-      { path: 'mam-kawe', element: <FlowPage /> },
+      { path: 'mam-kawe', element: <FlowMenuPage /> },
+      { path: 'mam-kawe/do-sprobowania', element: <WishlistFlowPage /> },
+      { path: 'mam-kawe/zaskocz', element: <SurprisePage /> },
       { path: 'mam-kawe/:step', element: <FlowPage /> },
       { path: 'napoje', element: <DrinksPage /> },
       { path: 'napoje/mleko', element: <MilkPage /> },

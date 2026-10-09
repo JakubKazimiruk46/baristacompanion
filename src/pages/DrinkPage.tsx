@@ -11,6 +11,7 @@ import { DrinkBody } from '../features/drinks/DrinkBody';
 import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { FavoriteButton } from '../features/favorites/FavoriteButton';
 import { useShareCard } from '../features/share/ShareSheet';
+import { WishlistButton } from '../features/wishlist/WishlistButton';
 import { NotFoundPage } from './NotFoundPage';
 
 const buttonClass =
@@ -43,8 +44,10 @@ function DrinkView({ drink }: { drink: Drink }) {
           </p>
         )}
         <div className="mt-4 flex flex-wrap gap-2">
-          {mine ? <RemoveButton drink={drink} /> : <FavoriteButton drinkId={drink.id} />}
+          {!mine && <FavoriteButton drinkId={drink.id} />}
+          <WishlistButton drinkId={drink.id} />
           <ShareButton drink={drink} />
+          {mine && <RemoveButton drink={drink} />}
         </div>
         <ReviewNote item={drink} />
       </PageHeader>

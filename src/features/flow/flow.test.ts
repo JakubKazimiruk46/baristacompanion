@@ -42,7 +42,7 @@ describe('ścieżka „Mam kawę”', () => {
   });
 
   it('adresy kroków', () => {
-    expect(stepPath('ziarna')).toBe('/mam-kawe');
+    expect(stepPath('ziarna')).toBe('/mam-kawe/ziarna');
     expect(stepPath('podanie')).toBe('/mam-kawe/podanie');
     expect(previousStep('ziarna', {})).toBeNull();
     expect(previousStep('metody', {})).toBe('ziarna');

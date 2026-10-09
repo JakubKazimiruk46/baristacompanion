@@ -2,7 +2,7 @@
 
 Aplikacja PWA dla domowych baristów, którzy parzą kawę metodami alternatywnymi (kawiarka, prasa francuska, drip, cold brew…), bez ekspresu. Sednem są drinki kawowe (espresso tonic, kawa pomarańczowa, café bombón…) i ich efektowne podanie. Treści leżą w repozytorium (`src/data`), dane użytkownika w przeglądarce. Konto (Supabase) jest opcjonalnym dodatkiem: bez niego wszystko działa jak dotąd.
 
-Plan i historia kroków: [plans/2026-10-08-barista-companion-mvp.md](plans/2026-10-08-barista-companion-mvp.md), dalsze funkcje: [plans/2026-10-08-funkcje-z-analizy-konkurencji.md](plans/2026-10-08-funkcje-z-analizy-konkurencji.md), następny etap (młynek, własne przepisy, drinki, Android, backend, AI): [plans/2026-10-08-przepisy-aplikacja-natywna-backend.md](plans/2026-10-08-przepisy-aplikacja-natywna-backend.md). Publikacja: [docs/publikacja.md](docs/publikacja.md), test na telefonie: [docs/test-na-telefonie.md](docs/test-na-telefonie.md), Android: [docs/aplikacja-android.md](docs/aplikacja-android.md), backend: [docs/backend.md](docs/backend.md).
+Plan i historia kroków: [plans/2026-10-08-barista-companion-mvp.md](plans/2026-10-08-barista-companion-mvp.md), dalsze funkcje: [plans/2026-10-08-funkcje-z-analizy-konkurencji.md](plans/2026-10-08-funkcje-z-analizy-konkurencji.md), następny etap (młynek, własne przepisy, drinki, Android, backend, AI): [plans/2026-10-08-przepisy-aplikacja-natywna-backend.md](plans/2026-10-08-przepisy-aplikacja-natywna-backend.md), obecny etap (społeczność z napojami, Baribar, nowe Parzenie i Napoje, konto w aplikacji): [plans/2026-10-09-spolecznosc-baribar-nawigacja.md](plans/2026-10-09-spolecznosc-baribar-nawigacja.md). Publikacja: [docs/publikacja.md](docs/publikacja.md), test na telefonie: [docs/test-na-telefonie.md](docs/test-na-telefonie.md), Android: [docs/aplikacja-android.md](docs/aplikacja-android.md), backend: [docs/backend.md](docs/backend.md).
 
 ## Stack
 
@@ -67,10 +67,11 @@ src/
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
                           panel przy skali mielenia i wiersz w parzeniu, odmiana jednostek
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
+    wishlist/             „Chcę spróbować”: lista napojów do spróbowania (zapis i przycisk)
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
     share/                karta napoju do udostępnienia: układ i kolory (czyste funkcje), SVG, eksport do PNG
-    flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
+    flow/                 ścieżka „Mam kawę”: kroki (od ziaren albo od napoju), wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), color (kontrast, HSL), download, localStore,
                           useDialogParam, useNow, useOnline, useWakeLock, notifications (Capacitor, w PWA nic nie robi),
@@ -88,8 +89,10 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | Adres | Ekran |
 | :- | :- |
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
-| `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
-| `/napoje` | katalog z „Moimi napojami” na początku i filtrami w adresie (`?ulubione=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
+| `/mam-kawe` | menu: „Napoje do spróbowania”, „Zaskocz mnie”, „Wybiorę sam” |
+| `/mam-kawe/do-sprobowania`, `/mam-kawe/zaskocz` | lista „Chcę spróbować” i losowy napój (`?napoj=id&temp=&mam=1`); wybór zaczyna ścieżkę od napoju |
+| `/mam-kawe/:krok` | ścieżka „Wybiorę sam”: ziarna → metody → metoda → napoje → parzenie → napoj → podanie; od napoju: metoda → parzenie → napoj → podanie |
+| `/napoje` | katalog z „Moimi napojami” na początku i filtrami w adresie (`?ulubione=1&sprobuj=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
 | `/napoje/:id` | napój z katalogu albo z „Moich napojów” (id `moj-…`); `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |

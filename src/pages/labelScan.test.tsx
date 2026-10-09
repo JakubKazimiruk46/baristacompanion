@@ -73,7 +73,7 @@ describe('skan etykiety w formularzu ziaren', () => {
 
   it('ścieżka „Mam kawę”: skan opisuje ziarna i odblokowuje następny krok', async () => {
     read.mockResolvedValue('BRAZYLIA SANTOS\nśrednio palona\nnuty: czekolada, orzech laskowy');
-    const { user } = renderApp('/mam-kawe');
+    const { user } = renderApp('/mam-kawe/ziarna');
     const next = screen.getByRole('link', { name: 'Dalej: polecane metody' });
     expect(next).toHaveAttribute('aria-disabled', 'true');
 

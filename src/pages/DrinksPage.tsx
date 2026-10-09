@@ -24,6 +24,7 @@ import { useFavorites } from '../features/favorites/store';
 import { canMake } from '../features/shelf/availability';
 import { useShopping } from '../features/shelf/shopping';
 import { useShelf } from '../features/shelf/store';
+import { useWishlist } from '../features/wishlist/store';
 import { count } from '../lib/format';
 import { aiEnabled } from '../lib/supabase';
 
@@ -37,11 +38,12 @@ export function DrinksPage() {
   const location = useLocation();
   const [params, setParams] = useSearchParams();
   const favoriteIds = useFavorites();
+  const wishlistIds = useWishlist();
   const shelf = useShelf();
   const mine = useMyDrinks();
   const drinks = useAllDrinks();
   const filters = filtersFromParams(params);
-  const results = filterDrinks(drinks, filters, { favoriteIds, shelf });
+  const results = filterDrinks(drinks, filters, { favoriteIds, wishlistIds, shelf });
   const active = hasActiveFilters(filters);
 
   // replace: zmiana filtra nie dokłada wpisu w historii, więc „wstecz” wychodzi z listy.

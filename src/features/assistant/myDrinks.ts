@@ -89,7 +89,12 @@ export function useDrink(id: string | undefined): Drink | undefined {
   return getDrink(id) ?? mine.find((item) => item.drink.id === id)?.drink;
 }
 
+/** Napój z katalogu albo z „Moich napojów” poza Reactem (np. w logice ścieżki „Mam kawę”). */
+export function findDrink(id: string): Drink | undefined {
+  return getDrink(id) ?? myDrinksStore.get(id);
+}
+
 /** Nazwa napoju z katalogu albo z „Moich napojów” (np. na liście zakupów). */
 export function drinkName(id: string): string | undefined {
-  return getDrink(id)?.name ?? myDrinksStore.get(id)?.name;
+  return findDrink(id)?.name;
 }
