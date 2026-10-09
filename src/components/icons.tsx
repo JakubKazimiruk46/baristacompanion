@@ -302,3 +302,23 @@ export function PencilIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Postać (konto). */
+export function UserIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5" />
+    </Icon>
+  );
+}
+
+/** Tarcza (prywatność). */
+export function ShieldIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 3 5 6v5.5c0 4.4 3 8 7 9.5 4-1.5 7-5.1 7-9.5V6l-7-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </Icon>
+  );
+}

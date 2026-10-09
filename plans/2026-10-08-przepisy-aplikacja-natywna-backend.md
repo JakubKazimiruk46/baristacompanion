@@ -51,9 +51,9 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | P1 | Drinki z alkoholem (irish coffee, espresso martini) w katalogu? | 3 | Tak, z oznaczeniem „z alkoholem” i filtrem „Bez alkoholu” | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
 | P2 | Dalgona i frappé po grecku wymagają kawy rozpuszczalnej. Dodać ją jako bazę? | 3 | Tak, jako „metodę” bez parzenia (tylko rozpuszczenie), z notatką, że to wyjątek | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
 | P3 | Aplikacja natywna: tylko Android na start? Publikacja w Google Play (jednorazowo 25 USD) czy tylko plik APK do zainstalowania? | 4 | Android, na start APK do testów, Google Play później | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
-| P4 | Backend: Supabase (plan darmowy, region UE)? Kto zakłada konto i projekt? | 5 | Supabase; konto zakłada autor, sesja prowadzi krok po kroku | |
-| P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | |
-| P6 | Kto jest administratorem danych w polityce prywatności (autor jako osoba prywatna, firma)? | 5 | Do decyzji autora; sesja przygotuje szkic do uzupełnienia | |
+| P4 | Backend: Supabase (plan darmowy, region UE)? Kto zakłada konto i projekt? | 5 | Supabase; konto zakłada autor, sesja prowadzi krok po kroku | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Projektu jeszcze nie ma: instrukcja w `docs/backend.md` |
+| P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Wiadomość ma link i kod (kod działa w aplikacji na Androida) |
+| P6 | Kto jest administratorem danych w polityce prywatności (autor jako osoba prywatna, firma)? | 5 | Do decyzji autora; sesja przygotuje szkic do uzupełnienia | Otwarte: szkic w `/prywatnosc` ma miejsca „do uzupełnienia” |
 | P7 | Przepisy społeczności widoczne od razu czy po akceptacji? Kto moderuje? | 7 | Od razu, a zgłoszenia ukrywają przepis do decyzji moderatora (autor) | |
 | P8 | Zgoda na koszty API Claude: dzienny limit na użytkownika i miesięczny limit wydatków? AI tylko dla zalogowanych? | 8 | Tylko dla zalogowanych, np. 20 skanów i 10 propozycji drinków dziennie, limit wydatków ustawiony w konsoli Anthropic | |
 | P9 | Asystent drinków: czy wolno mu proponować składniki spoza katalogu? | 9 | Nie: tylko składniki, metody i naczynia z danych, żeby rysunek i półka działały | |
@@ -75,7 +75,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 2. Własne przepisy | zrobione (gałąź `feature/wlasne-przepisy`, od `feature/mlynek`), czeka na akceptację autora |
 | 3. Szerszy katalog drinków | zrobione (gałąź `feature/katalog-drinkow`, od `feature/wlasne-przepisy`), czeka na akceptację autora |
 | 4. Powiadomienia w aplikacji na Androida | kod gotowy (gałąź `feature/android`, od `feature/katalog-drinkow`); czeka na test autora na telefonie albo w emulatorze |
-| 5. Backend: konto i prywatność | do zrobienia |
+| 5. Backend: konto i prywatność | kod gotowy (gałąź `feature/konto`, od `feature/android`); czeka na projekt Supabase autora i test logowania na podglądzie Vercela |
 | 6. Synchronizacja danych | do zrobienia |
 | 7. Przepisy społeczności | do zrobienia |
 | 8. AI: rozpoznawanie etykiet | do zrobienia |
@@ -128,6 +128,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - usunięcie konta usuwa użytkownika i wszystkie jego dane (funkcja serwerowa),
    - bez logowania aplikacja działa jak dotąd (wszystkie testy i E2E),
    - w repozytorium nie ma sekretów; `.env.example` opisuje zmienne.
+
+   Wykonanie (2026-10-09): migracja `profiles` (nick unikalny bez względu na wielkość liter, RLS tylko dla właściciela, użytkownik zmienia tylko nick, profil z triggera), test pgTAP, funkcja `delete-account` (usuwa użytkownika, reszta przez `on delete cascade`), `supabase/config.toml`, `.env.example` (z wyjątkiem w `.gitignore`). Klient `lib/supabase.ts` ładowany dynamicznie: start aplikacji go nie ładuje bez zapisanej sesji. Ekrany `/konto` (link i kod z e-maila, Google poza aplikacją natywną, nick, eksport danych konta do JSON, wylogowanie, usunięcie z potwierdzeniem) i `/prywatnosc` (szkic z miejscami do uzupełnienia). Wejście ze Startu i z „Moich ziaren”. Testy ekranów z atrapą `src/test/fakeSupabase.ts`. Nie sprawdzone na prawdziwym projekcie: nie ma go jeszcze (konto zakłada autor, `docs/backend.md`), więc logowanie lokalnie i na Vercelu czeka na autora.
 6. **Synchronizacja danych.** Ziarna, dziennik, ulubione, półka, lista zakupów, ilości z kalkulatora, młynki i własne przepisy synchronizują się między urządzeniami. Rekordy dostają `updatedAt` i znacznik usunięcia. Zapis w przeglądarce dalej jest źródłem prawdy offline, a konflikty rozstrzyga zasada „wygrywa nowsza zmiana” dla każdego rekordu osobno. Po drodze powstaje wersjonowany format danych, więc eksport i import JSON (kopia zapasowa bez konta) wychodzi przy okazji. Gotowe, gdy:
    - zmiana na jednym urządzeniu pojawia się na drugim po odświeżeniu i po powrocie do aplikacji,
    - praca offline i późniejsza synchronizacja nie gubią zmian,

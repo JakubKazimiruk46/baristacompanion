@@ -1,8 +1,8 @@
 # Barista Companion
 
-Aplikacja PWA dla domowych baristów, którzy parzą kawę metodami alternatywnymi (kawiarka, prasa francuska, drip, cold brew…), bez ekspresu. Sednem są drinki kawowe (espresso tonic, kawa pomarańczowa, café bombón…) i ich efektowne podanie. Bez backendu i kont: treści leżą w repozytorium (`src/data`), dane użytkownika w przeglądarce.
+Aplikacja PWA dla domowych baristów, którzy parzą kawę metodami alternatywnymi (kawiarka, prasa francuska, drip, cold brew…), bez ekspresu. Sednem są drinki kawowe (espresso tonic, kawa pomarańczowa, café bombón…) i ich efektowne podanie. Treści leżą w repozytorium (`src/data`), dane użytkownika w przeglądarce. Konto (Supabase) jest opcjonalnym dodatkiem: bez niego wszystko działa jak dotąd.
 
-Plan i historia kroków: [plans/2026-10-08-barista-companion-mvp.md](plans/2026-10-08-barista-companion-mvp.md), dalsze funkcje: [plans/2026-10-08-funkcje-z-analizy-konkurencji.md](plans/2026-10-08-funkcje-z-analizy-konkurencji.md), następny etap (młynek, własne przepisy, drinki, Android, backend, AI): [plans/2026-10-08-przepisy-aplikacja-natywna-backend.md](plans/2026-10-08-przepisy-aplikacja-natywna-backend.md). Publikacja: [docs/publikacja.md](docs/publikacja.md), test na telefonie: [docs/test-na-telefonie.md](docs/test-na-telefonie.md).
+Plan i historia kroków: [plans/2026-10-08-barista-companion-mvp.md](plans/2026-10-08-barista-companion-mvp.md), dalsze funkcje: [plans/2026-10-08-funkcje-z-analizy-konkurencji.md](plans/2026-10-08-funkcje-z-analizy-konkurencji.md), następny etap (młynek, własne przepisy, drinki, Android, backend, AI): [plans/2026-10-08-przepisy-aplikacja-natywna-backend.md](plans/2026-10-08-przepisy-aplikacja-natywna-backend.md). Publikacja: [docs/publikacja.md](docs/publikacja.md), test na telefonie: [docs/test-na-telefonie.md](docs/test-na-telefonie.md), Android: [docs/aplikacja-android.md](docs/aplikacja-android.md), backend: [docs/backend.md](docs/backend.md).
 
 ## Stack
 
@@ -15,6 +15,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 - vite-plugin-pwa 2 (`generateSW`, `autoUpdate`); wdrożenie na Vercel (`vercel.json`)
 - tesseract.js 7: rozpoznawanie tekstu na etykietach ziaren, w przeglądarce (bez backendu)
 - Capacitor 8: aplikacja na Androida z tej samej PWA (`android/`, `capacitor.config.ts`), lokalne powiadomienia (`@capacitor/local-notifications`)
+- Supabase (`@supabase/supabase-js` 2, ładowany dynamicznie): konto, baza z RLS, funkcje serwerowe w Deno (`supabase/`)
 
 ## Komendy
 
@@ -54,6 +55,7 @@ src/
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
                           scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
+    account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
                           panel przy skali mielenia i wiersz w parzeniu, odmiana jednostek
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
@@ -63,12 +65,14 @@ src/
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), color (kontrast, HSL), download, localStore,
-                          useDialogParam, useNow, useWakeLock, notifications (Capacitor, w PWA nic nie robi)
+                          useDialogParam, useNow, useOnline, useWakeLock, notifications (Capacitor, w PWA nic nie robi),
+                          supabase (klient ładowany dynamicznie, wyłączony bez zmiennych VITE_SUPABASE_*)
   pages/                  ekrany tras
-  test/                   setup, renderApp, testy kontrastu i konfiguracji wdrożenia
+  test/                   setup, renderApp, fakeSupabase (Supabase w pamięci), testy kontrastu i konfiguracji
 e2e/                      testy Playwright
 docs/                     publikacja, test na telefonie, aplikacja na Androida
 android/                  projekt Androida (Capacitor): manifest, ikony, ekran startowy, ikona powiadomień
+supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (Deno), config.toml
 ```
 
 ## Trasy
@@ -86,9 +90,10 @@ android/                  projekt Androida (Capacitor): manifest, ikony, ekran s
 | `/przepis#dane` | przepis z linku: podgląd i „Zapisz u siebie” |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
+| `/konto`, `/prywatnosc` | konto (logowanie linkiem albo kodem z e-maila i przez Google, nick, eksport, usunięcie) i polityka prywatności |
 | `/ziarna/mlynek`, `/ziarna/mlynek/nowy` | Mój młynek: ustawienia dla metod, wybór używanego młynka, nowy młynek; `?mielenie=id-metody` otwiera okno ustawienia (też na ekranie metody, w „Mam kawę” i w parzeniu) |
 
-Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę” należy do Startu, a przepis z linku (`/przepis`) do Parzenia.
+Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto i polityka prywatności należą do Startu, a przepis z linku (`/przepis`) do Parzenia.
 
 ## Dane (`src/data`)
 
@@ -128,6 +133,16 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - jsdom nie ma `showModal()`, `scrollTo()` ani `URL.createObjectURL`: pierwsze dwa uzupełnia `src/test/setup.ts`, trzecie podmieniaj w teście. Nie rysuje też na kanwie: eksport karty (`share/exportCard`) i OCR podmieniaj przez `vi.mock`.
 - Vitest podmienia importy CSS na pusty tekst: plik CSS w teście czytaj przez `fs` (patrz `contrast.test.ts`).
 - Wersję natywną testuj z podmienionymi `@capacitor/core` (`isNativePlatform`) i `@capacitor/local-notifications` (`vi.mock`, patrz `pages/notifications.test.tsx`). Wtyczkę między testami zapominaj przez `resetNotificationsForTests()`.
+
+## Backend (Supabase)
+
+- **Bez konta działa wszystko, co działało.** Funkcje z serwerem są dodatkiem i chowają się bez internetu (`useOnline`) albo bez zmiennych `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (`backendEnabled()`).
+- Klienta bierz tylko z `getSupabase()` (`lib/supabase`): ładuje bibliotekę dynamicznie. Start aplikacji jej nie ładuje, chyba że w przeglądarce jest zapisana sesja (`barista-companion.auth`). Stan konta: `useAuth()` (`features/account/auth`).
+- Każda tabela: `enable row level security`, reguły tylko dla właściciela (`(select auth.uid()) = …`), klucz obcy do `auth.users` z `on delete cascade` (usunięcie konta usuwa wszystko). Nowa tabela to nowa migracja w `supabase/migrations` (nazwa z datą) i test pgTAP w `supabase/tests`.
+- Sekrety (klucz `service_role`, klucz Claude) tylko w sekretach funkcji (`npx supabase secrets set`), nigdy w repozytorium ani w `VITE_*`. Funkcje serwerowe w Deno korzystają z `supabase/functions/_shared/http.ts` (CORS, zalogowany użytkownik, błędy po polsku) i nie logują treści od użytkowników.
+- Teksty od użytkowników zawsze jako tekst (React), nigdy jako HTML.
+- W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
+- Nowa funkcja z serwerem dopisuje do polityki prywatności (`pages/PrivacyPage.tsx`), co zbiera, po co i gdzie. Instrukcja wdrożenia: [docs/backend.md](docs/backend.md).
 
 ## PWA, telefon i publikacja
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { BeanIcon, BrewIcon, ChevronRightIcon, DrinkIcon } from '../components/icons';
+import { BeanIcon, BrewIcon, ChevronRightIcon, DrinkIcon, UserIcon } from '../components/icons';
 import { Section } from '../components/Section';
 import { getDrink } from '../data';
 import { ColdBrewBadge } from '../features/coldbrew/ColdBrewLinks';
@@ -14,6 +14,7 @@ const SHORTCUTS = [
   { to: '/napoje', label: 'Napoje', hint: 'drinki kawowe na ciepło i na zimno', Icon: DrinkIcon },
   { to: '/parzenie', label: 'Parzenie', hint: 'metody krok po kroku, ze stoperem', Icon: BrewIcon },
   { to: '/ziarna', label: 'Moje ziarna', hint: 'Twoje kawy i jak je zaparzyć', Icon: BeanIcon },
+  { to: '/konto', label: 'Konto', hint: 'opcjonalne: Twoje dane na wszystkich urządzeniach', Icon: UserIcon },
 ];
 
 export function StartPage() {

@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router';
 import { AppLayout } from './components/AppLayout';
+import { AccountPage } from './pages/AccountPage';
 import { BeanFormPage } from './pages/BeanFormPage';
 import { BeanPage } from './pages/BeanPage';
 import { BeansPage } from './pages/BeansPage';
@@ -16,6 +17,7 @@ import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
 import { MilkPage } from './pages/MilkPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { RecipeFormPage } from './pages/RecipeFormPage';
 import { RecipePage } from './pages/RecipePage';
 import { SharedRecipePage } from './pages/SharedRecipePage';
@@ -55,6 +57,8 @@ export const routes: RouteObject[] = [
       { path: 'ziarna/mlynek/nowy', element: <GrinderFormPage /> },
       { path: 'ziarna/:beanId', element: <BeanPage /> },
       { path: 'ziarna/:beanId/edycja', element: <BeanFormPage /> },
+      { path: 'konto', element: <AccountPage /> },
+      { path: 'prywatnosc', element: <PrivacyPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
