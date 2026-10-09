@@ -54,7 +54,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | P4 | Backend: Supabase (plan darmowy, region UE)? Kto zakłada konto i projekt? | 5 | Supabase; konto zakłada autor, sesja prowadzi krok po kroku | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Projektu jeszcze nie ma: instrukcja w `docs/backend.md` |
 | P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Wiadomość ma link i kod (kod działa w aplikacji na Androida) |
 | P6 | Kto jest administratorem danych w polityce prywatności (autor jako osoba prywatna, firma)? | 5 | Do decyzji autora; sesja przygotuje szkic do uzupełnienia | Otwarte: szkic w `/prywatnosc` ma miejsca „do uzupełnienia” |
-| P7 | Przepisy społeczności widoczne od razu czy po akceptacji? Kto moderuje? | 7 | Od razu, a zgłoszenia ukrywają przepis do decyzji moderatora (autor) | |
+| P7 | Przepisy społeczności widoczne od razu czy po akceptacji? Kto moderuje? | 7 | Od razu, a zgłoszenia ukrywają przepis do decyzji moderatora (autor) | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Przywrócony przez moderatora przepis po kolejnych zgłoszeniach już nie znika (ochrona przed nadużyciem) |
 | P8 | Zgoda na koszty API Claude: dzienny limit na użytkownika i miesięczny limit wydatków? AI tylko dla zalogowanych? | 8 | Tylko dla zalogowanych, np. 20 skanów i 10 propozycji drinków dziennie, limit wydatków ustawiony w konsoli Anthropic | |
 | P9 | Asystent drinków: czy wolno mu proponować składniki spoza katalogu? | 9 | Nie: tylko składniki, metody i naczynia z danych, żeby rysunek i półka działały | |
 
@@ -77,7 +77,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 4. Powiadomienia w aplikacji na Androida | kod gotowy (gałąź `feature/android`, od `feature/katalog-drinkow`); czeka na test autora na telefonie albo w emulatorze |
 | 5. Backend: konto i prywatność | kod gotowy (gałąź `feature/konto`, od `feature/android`); czeka na projekt Supabase autora i test logowania na podglądzie Vercela |
 | 6. Synchronizacja danych | kod gotowy (gałąź `feature/synchronizacja`, od `feature/konto`); czeka na sprawdzenie autora na dwóch urządzeniach |
-| 7. Przepisy społeczności | do zrobienia |
+| 7. Przepisy społeczności | kod gotowy (gałąź `feature/spolecznosc`, od `feature/synchronizacja`); czeka na projekt Supabase autora |
 | 8. AI: rozpoznawanie etykiet | do zrobienia |
 | 9. AI: asystent drinków | do zrobienia |
 | 10. Baza ziaren i palarni | do zrobienia |
@@ -143,6 +143,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - zgłoszony przepis znika zgodnie z P7, a moderator może go ukryć albo przywrócić,
    - baza pilnuje limitów (długość tekstów, liczba kroków) i uprawnień (RLS),
    - przepisy bez internetu są niedostępne, ale reszta aplikacji działa.
+
+   Wykonanie (2026-10-09): migracja z tabelami `public_recipes` (ograniczenia długości, kroków przez `valid_recipe_steps`, dawki i temperatury; autor zmienia tylko treść, stan, liczniki i nick ustawia baza; limit 100 przepisów na osobę), `recipe_saves`, `recipe_reports`, `moderators` i funkcjami `save_public_recipe`, `report_public_recipe`, `moderation_queue`, `moderate_public_recipe`, `is_moderator`; test pgTAP. Na ekranie metody sekcja „Przepisy społeczności” (najnowsze, najczęściej zapisywane, „Pokaż więcej”), ładowana dopiero, gdy pojawi się na ekranie. Ekran przepisu: „Parz według tego przepisu” (zapisuje kopię i zaczyna parzenie), „Zapisz u siebie” (kopia z `origin`: od kogo), „Zgłoś” (powód i komentarz). Przy własnym przepisie: „Opublikuj” (wymaga konta i nicku, bez ustawienia młynka), „Zaktualizuj”, „Wycofaj”. Moderacja na `/moderacja`, wejście z konta dla moderatora (dodawanie moderatora w `docs/backend.md`). Polityka prywatności uzupełniona. Testy na atrapie serwera z odpowiednikami funkcji.
 8. **AI: rozpoznawanie etykiet.** Funkcja serwerowa przyjmuje zmniejszone zdjęcie, wysyła je do Claude z opisem wymaganej odpowiedzi (JSON zgodny z `LabelGuess`, przez tool use), sprawdza wynik i zwraca go. Zalogowany użytkownik online dostaje AI, a pozostali dotychczasowe rozpoznawanie w przeglądarce. Gotowe, gdy:
    - przed pierwszym wysłaniem zdjęcia jest zgoda z informacją, dokąd trafia zdjęcie,
    - limit dzienny z P8 działa, a po jego przekroczeniu jest powrót do OCR w przeglądarce,

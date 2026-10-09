@@ -18,8 +18,15 @@ export interface UserRecipe {
   grinder?: GrindRecord;
   steps: BrewStep[];
   note?: string;
+  /** Przepis zapisany z przepisów społeczności: skąd i od kogo. */
+  origin?: RecipeOrigin;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface RecipeOrigin {
+  communityId: string;
+  author: string;
 }
 
 export type RecipeInput = Omit<UserRecipe, 'id' | 'createdAt' | 'updatedAt'>;
@@ -120,7 +127,8 @@ export function parseRecipeInput(value: unknown): RecipeInput | null {
     r.steps.length === 0 ||
     r.steps.length > RECIPE_LIMITS.steps ||
     !r.steps.every(isStep) ||
-    (r.note !== undefined && (typeof r.note !== 'string' || !r.note.trim() || r.note.length > RECIPE_LIMITS.note))
+    (r.note !== undefined && (typeof r.note !== 'string' || !r.note.trim() || r.note.length > RECIPE_LIMITS.note)) ||
+    (r.origin !== undefined && !isOrigin(r.origin))
   ) {
     return null;
   }
@@ -133,7 +141,21 @@ export function parseRecipeInput(value: unknown): RecipeInput | null {
     ...(r.grinder !== undefined && { grinder: r.grinder as GrindRecord }),
     steps: (r.steps as BrewStep[]).map(cleanStep),
     ...(typeof r.note === 'string' && { note: r.note }),
+    ...(r.origin !== undefined && { origin: r.origin as RecipeOrigin }),
   };
+}
+
+function isOrigin(value: unknown): value is RecipeOrigin {
+  if (typeof value !== 'object' || value === null) return false;
+  const o = value as Record<string, unknown>;
+  return (
+    typeof o.communityId === 'string' &&
+    o.communityId.length > 0 &&
+    o.communityId.length <= 100 &&
+    typeof o.author === 'string' &&
+    o.author.length > 0 &&
+    o.author.length <= 30
+  );
 }
 
 /** Przepis z zapisu w przeglądarce. null: uszkodzony. */

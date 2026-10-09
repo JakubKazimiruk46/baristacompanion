@@ -24,6 +24,7 @@ import { useColdBrew } from '../features/coldbrew/store';
 import { DrinkCard } from '../features/drinks/DrinkCard';
 import { EntryCard } from '../features/journal/EntryCard';
 import { useJournal } from '../features/journal/store';
+import { CommunitySection } from '../features/community/CommunitySection';
 import { RecipesSection } from '../features/recipes/RecipesSection';
 import { formatSeconds } from '../lib/format';
 import { useNow } from '../lib/useNow';
@@ -122,6 +123,7 @@ function MethodDetails({ method: base }: { method: BrewMethod }) {
       </Section>
 
       <RecipesSection method={method} />
+      <CommunitySection methodId={method.id} />
 
       {isLongBrew(method) && <ColdBrewVariantsSection methodId={method.id} />}
 

@@ -56,6 +56,8 @@ src/
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
                           scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
     account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
+    community/            przepisy społeczności: zapytania (api.ts, walidacja jak własny przepis), sekcja na
+                          ekranie metody, publikowanie przy własnym przepisie
     sync/                 synchronizacja i kopia zapasowa: format rekordów, scalanie (czyste funkcje), adaptery
                           magazynów, śledzenie zmian (metadane), wysyłka i pobieranie, plik JSON
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
@@ -90,12 +92,14 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
 | `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis`, `…/:przepis/edycja` | własne przepisy: nowy (kopia przepisu metody), ekran przepisu (kalkulator, mielenie, kroki, „Wyślij”, usuwanie), edycja |
 | `/przepis#dane` | przepis z linku: podgląd i „Zapisz u siebie” |
+| `/parzenie/:id/spolecznosc/:przepis` | przepis społeczności: „Parz według tego przepisu”, „Zapisz u siebie”, „Zgłoś” |
+| `/moderacja` | kolejka moderatora: zgłoszone i ukryte przepisy, „Ukryj” i „Przywróć” |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
 | `/konto`, `/prywatnosc` | konto (logowanie linkiem albo kodem z e-maila i przez Google, nick, eksport, usunięcie) i polityka prywatności |
 | `/ziarna/mlynek`, `/ziarna/mlynek/nowy` | Mój młynek: ustawienia dla metod, wybór używanego młynka, nowy młynek; `?mielenie=id-metody` otwiera okno ustawienia (też na ekranie metody, w „Mam kawę” i w parzeniu) |
 
-Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto i polityka prywatności należą do Startu, a przepis z linku (`/przepis`) do Parzenia.
+Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto, polityka prywatności i moderacja należą do Startu, a przepis z linku (`/przepis`) do Parzenia.
 
 ## Dane (`src/data`)
 
@@ -145,6 +149,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Teksty od użytkowników zawsze jako tekst (React), nigdy jako HTML.
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
 - **Synchronizacja** (`features/sync`): magazyny w przeglądarce zostają źródłem prawdy offline. Śledzenie zmian (`local.ts`) zapisuje dla każdego rekordu czas zmiany, znacznik usunięcia i czy czeka na wysłanie (`barista-companion.sync.v1`), a `mergeRecords` scala według zasady „wygrywa nowsza zmiana” dla każdego rekordu osobno (usunięcie też jest zmianą). Serwer: tabela `user_data` i RPC `sync_push`. Nowy magazyn z danymi użytkownika dostaje adapter w `sync/collections.ts` (rekordy, kolejność, parser, ewentualnie klucz duplikatu i podmiana odwołań) i `replaceAll` w swoim magazynie. Zmian nie zapisuj z pominięciem magazynu: śledzenie widzi tylko `store.set`.
+- **Przepisy społeczności** (`features/community`, tabele `public_recipes`, `recipe_saves`, `recipe_reports`): przepis z serwera przechodzi `parseRecipeInput` jak własny, zanim się narysuje. Liczniki, stan i nick ustawia baza (funkcje `save_public_recipe`, `report_public_recipe`, `moderate_public_recipe`, `moderation_queue`), a autor zmienia tylko treść. Zgłoszenie ukrywa przepis do decyzji moderatora (P7), a przywrócony już nie znika po kolejnych zgłoszeniach. Kopia u siebie ma `origin` (od kogo); takiej kopii nie da się opublikować. Lista ładuje się, gdy sekcja pojawi się na ekranie.
 - Kopia zapasowa (`sync/backup.ts`, ekran konta, działa bez konta): format `barista-companion.backup` w wersji 2, wczytanie scala z danymi na urządzeniu.
 - Nowa funkcja z serwerem dopisuje do polityki prywatności (`pages/PrivacyPage.tsx`), co zbiera, po co i gdzie. Instrukcja wdrożenia: [docs/backend.md](docs/backend.md).
 

@@ -15,6 +15,7 @@ import {
   type AccountUser,
 } from '../features/account/auth';
 import { downloadAccountExport, loadProfile, NICK_LIMITS, nickError, saveNick, type Profile } from '../features/account/profile';
+import { isModerator } from '../features/community/api';
 import { dayAndTime } from '../features/coldbrew/time';
 import { downloadBackup, importBackup } from '../features/sync/backup';
 import { syncNow, useSyncStatus } from '../features/sync/engine';
@@ -260,6 +261,7 @@ function AccountDetails({ user, onDeleted }: { user: AccountUser; onDeleted: () 
       </div>
 
       <SyncSection />
+      <ModerationLink />
 
       <Section title="Nick">
         {profile === undefined ? (
@@ -338,6 +340,26 @@ function AccountDetails({ user, onDeleted }: { user: AccountUser; onDeleted: () 
         </div>
       </Sheet>
     </>
+  );
+}
+
+/** Wejście do moderacji przepisów, tylko dla moderatora. */
+function ModerationLink() {
+  const [moderator, setModerator] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void isModerator().then((value) => {
+      if (!cancelled) setModerator(value);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  if (!moderator) return null;
+  return (
+    <Link to="/moderacja" className={`mt-6 ${secondary}`}>
+      Moderacja przepisów społeczności
+    </Link>
   );
 }
 

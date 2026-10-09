@@ -100,5 +100,16 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 | :- | :- |
 | `20261009120000_profiles.sql` | profil (nick), RLS, profil zakładany z kontem |
 | `20261009130000_user_data.sql` | synchronizacja: tabela `user_data` (rekord na wiersz, RLS tylko dla właściciela, limit 20 000 wierszy) i funkcja `sync_push` (zapisuje tylko nowsze wersje) |
+| `20261009140000_community_recipes.sql` | przepisy społeczności: `public_recipes` (ograniczenia długości i kroków, RLS), zapisy, zgłoszenia, moderatorzy i funkcje do zapisu, zgłoszeń i moderacji |
+
+## 9. Moderator przepisów społeczności
+
+Zgłoszony przepis znika z listy do decyzji moderatora (decyzja P7). Żeby zostać moderatorem, zaloguj się raz w aplikacji, a potem w panelu Supabase: **Authentication → Users** skopiuj swoje **UID** i w **SQL Editor** uruchom:
+
+```sql
+insert into public.moderators (user_id) values ('TWOJE-UID');
+```
+
+Na ekranie konta pojawi się wtedy „Moderacja przepisów społeczności” (`/moderacja`): lista zgłoszonych i ukrytych przepisów z powodami zgłoszeń oraz przyciski „Ukryj” i „Przywróć”. Przywrócony przepis po kolejnych zgłoszeniach już nie znika, tylko wraca do kolejki.
 
 Logi funkcji: **Edge Functions → nazwa → Logs**. Funkcje nie zapisują w logach adresów e-mail ani treści od użytkowników.

@@ -14,6 +14,7 @@ import { GrindScale } from '../features/brewing/GrindScale';
 import { StepList } from '../features/brewing/StepList';
 import { useColdBrew } from '../features/coldbrew/store';
 import { formatSetting } from '../features/grinder/format';
+import { PublishSection } from '../features/community/PublishSection';
 import { recipePath, recipeToMethod, type UserRecipe } from '../features/recipes/recipe';
 import { ShareRecipeSheet } from '../features/recipes/ShareRecipeSheet';
 import { recipesStore, useRecipe } from '../features/recipes/store';
@@ -48,7 +49,7 @@ function RecipeDetails({ base, recipe }: { base: BrewMethod; recipe: UserRecipe 
     <article>
       <PageHeader
         title={recipe.name}
-        lead={`Twoja wersja przepisu: ${base.name}.`}
+        lead={recipe.origin ? `Przepis od ${recipe.origin.author} na: ${base.name}.` : `Twoja wersja przepisu: ${base.name}.`}
         back={{ to: `/parzenie/${base.id}`, label: base.name }}
         icon={<MethodIcon methodId={base.id} className="size-9" />}
       >
@@ -79,6 +80,8 @@ function RecipeDetails({ base, recipe }: { base: BrewMethod; recipe: UserRecipe 
       <Section title="Kroki">
         <StepList steps={method.steps} />
       </Section>
+
+      <PublishSection recipe={recipe} />
 
       <div className="mt-8 flex flex-col gap-3">
         <StartButton recipe={recipe} long={isLongBrew(method.steps)} />

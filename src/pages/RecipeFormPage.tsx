@@ -36,7 +36,8 @@ export function RecipeFormPage() {
           initialSetting={setting}
           submitLabel="Zapisz zmiany"
           onSubmit={(input) => {
-            recipesStore.update(recipe.id, input);
+            // Edycja zostawia informację, od kogo jest przepis zapisany ze społeczności.
+            recipesStore.update(recipe.id, { ...input, ...(recipe.origin && { origin: recipe.origin }) });
             // Z ekranu przepisu cofamy się do niego, a z linku z zewnątrz otwieramy go zamiast formularza.
             if (from) navigate(-1);
             else navigate(recipePath(recipe), { replace: true });

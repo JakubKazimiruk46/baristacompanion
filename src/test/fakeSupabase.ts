@@ -49,6 +49,8 @@ export function createFakeSupabase() {
   const forced = new Map<string, FakeError>();
   const functions = new Map<string, (body: unknown, user: FakeUser | null) => unknown>();
   const rpcs = new Map<string, (args: Record<string, unknown>, user: FakeUser | null) => unknown>();
+  /** Jak DEFAULT i triggery „before insert” w bazie. */
+  const beforeInsert = new Map<string, (row: Row) => Row>();
   const listeners = new Set<AuthListener>();
   let session: Session | null = null;
   let nextId = 1;
@@ -95,6 +97,12 @@ export function createFakeSupabase() {
     }
     emit('SIGNED_OUT');
   }
+
+  const prepare = (row: Row) => {
+    const hook = beforeInsert.get(currentTable);
+    return hook ? hook(row) : row;
+  };
+  let currentTable = '';
 
   class Query implements PromiseLike<Result> {
     private filters: Filter[] = [];
@@ -211,6 +219,7 @@ export function createFakeSupabase() {
     }
 
     private run(): Result {
+      currentTable = this.name;
       const error = takeError(`${this.name}.${this.op}`);
       if (error) return { data: null, error };
       const rows = table(this.name);
@@ -220,11 +229,13 @@ export function createFakeSupabase() {
           result = this.matching();
           break;
         case 'insert': {
-          const values = (Array.isArray(this.payload) ? this.payload : [this.payload!]).map((row) => ({
-            id: row.id ?? `${this.name}-${nextId++}`,
-            created_at: row.created_at ?? new Date().toISOString(),
-            ...row,
-          }));
+          const values = (Array.isArray(this.payload) ? this.payload : [this.payload!]).map((row) =>
+            prepare({
+              id: row.id ?? `${this.name}-${nextId++}`,
+              created_at: row.created_at ?? new Date().toISOString(),
+              ...row,
+            }),
+          );
           rows.push(...values);
           result = values;
           break;
@@ -238,9 +249,14 @@ export function createFakeSupabase() {
           result = [];
           for (const value of Array.isArray(this.payload) ? this.payload : [this.payload!]) {
             const existing = rows.find((row) => keys.every((key) => row[key] === value[key]));
-            if (existing) Object.assign(existing, value);
-            else rows.push({ ...value });
-            result.push(existing ?? value);
+            if (existing) {
+              Object.assign(existing, value);
+              result.push(existing);
+            } else {
+              const inserted = prepare({ id: value.id ?? `${this.name}-${nextId++}`, created_at: new Date().toISOString(), ...value });
+              rows.push(inserted);
+              result.push(inserted);
+            }
           }
           break;
         }
@@ -384,6 +400,10 @@ export function createFakeSupabase() {
     },
     onRpc(name: string, handler: (args: Record<string, unknown>, user: FakeUser | null) => unknown) {
       rpcs.set(name, handler);
+    },
+    /** Wartości domyślne i trigger „before insert” tabeli. */
+    onBeforeInsert(name: string, hook: (row: Row) => Row) {
+      beforeInsert.set(name, hook);
     },
   };
   return fake;

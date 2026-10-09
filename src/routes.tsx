@@ -6,6 +6,7 @@ import { BeanPage } from './pages/BeanPage';
 import { BeansPage } from './pages/BeansPage';
 import { BrewingPage } from './pages/BrewingPage';
 import { BrewSessionPage } from './pages/BrewSessionPage';
+import { CommunityRecipePage } from './pages/CommunityRecipePage';
 import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
 import { FlowPage } from './pages/FlowPage';
@@ -16,6 +17,7 @@ import { JournalEntryPage } from './pages/JournalEntryPage';
 import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
 import { MilkPage } from './pages/MilkPage';
+import { ModerationPage } from './pages/ModerationPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { RecipeFormPage } from './pages/RecipeFormPage';
@@ -50,6 +52,7 @@ export const routes: RouteObject[] = [
       { path: 'parzenie/:methodId/przepisy/nowy', element: <RecipeFormPage /> },
       { path: 'parzenie/:methodId/przepisy/:recipeId', element: <RecipePage /> },
       { path: 'parzenie/:methodId/przepisy/:recipeId/edycja', element: <RecipeFormPage /> },
+      { path: 'parzenie/:methodId/spolecznosc/:recipeId', element: <CommunityRecipePage /> },
       { path: 'przepis', element: <SharedRecipePage /> },
       { path: 'ziarna', element: <BeansPage /> },
       { path: 'ziarna/nowe', element: <BeanFormPage /> },
@@ -59,6 +62,7 @@ export const routes: RouteObject[] = [
       { path: 'ziarna/:beanId/edycja', element: <BeanFormPage /> },
       { path: 'konto', element: <AccountPage /> },
       { path: 'prywatnosc', element: <PrivacyPage /> },
+      { path: 'moderacja', element: <ModerationPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
