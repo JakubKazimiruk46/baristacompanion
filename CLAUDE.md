@@ -49,8 +49,10 @@ src/
   features/
     drinks/               filtry i wyszukiwanie, losowanie (random.ts), kafelki i karty, okno filtrów i losowania,
                           składniki, kroki, sekcja „Jak podać”, treść ekranu napoju (DrinkBody)
-    assistant/            asystent drinków (AI): zapytanie i sprawdzenie propozycji (api.ts), „Moje napoje” (zapis,
-                          useDrink, useAllDrinks), oznaczenie „Przepis od AI”
+    assistant/            asystent drinków (AI): zapytanie i sprawdzenie propozycji (api.ts), „Moje napoje” (zapis ze źródłem
+                          ai/own/community, useDrink, useAllDrinks, findDrink), oznaczenie „Przepis od AI”
+    drinkEditor/          kreator napoju: formularz jako czyste funkcje (draft.ts: napój ↔ formularz, błędy, podgląd,
+                          podpowiedź warstw) i edytor z podglądem szklanki na żywo
     glass/                <DrinkGlass>: geometria naczyń (czyste funkcje) i rysunek SVG z dekoracjami
     brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia, widoki listy metod (methodList.ts),
                           kalkulator ilości (dose.ts: przeliczanie kroków, doseStore: wybrana ilość), lista kroków
@@ -97,6 +99,7 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/mam-kawe/:krok` | ścieżka „Wybiorę sam”: ziarna → metody → metoda → napoje → parzenie → napoj → podanie; od napoju: metoda → parzenie → napoj → podanie |
 | `/napoje` | katalog (siatka kafelków) z „Moimi napojami” na początku, wyszukiwaniem `?q=` i filtrami w adresie (`?ulubione=1&sprobuj=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`); szybkie filtry w rzędzie, reszta w oknie `?filtry=1`, „Wylosuj kawę” `?los=id` losuje spośród wyników |
 | `/napoje/:id` | napój z katalogu albo z „Moich napojów” (id `moj-…`); `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
+| `/napoje/nowy`, `/napoje/nowy?z=id`, `/napoje/:id/edycja` | kreator napoju: od zera, „Własna wersja” innego napoju, edycja „Mojego napoju” |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/zakupy` | lista zakupów (`/napoje/co-mam` przekierowuje do Baribaru) |
 | `/napoje/asystent` | asystent drinków (AI, z kontem): propozycja napoju z katalogu i półki, „Zapisz w Moich napojach” |
@@ -127,7 +130,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Baribar. Zakładka jest aktywna także
 - Młynek (`grinders.ts`): jednostka (`click`/`mark`/`turn`), skala, krok i zakres dla każdego stopnia z `GRIND_SIZES`; `null` = tak drobno nie zmieli (tylko na drobnym końcu skali). Liczby odmieniaj przez `formatSetting()` (`features/grinder/format`), także ułamki („2,5 obrotu”).
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.
 - Reguły spójności napoju (odwołania, objętości, kolory, ilości, długości tekstów, id) są w czystym module `supabase/functions/_shared/drinkRules.ts` z katalogiem w parametrze; aplikacja woła je przez `validateDrink()` (`src/data/validate.ts`). Te same reguły sprawdzają katalog (`data.test.ts`), „Moje napoje” i propozycje asystenta, więc nową regułę napoju dopisuj tam, nie do testu. Nowy adres pod `/napoje/` dopisz do `DRINK_PAGES`.
-- „Moje napoje” (`features/assistant/myDrinks.ts`, zapis `barista-companion.my-drinks.v1`, kolekcja synchronizacji `drinks`): zapisane propozycje asystenta, id z przedrostkiem `moj-`. Napój po id bierz przez `useDrink()`/`drinkName()`, a listę przez `useAllDrinks()`, nie z samego `getDrink()`/`drinks`, gdy ekran ma działać też dla nich. Nie mają „Ulubionego” (ulubione to tylko katalog), za to mają „Usuń”.
+- „Moje napoje” (`features/assistant/myDrinks.ts`, zapis `barista-companion.my-drinks.v1`, kolekcja synchronizacji `drinks`): propozycje asystenta (`source: 'ai'`), napoje z kreatora (`'own'`) i kopie ze społeczności (`'community'` z `origin`), id z przedrostkiem `moj-`. Poprawiona w kreatorze propozycja AI staje się `own`. Kreator (`features/drinkEditor`) kończy zapis `validateDrink`, a pętla „napój → formularz → napój” jest bezstratna dla całego katalogu (test). Napój po id bierz przez `useDrink()`/`drinkName()`, a listę przez `useAllDrinks()`, nie z samego `getDrink()`/`drinks`, gdy ekran ma działać też dla nich. Nie mają „Ulubionego” (ulubione to tylko katalog), za to mają „Usuń”.
 - `data.test.ts` pilnuje spójności (odwołania, objętości, czasy, kolory). Nowy napój albo metoda muszą przez nie przejść.
 
 ## Konwencje

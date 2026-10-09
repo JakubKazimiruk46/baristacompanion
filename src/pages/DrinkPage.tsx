@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import { ReviewNote } from '../components/ReviewNote';
 import { Sheet } from '../components/Sheet';
-import { ShareIcon, TrashIcon } from '../components/icons';
+import { PencilIcon, ShareIcon, TrashIcon } from '../components/icons';
 import { hasAlcohol, type Drink } from '../data';
 import { AiBadge } from '../features/assistant/AiBadge';
-import { isMyDrinkId, myDrinksStore, useDrink } from '../features/assistant/myDrinks';
+import { isMyDrinkId, myDrinksStore, useDrink, useMyDrinkRecord, type MyDrink } from '../features/assistant/myDrinks';
 import { DrinkBody } from '../features/drinks/DrinkBody';
 import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { FavoriteButton } from '../features/favorites/FavoriteButton';
@@ -27,12 +27,13 @@ export function DrinkPage() {
 
 function DrinkView({ drink }: { drink: Drink }) {
   const mine = isMyDrinkId(drink.id);
+  const record = useMyDrinkRecord(drink.id);
   return (
     <article>
       <PageHeader title={drink.name} lead={drink.description} back={{ to: '/napoje', label: 'Napoje' }}>
-        {mine && (
+        {record && (
           <div className="mt-3">
-            <AiBadge />
+            <SourceBadge record={record} />
           </div>
         )}
         <div className="mt-3">
@@ -47,13 +48,36 @@ function DrinkView({ drink }: { drink: Drink }) {
           {!mine && <FavoriteButton drinkId={drink.id} />}
           <WishlistButton drinkId={drink.id} />
           <ShareButton drink={drink} />
-          {mine && <RemoveButton drink={drink} />}
+          {mine ? (
+            <>
+              <Link to={`/napoje/${drink.id}/edycja`} className={buttonClass}>
+                <PencilIcon className="size-5" />
+                Edytuj
+              </Link>
+              <RemoveButton drink={drink} />
+            </>
+          ) : (
+            <Link to={`/napoje/nowy?z=${drink.id}`} className={buttonClass}>
+              <PencilIcon className="size-5" />
+              Własna wersja
+            </Link>
+          )}
         </div>
         <ReviewNote item={drink} />
       </PageHeader>
 
       <DrinkBody drink={drink} />
     </article>
+  );
+}
+
+/** Skąd jest „Mój napój”: od AI (sprawdź proporcje), ze społeczności (od kogo) albo własny. */
+function SourceBadge({ record }: { record: MyDrink }) {
+  if (record.source === 'ai') return <AiBadge />;
+  return (
+    <p className="inline-flex items-center rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-accent">
+      {record.source === 'community' && record.origin ? `Ze społeczności, od ${record.origin.author}` : 'Twój napój'}
+    </p>
   );
 }
 

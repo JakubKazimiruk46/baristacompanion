@@ -8,6 +8,7 @@ import { BeanPage } from './pages/BeanPage';
 import { BrewingPage } from './pages/BrewingPage';
 import { BrewSessionPage } from './pages/BrewSessionPage';
 import { CommunityRecipePage } from './pages/CommunityRecipePage';
+import { DrinkFormPage } from './pages/DrinkFormPage';
 import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
 import { FlowMenuPage, WishlistFlowPage } from './pages/FlowMenuPage';
@@ -49,7 +50,9 @@ export const routes: RouteObject[] = [
       { path: 'napoje/co-mam', element: <Navigate to="/baribar?sekcja=mleka" replace /> },
       { path: 'napoje/zakupy', element: <ShoppingListPage /> },
       { path: 'napoje/asystent', element: <AssistantPage /> },
+      { path: 'napoje/nowy', element: <DrinkFormPage /> },
       { path: 'napoje/:drinkId', element: <DrinkPage /> },
+      { path: 'napoje/:drinkId/edycja', element: <DrinkFormPage /> },
       { path: 'parzenie', element: <BrewingPage /> },
       { path: 'parzenie/dziennik', element: <JournalPage /> },
       { path: 'parzenie/dziennik/:entryId', element: <JournalEntryPage /> },

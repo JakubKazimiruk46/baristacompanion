@@ -11,6 +11,7 @@ import {
   HeartIcon,
   MilkIcon,
   PantryIcon,
+  PlusIcon,
   SearchIcon,
   SlidersIcon,
   SyrupIcon,
@@ -172,6 +173,16 @@ export function DrinksPage() {
       )}
 
       <Section title="Więcej o napojach">
+        <Link
+          to="/napoje/nowy"
+          className="mb-3 flex min-h-16 items-center gap-3 rounded-2xl border border-accent bg-surface p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <PlusIcon className="size-7 shrink-0 text-accent" />
+          <span className="min-w-0">
+            <span className="block leading-tight font-semibold">Stwórz własny napój</span>
+            <span className="block text-xs text-ink-muted">Ułóż warstwy, wybierz szklankę i dekoracje</span>
+          </span>
+        </Link>
         <KitchenLinks />
         {aiEnabled() && (
           <Link
