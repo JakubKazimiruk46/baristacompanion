@@ -70,7 +70,9 @@ src/
     favorites/            ulubione napoje i ulubione metody: zapis i przyciski „Ulubiony”/„Ulubiona”
     wishlist/             „Chcę spróbować”: lista napojów do spróbowania (zapis i przycisk)
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
-    shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
+    bar/                  Baribar: sekcje, filtry i grupy ziaren, ile napojów używa składnika (bar.ts, czyste funkcje),
+                          sekcja ziaren, sekcje półki (mleka, syropy, dodatki, sprzęt, „brakuje jednej rzeczy”)
+    shelf/                półka (co jest w barku), dostępność napoju (czysta funkcja), lista zakupów
     share/                karta napoju do udostępnienia: układ i kolory (czyste funkcje), SVG, eksport do PNG
     flow/                 ścieżka „Mam kawę”: kroki (od ziaren albo od napoju), wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
@@ -96,7 +98,7 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/napoje` | katalog (siatka kafelków) z „Moimi napojami” na początku, wyszukiwaniem `?q=` i filtrami w adresie (`?ulubione=1&sprobuj=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`); szybkie filtry w rzędzie, reszta w oknie `?filtry=1`, „Wylosuj kawę” `?los=id` losuje spośród wyników |
 | `/napoje/:id` | napój z katalogu albo z „Moich napojów” (id `moj-…`); `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
-| `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
+| `/napoje/zakupy` | lista zakupów (`/napoje/co-mam` przekierowuje do Baribaru) |
 | `/napoje/asystent` | asystent drinków (AI, z kontem): propozycja napoju z katalogu i półki, „Zapisz w Moich napojach” |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody jako kafelki (`?widok=ostatnie\|ulubione`, domyślnie A–Z), szczegóły z „Ulubiona”, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
 | `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis`, `…/:przepis/edycja` | własne przepisy: nowy (kopia przepisu metody), ekran przepisu (kalkulator, mielenie, kroki, „Wyślij”, usuwanie), edycja |
@@ -104,11 +106,12 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/parzenie/:id/spolecznosc/:przepis` | przepis społeczności: „Parz według tego przepisu”, „Zapisz u siebie”, „Zgłoś” |
 | `/moderacja` | kolejka moderatora: zgłoszone i ukryte przepisy, „Ukryj” i „Przywróć” |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
-| `/ziarna`, `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | Moje ziarna |
+| `/baribar` | Baribar: `?sekcja=ziarna\|mleka\|syropy\|dodatki\|sprzet`, ziarna z `?q=&palenie=jasne&rodzaj=single`; podsumowanie „zrobisz teraz” |
+| `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | ziarna (część Baribaru; `/ziarna` przekierowuje na `/baribar`) |
 | `/konto`, `/prywatnosc` | konto (logowanie linkiem albo kodem z e-maila i przez Google, nick, eksport, usunięcie) i polityka prywatności |
 | `/ziarna/mlynek`, `/ziarna/mlynek/nowy` | Mój młynek: ustawienia dla metod, wybór używanego młynka, nowy młynek; `?mielenie=id-metody` otwiera okno ustawienia (też na ekranie metody, w „Mam kawę” i w parzeniu) |
 
-Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto, polityka prywatności i moderacja należą do Startu, a przepis z linku (`/przepis`) do Parzenia.
+Dolna nawigacja: Start, Napoje, Parzenie, Baribar. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto, polityka prywatności i moderacja należą do Startu, przepis z linku (`/przepis`) do Parzenia, a ziarna i młynek (`/ziarna/...`) do Baribaru.
 
 ## Dane (`src/data`)
 
@@ -136,6 +139,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - **Ekrany:** każdy zaczyna się od `<PageHeader>` (tytuł karty, h1 przyjmujący fokus po zmianie ekranu, opcjonalnie powrót i ikona). Sekcje przez `<Section>` (region z nagłówkiem h2). Puste stany przez `<EmptyState>`.
 - **Nawigacja:** główne linki mają `viewTransition` (płynne przejście; wyłączone przy ograniczeniu ruchu). Link z listy przekazuje `state={{ from }}`, a `<BackLink>` wtedy cofa w historii (zachowuje filtry i przewinięcie).
 - **Okna:** `<Sheet>` (natywny `<dialog>`). Stan okna w adresie przez `useDialogParam`, żeby gest „wstecz” je zamykał.
+- **Przewijane w bok rzędy pigułek** (`overflow-x-auto`): `<fieldset>` dostaje `min-w-0` (domyślnie rozpycha się do treści), a etykieta z ukrytym polem `sr-only` jest `relative` (inaczej pole „ucieka” z rzędu i robi poziome przewijanie strony; `ChoiceChip` i `Segmented` już to mają).
 - **Zapis w przeglądarce:** zawsze przez `createLocalStore` (`lib/localStore`): odporny na brak localStorage, wspólny stan przez `useSyncExternalStore`. Klucze z prefiksem `barista-companion.` i wersją (`.v1`). Parser odrzuca uszkodzone wpisy i odwołania do nieistniejących danych, zamiast tracić cały zapis.
 - **Dziennik:** prowadzone parzenie tworzy wpis samo przy „Zakończ” (`BrewSession`), cold brew przy zakończeniu maceracji. Nie twórz wpisów w innych miejscach. Wpis zapisuje ustawienie używanego młynka (`grindRecordFor`, cold brew już przy zalaniu), a „Zaparz tak samo” przywraca je razem z ilością (`grindersStore.restore`). Parzenie według własnego przepisu zapisuje `recipeId` i `recipeName`, a ustawienie młynka bierze z przepisu.
 - **Czas:** stopery liczą z `Date.now()` od znacznika startu (czyste funkcje w `features/brewing/timer.ts`, `features/coldbrew/time.ts`), nigdy przez sumowanie interwałów.

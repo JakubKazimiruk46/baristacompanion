@@ -53,10 +53,10 @@ describe('konto: bez backendu i bez logowania', () => {
     await vi.waitFor(() => expect(createClientMock).toHaveBeenCalledTimes(1));
   });
 
-  it('wejście na konto jest też w „Moich ziarnach”', async () => {
-    const { user, router } = renderApp('/ziarna');
+  it('wejście na konto jest na starcie', async () => {
+    const { user, router } = renderApp('/');
     expect(createClientMock).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('link', { name: /Konto i prywatność/ }));
+    await user.click(screen.getByRole('link', { name: /^Konto/ }));
     expect(currentUrl(router)).toBe('/konto');
   });
 });

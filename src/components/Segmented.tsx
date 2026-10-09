@@ -19,7 +19,7 @@ export function Segmented<T extends string>({ label, options, labels, value, onC
         {options.map((option) => (
           <label
             key={option}
-            className="flex min-h-10 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-full px-2 py-1 text-center text-sm leading-tight font-medium text-ink-muted select-none has-checked:bg-surface has-checked:text-ink has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-accent"
+            className="relative flex min-h-10 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-full px-2 py-1 text-center text-sm leading-tight font-medium text-ink-muted select-none has-checked:bg-surface has-checked:text-ink has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-accent"
           >
             <input
               type="radio"

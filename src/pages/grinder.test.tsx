@@ -62,7 +62,7 @@ describe('mój młynek', () => {
     expect(grindersStore.getSnapshot().grinders[0]!.settings).toEqual({ drip: 22 });
 
     // „Moje ziarna” pokazują młynek i liczbę ustawień.
-    await user.click(within(mainNav()).getByRole('link', { name: 'Moje ziarna' }));
+    await user.click(within(mainNav()).getByRole('link', { name: 'Baribar' }));
     expect(screen.getByRole('link', { name: /Mój młynek/ })).toHaveTextContent('Comandante C40 MK4 · 1 ustawienie');
   });
 

@@ -20,7 +20,7 @@ import {
   type SavedGrinder,
 } from '../features/grinder/store';
 import { capitalize } from '../lib/format';
-import { addButtonClass } from './BeansPage';
+import { addButtonClass } from '../features/bar/BeansSection';
 
 const secondary =
   'flex h-12 flex-1 items-center justify-center rounded-full border border-line bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
@@ -37,7 +37,7 @@ export function GrindersPage() {
     <PageHeader
       title={state.grinders.length > 1 ? 'Moje młynki' : 'Mój młynek'}
       lead="Zapisz, jak mielisz do każdej metody, a dobrą kawę łatwo powtórzysz."
-      back={{ to: '/ziarna', label: 'Moje ziarna' }}
+      back={{ to: '/baribar', label: 'Baribar' }}
     />
   );
 

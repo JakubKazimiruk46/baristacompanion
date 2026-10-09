@@ -61,7 +61,7 @@ export function DrinkAvailability({ drink }: { drink: Drink }) {
   if (!shelf) {
     return (
       <Link
-        to="/napoje/co-mam"
+        to="/baribar?sekcja=mleka"
         className="mb-3 flex h-12 items-center gap-2 rounded-2xl border border-dashed border-line px-4 text-sm font-medium text-accent"
       >
         <PantryIcon className="size-5" />

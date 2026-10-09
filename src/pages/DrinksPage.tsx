@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
 import {
+  BarIcon,
   BookmarkIcon,
   CartIcon,
   CloseIcon,
@@ -234,7 +235,7 @@ function NoResults({ filters, query, favorites, wishlist }: NoResultsProps) {
   if (filters.available) {
     return (
       <EmptyState icon={PantryIcon} title="Z tego, co masz, nic nie wyjdzie">
-        Zaznacz w <Link to="/napoje/co-mam" className="font-medium text-accent underline">Co mam w domu</Link>,
+        Zaznacz w <Link to="/baribar?sekcja=mleka" className="font-medium text-accent underline">Baribarze</Link>,
         co masz w kuchni, albo wyłącz któryś filtr.
       </EmptyState>
     );
@@ -256,17 +257,17 @@ function NoResults({ filters, query, favorites, wishlist }: NoResultsProps) {
 const kitchenLink =
   'flex min-h-16 items-center gap-3 rounded-2xl bg-accent-soft p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
-/** „Co mam w domu” i lista zakupów: ile napojów zrobisz teraz, ile rzeczy kupić. */
+/** Baribar i lista zakupów: ile napojów zrobisz teraz, ile rzeczy kupić. */
 function KitchenLinks() {
   const shelf = useShelf();
   const shopping = useShopping().filter((item) => !item.bought);
   const ready = useAllDrinks().filter((drink) => canMake(drink, shelf)).length;
   return (
     <nav aria-label="Twoja kuchnia" className="mb-3 grid grid-cols-2 gap-2">
-      <Link to="/napoje/co-mam" className={kitchenLink}>
-        <PantryIcon className="size-7 shrink-0 text-accent" />
+      <Link to="/baribar?sekcja=mleka" className={kitchenLink}>
+        <BarIcon className="size-7 shrink-0 text-accent" />
         <span className="min-w-0">
-          <span className="block leading-tight font-semibold">Co mam w domu</span>
+          <span className="block leading-tight font-semibold">Baribar</span>
           <span className="block text-xs">zrobisz {count(ready, ['napój', 'napoje', 'napojów'])}</span>
         </span>
       </Link>

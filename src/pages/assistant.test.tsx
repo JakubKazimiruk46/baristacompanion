@@ -177,11 +177,15 @@ describe('Moje napoje', () => {
     await user.click(screen.getByRole('button', { name: /Dodaj do listy zakupów/ }));
     expect(shoppingStore.getSnapshot().map((i) => i.id).sort()).toEqual(['pomaranczowy', 'tonik']);
 
+    // Czekamy na nagłówki ekranów: nazwa napoju jest i na liście zakupów, i na ekranie napoju,
+    // więc bez tego test mógłby kliknąć przycisk ze starego, właśnie znikającego ekranu.
     await router.navigate('/napoje/zakupy');
-    expect((await screen.findAllByText(/Kawa Tonik z Pomarańczą/)).length).toBeGreaterThan(0);
+    await screen.findByRole('heading', { level: 1, name: 'Lista zakupów' });
+    expect(screen.getAllByText(/Kawa Tonik z Pomarańczą/).length).toBeGreaterThan(0);
 
     await router.navigate(`/napoje/${drink.id}`);
-    await user.click(await screen.findByRole('button', { name: 'Usuń' }));
+    await screen.findByRole('heading', { level: 1, name: drink.name });
+    await user.click(screen.getByRole('button', { name: 'Usuń' }));
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Usuń' }));
     expect(currentUrl(router)).toBe('/napoje?moje=1');
     expect(myDrinksStore.getSnapshot()).toEqual([]);

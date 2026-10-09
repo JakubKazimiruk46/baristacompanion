@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router';
-import { BeanIcon, BrewIcon, DrinkIcon, HomeIcon, type IconComponent } from './icons';
+import { BarIcon, BrewIcon, DrinkIcon, HomeIcon, type IconComponent } from './icons';
 
 type Tab = {
   to: string;
@@ -13,7 +13,7 @@ const tabs: Tab[] = [
   { to: '/', label: 'Start', Icon: HomeIcon, also: ['/mam-kawe', '/konto', '/prywatnosc', '/moderacja'] },
   { to: '/napoje', label: 'Napoje', Icon: DrinkIcon },
   { to: '/parzenie', label: 'Parzenie', Icon: BrewIcon, also: ['/przepis'] },
-  { to: '/ziarna', label: 'Moje ziarna', Icon: BeanIcon },
+  { to: '/baribar', label: 'Baribar', Icon: BarIcon, also: ['/ziarna'] },
 ];
 
 const isUnder = (pathname: string, base: string) =>

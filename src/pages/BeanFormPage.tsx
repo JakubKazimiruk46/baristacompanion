@@ -13,7 +13,7 @@ export function BeanFormPage() {
   if (!beanId) {
     return (
       <>
-        <PageHeader title="Nowe ziarna" back={{ to: '/ziarna', label: 'Moje ziarna' }} />
+        <PageHeader title="Nowe ziarna" back={{ to: '/baribar', label: 'Baribar' }} />
         <BeanForm
           submitLabel="Zapisz ziarna"
           onSubmit={(input) => {

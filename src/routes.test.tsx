@@ -32,8 +32,8 @@ describe('dolna nawigacja', () => {
       'aria-current',
     );
 
-    await user.click(within(mainNav()).getByRole('link', { name: 'Moje ziarna' }));
-    expect(screen.getByRole('heading', { level: 1, name: 'Moje ziarna' })).toBeInTheDocument();
+    await user.click(within(mainNav()).getByRole('link', { name: 'Baribar' }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Baribar' })).toBeInTheDocument();
   });
 
   it('podstrona zostawia podświetloną zakładkę', () => {
@@ -48,6 +48,13 @@ describe('dolna nawigacja', () => {
     const { user } = renderApp('/');
     await user.click(within(mainNav()).getByRole('link', { name: 'Parzenie' }));
     expect(document.activeElement).toBe(screen.getByRole('heading', { level: 1, name: 'Parzenie' }));
+  });
+
+  it('ziarna należą do Baribaru, a stare adresy tam prowadzą', () => {
+    const { router } = renderApp('/ziarna');
+    expect(router.state.location.pathname).toBe('/baribar');
+    expect(within(mainNav()).getByRole('link', { name: 'Baribar' })).toHaveAttribute('aria-current', 'page');
+    router.dispose();
   });
 
   it('ścieżka „Mam kawę” należy do zakładki Start', () => {
