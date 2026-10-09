@@ -55,7 +55,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Wiadomość ma link i kod (kod działa w aplikacji na Androida) |
 | P6 | Kto jest administratorem danych w polityce prywatności (autor jako osoba prywatna, firma)? | 5 | Do decyzji autora; sesja przygotuje szkic do uzupełnienia | Otwarte: szkic w `/prywatnosc` ma miejsca „do uzupełnienia” |
 | P7 | Przepisy społeczności widoczne od razu czy po akceptacji? Kto moderuje? | 7 | Od razu, a zgłoszenia ukrywają przepis do decyzji moderatora (autor) | Przyjęta rekomendacja (2026-10-09), do potwierdzenia. Przywrócony przez moderatora przepis po kolejnych zgłoszeniach już nie znika (ochrona przed nadużyciem) |
-| P8 | Zgoda na koszty API Claude: dzienny limit na użytkownika i miesięczny limit wydatków? AI tylko dla zalogowanych? | 8 | Tylko dla zalogowanych, np. 20 skanów i 10 propozycji drinków dziennie, limit wydatków ustawiony w konsoli Anthropic | |
+| P8 | Zgoda na koszty API Claude: dzienny limit na użytkownika i miesięczny limit wydatków? AI tylko dla zalogowanych? | 8 | Tylko dla zalogowanych, np. 20 skanów i 10 propozycji drinków dziennie, limit wydatków ustawiony w konsoli Anthropic | Przyjęta rekomendacja (2026-10-09), do potwierdzenia: 20 skanów i 10 drinków dziennie (zmiana sekretami bez wdrażania), limit wydatków ustawia autor w konsoli Anthropic |
 | P9 | Asystent drinków: czy wolno mu proponować składniki spoza katalogu? | 9 | Nie: tylko składniki, metody i naczynia z danych, żeby rysunek i półka działały | |
 
 ## Jak pracować
@@ -78,7 +78,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 5. Backend: konto i prywatność | kod gotowy (gałąź `feature/konto`, od `feature/android`); czeka na projekt Supabase autora i test logowania na podglądzie Vercela |
 | 6. Synchronizacja danych | kod gotowy (gałąź `feature/synchronizacja`, od `feature/konto`); czeka na sprawdzenie autora na dwóch urządzeniach |
 | 7. Przepisy społeczności | kod gotowy (gałąź `feature/spolecznosc`, od `feature/synchronizacja`); czeka na projekt Supabase autora |
-| 8. AI: rozpoznawanie etykiet | do zrobienia |
+| 8. AI: rozpoznawanie etykiet | kod gotowy (gałąź `feature/ai-etykiety`, od `feature/spolecznosc`); czeka na klucz API autora i test na prawdziwych opakowaniach |
 | 9. AI: asystent drinków | do zrobienia |
 | 10. Baza ziaren i palarni | do zrobienia |
 
@@ -150,6 +150,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - limit dzienny z P8 działa, a po jego przekroczeniu jest powrót do OCR w przeglądarce,
    - odpowiedź jest walidowana (nieznane nuty i palenia odrzucone),
    - testy pokrywają ścieżkę AI, limit i powrót do OCR (fetch podmieniony).
+
+   Wykonanie (2026-10-09): funkcja `scan-label` (Deno, `npm:@anthropic-ai/sdk@0.128.0`), model `claude-opus-5-5` z `effort: "low"` i serwerowym fallbackiem po odmowie (`fallbacks: "default"`). Odstępstwo od planu: zamiast tool use JSON przez structured outputs (`output_config.format` ze schematem), bo na `claude-opus-5-5` wymuszony `tool_choice` zwraca 400, a narzędzie było potrzebne tylko do uzyskania JSON. Schemat, prompt i walidacja w czystym `supabase/functions/_shared/labelScan.ts` (wspólne dla serwera i aplikacji, test zgodności list z `src/data`). Dzienny limit w tabeli `ai_usage` (funkcje tylko dla `service_role`, nieudana próba oddaje użycie). W aplikacji: zgoda przed pierwszym zdjęciem (dokąd trafia), wybór ścieżki (zalogowany i online: AI, inaczej telefon), powrót do OCR po limicie, błędzie albo odpowiedzi spoza schematu, informacja, która ścieżka zadziałała. AI odczytuje też datę palenia: nowe opcjonalne pole „Data palenia” w ziarnach (ekran ziaren pokazuje, ile dni temu). Funkcje Deno sprawdzone `tsc` względem typów SDK i supabase-js (tu nie ma Deno). Szacunkowy koszt skanu ok. 0,02–0,03 USD (`docs/backend.md`).
 9. **AI: asystent drinków.** Ekran `/napoje/asystent`: użytkownik opisuje, na co ma ochotę (domyślnie z tym, co ma na półce). Funkcja serwerowa prosi Claude o napój w schemacie `Drink`, ograniczony do składników, metod, naczyń i dekoracji z danych (P9). Wynik przechodzi te same reguły co `data.test.ts` (wydziel je do `src/data/validate.ts`) i rysuje się jak każdy napój. Gotowe, gdy:
    - propozycja wyświetla się z rysunkiem szklanki, krokami i podaniem, z oznaczeniem „Przepis od AI, sprawdź proporcje”,
    - niepoprawna odpowiedź AI nie psuje ekranu (walidacja, ponowienie albo komunikat),

@@ -72,6 +72,24 @@ export function PrivacyPage() {
         <p className="mt-3">Nie sprzedajemy danych, nie wyświetlamy reklam i nie śledzimy Cię między stronami.</p>
       </Section>
 
+      <Section title="AI (tylko z kontem i za Twoją zgodą)">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong>Zdjęcie etykiety</strong>: przy pierwszym skanie aplikacja pyta o zgodę. Zdjęcie trafia przez nasz
+            serwer do Anthropic (dostawca modelu Claude, USA) tylko po to, żeby odczytać etykietę. Nie zapisujemy go,
+            a logi nie zawierają zdjęcia ani odczytanego tekstu. Bez zgody etykietę odczytuje telefon.
+          </li>
+          <li>
+            <strong>Licznik użyć</strong>: ile razy danego dnia skorzystano z AI (dzienny limit). Usuwamy go razem z
+            kontem.
+          </li>
+          <li>
+            Anthropic przetwarza dane w naszym imieniu i nie używa ich do trenowania modeli.{' '}
+            <Fill>okres przechowywania danych przez Anthropic według umowy i podstawa transferu do USA</Fill>.
+          </li>
+        </ul>
+      </Section>
+
       <Section title="Gdzie są dane">
         <ul className="list-disc space-y-2 pl-5">
           <li>

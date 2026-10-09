@@ -6,6 +6,8 @@ export interface SavedBean {
   name: string;
   roaster?: string;
   profile: BeanProfile;
+  /** Data palenia z opakowania, RRRR-MM-DD. */
+  roastedOn?: string;
   createdAt: number;
 }
 
@@ -21,6 +23,7 @@ function isSavedBean(value: unknown): value is SavedBean {
     typeof bean.id === 'string' &&
     typeof bean.name === 'string' &&
     typeof bean.createdAt === 'number' &&
+    (bean.roastedOn === undefined || (typeof bean.roastedOn === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(bean.roastedOn))) &&
     profile !== undefined &&
     ROASTS.includes(profile.roast as BeanProfile['roast']) &&
     Array.isArray(profile.notes) &&

@@ -27,12 +27,13 @@ npm test            # testy jednostkowe i komponentów (Vitest, tylko src/)
 npm run test:watch  # jw. w trybie obserwacji
 npm run test:e2e    # build + Playwright (e2e/) na npm run preview, w przeglądarce Edge
 npm run typecheck   # tylko tsc
+npm run typecheck:functions  # typy funkcji serwerowych Deno (supabase/functions), bez instalowania Deno
 npm run android:sync  # build + kopia do projektu Androida (potem Run w Android Studio)
 npm run android:open  # otwiera android/ w Android Studio
 npm run android:apk   # APK do testów (wymaga Android Studio / JDK), docs/aplikacja-android.md
 ```
 
-Przed zakończeniem zmian: `npm run typecheck` i `npm test` muszą przechodzić. Po zmianach w ścieżce „Mam kawę” także `npm run test:e2e`.
+Przed zakończeniem zmian: `npm run typecheck` i `npm test` muszą przechodzić (po zmianach w `supabase/functions` także `npm run typecheck:functions`). Po zmianach w ścieżce „Mam kawę” także `npm run test:e2e`.
 
 ## Struktura
 
@@ -54,7 +55,8 @@ src/
                           zapis, edytor kroków, sekcja „Twoje przepisy”, link z przepisem (share.ts)
     coldbrew/             długi timer (czas gotowości), plik .ics, zapis startu
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
-                          scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
+                          scan/: skan etykiety (AI przez scan-label albo OCR w przeglądarce + parser tekstu,
+                          zgoda na AI, przygotowanie zdjęcia)
     account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
     community/            przepisy społeczności: zapytania (api.ts, walidacja jak własny przepis), sekcja na
                           ekranie metody, publikowanie przy własnym przepisie
@@ -150,6 +152,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
 - **Synchronizacja** (`features/sync`): magazyny w przeglądarce zostają źródłem prawdy offline. Śledzenie zmian (`local.ts`) zapisuje dla każdego rekordu czas zmiany, znacznik usunięcia i czy czeka na wysłanie (`barista-companion.sync.v1`), a `mergeRecords` scala według zasady „wygrywa nowsza zmiana” dla każdego rekordu osobno (usunięcie też jest zmianą). Serwer: tabela `user_data` i RPC `sync_push`. Nowy magazyn z danymi użytkownika dostaje adapter w `sync/collections.ts` (rekordy, kolejność, parser, ewentualnie klucz duplikatu i podmiana odwołań) i `replaceAll` w swoim magazynie. Zmian nie zapisuj z pominięciem magazynu: śledzenie widzi tylko `store.set`.
 - **Przepisy społeczności** (`features/community`, tabele `public_recipes`, `recipe_saves`, `recipe_reports`): przepis z serwera przechodzi `parseRecipeInput` jak własny, zanim się narysuje. Liczniki, stan i nick ustawia baza (funkcje `save_public_recipe`, `report_public_recipe`, `moderate_public_recipe`, `moderation_queue`), a autor zmienia tylko treść. Zgłoszenie ukrywa przepis do decyzji moderatora (P7), a przywrócony już nie znika po kolejnych zgłoszeniach. Kopia u siebie ma `origin` (od kogo); takiej kopii nie da się opublikować. Lista ładuje się, gdy sekcja pojawi się na ekranie.
+- **AI** (Claude tylko z funkcji serwerowych, klucz w sekretach Supabase): skan etykiety `scan-label`. Logikę, którą musi znać i serwer, i aplikacja (schemat odpowiedzi, prompt, walidacja wyniku), trzymaj w czystych modułach bez importów w `supabase/functions/_shared/` (np. `labelScan.ts`); aplikacja importuje je przez ścieżkę względną, a Vitest je testuje. Model `claude-opus-5-5`, JSON przez structured outputs (`output_config.format`; wymuszony `tool_choice` daje na tym modelu 400), `fallbacks: "default"` na odmowę. Każda funkcja AI: dzienny limit (`ai_usage`, `_shared/quota.ts`, P8), zgoda przed pierwszym wysłaniem danych, powrót do wersji bez AI po błędzie, limicie albo bez logowania. Funkcje Deno sprawdzaj `npm run typecheck:functions` (`supabase/functions/tsconfig.json` mapuje importy `npm:`/`jsr:` na `node_modules`; wersja w imporcie i w `devDependencies` musi być ta sama).
 - Kopia zapasowa (`sync/backup.ts`, ekran konta, działa bez konta): format `barista-companion.backup` w wersji 2, wczytanie scala z danymi na urządzeniu.
 - Nowa funkcja z serwerem dopisuje do polityki prywatności (`pages/PrivacyPage.tsx`), co zbiera, po co i gdzie. Instrukcja wdrożenia: [docs/backend.md](docs/backend.md).
 

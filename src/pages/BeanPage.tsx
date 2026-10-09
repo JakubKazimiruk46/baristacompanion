@@ -4,6 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Section } from '../components/Section';
 import { Sheet } from '../components/Sheet';
 import { BeanSummary } from '../features/beans/BeanSummary';
+import { formatRoastDate } from '../features/beans/scan/parseLabel';
 import { MethodRanking } from '../features/beans/MethodRanking';
 import { beansStore, useBeans } from '../features/beans/store';
 import { EntryCard } from '../features/journal/EntryCard';
@@ -13,6 +14,18 @@ import { NotFoundPage } from './NotFoundPage';
 
 const secondary =
   'flex h-12 flex-1 items-center justify-center rounded-full border border-line bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
+/** „Palona 3 października 2026, 6 dni temu”: świeżość ziaren. */
+function RoastAge({ date }: { date: string }) {
+  const now = useNow(3_600_000);
+  const days = Math.floor((now - new Date(`${date}T00:00:00`).getTime()) / 86_400_000);
+  const ago = days <= 0 ? 'dziś' : days === 1 ? 'wczoraj' : `${days} dni temu`;
+  return (
+    <p className="mt-2 text-sm text-ink-muted">
+      Palona {formatRoastDate(date)}, {ago}
+    </p>
+  );
+}
 
 export function BeanPage() {
   const { beanId } = useParams();
@@ -30,6 +43,7 @@ export function BeanPage() {
         <div className="mt-3">
           <BeanSummary profile={bean.profile} />
         </div>
+        {bean.roastedOn && <RoastAge date={bean.roastedOn} />}
       </PageHeader>
 
       <button

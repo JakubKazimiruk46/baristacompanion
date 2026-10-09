@@ -93,6 +93,7 @@ Przed udostępnieniem aplikacji uzupełnij w polityce prywatności (`src/pages/P
 | Funkcja | Co robi | Sekrety (`npx supabase secrets set …`) |
 | :- | :- | :- |
 | `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i `SUPABASE_SERVICE_ROLE_KEY` sam) |
+| `scan-label` | odczyt etykiety ziaren przez Claude (zdjęcie → pola formularza), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_LABEL_SCANS` (domyślnie 20) |
 
 Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 
@@ -100,9 +101,25 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 | :- | :- |
 | `20261009120000_profiles.sql` | profil (nick), RLS, profil zakładany z kontem |
 | `20261009130000_user_data.sql` | synchronizacja: tabela `user_data` (rekord na wiersz, RLS tylko dla właściciela, limit 20 000 wierszy) i funkcja `sync_push` (zapisuje tylko nowsze wersje) |
+| `20261009150000_ai_usage.sql` | dzienne liczniki AI (`ai_usage`) i funkcje `consume_ai_quota` / `release_ai_quota` (tylko dla funkcji serwerowych) |
 | `20261009140000_community_recipes.sql` | przepisy społeczności: `public_recipes` (ograniczenia długości i kroków, RLS), zapisy, zgłoszenia, moderatorzy i funkcje do zapisu, zgłoszeń i moderacji |
 
-## 9. Moderator przepisów społeczności
+## 9. AI: klucz Claude i limity kosztów
+
+1. Załóż konto na [platform.claude.com](https://platform.claude.com) i utwórz klucz API (**API Keys → Create Key**). Klucza nie wpisuj do aplikacji ani do repozytorium.
+2. Ustaw go jako sekret funkcji i wdroż funkcję:
+
+   ```sh
+   npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+   npx supabase functions deploy scan-label
+   ```
+
+3. W konsoli Anthropic ustaw **miesięczny limit wydatków** (**Settings → Limits → Spend limit**). To twarda granica kosztów niezależna od limitów w aplikacji.
+4. Dzienne limity na użytkownika (decyzja P8): 20 skanów etykiet (zmiana: `npx supabase secrets set AI_DAILY_LABEL_SCANS=30`). Nieudana próba (błąd, odmowa modelu) nie zjada limitu.
+
+Model: `claude-opus-5-5` (aktualny model domyślny), odpowiedź w formacie JSON wymuszonym schematem (structured outputs), niski poziom wysiłku (`effort: "low"`), bo odczyt etykiety to prosta ekstrakcja. Szacunkowy koszt jednego skanu: zdjęcie 1600 px to ok. 2,5–3 tys. tokenów wejścia, razem z instrukcją ok. 3,5 tys. tokenów (ok. 0,014 USD przy 4 USD za milion), plus kilkaset tokenów wyjścia (ok. 0,01 USD przy 20 USD za milion): razem ok. 0,02–0,03 USD. Przy limicie 20 skanów dziennie to najwyżej ok. 0,5 USD na osobę dziennie. Sprawdź prawdziwe zużycie w logach funkcji (liczba tokenów) i w konsoli Anthropic.
+
+## 10. Moderator przepisów społeczności
 
 Zgłoszony przepis znika z listy do decyzji moderatora (decyzja P7). Żeby zostać moderatorem, zaloguj się raz w aplikacji, a potem w panelu Supabase: **Authentication → Users** skopiuj swoje **UID** i w **SQL Editor** uruchom:
 

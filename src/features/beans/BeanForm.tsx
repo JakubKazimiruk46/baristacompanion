@@ -30,8 +30,9 @@ export function BeanForm({ initial, submitLabel, onSubmit }: BeanFormProps) {
   const [notes, setNotes] = useState<FlavorNote[]>(initial?.profile.notes ?? []);
   const [origin, setOrigin] = useState(initial?.profile.origin ?? '');
   const [kind, setKind] = useState<BeanProfile['kind']>(initial?.profile.kind ?? 'blend');
+  const [roastedOn, setRoastedOn] = useState(initial?.roastedOn ?? '');
   const [submitted, setSubmitted] = useState(false);
-  const ids = { name: useId(), roaster: useId(), origin: useId(), nameError: useId(), roastError: useId() };
+  const ids = { name: useId(), roaster: useId(), origin: useId(), roastedOn: useId(), nameError: useId(), roastError: useId() };
 
   const errors = {
     name: name.trim() ? null : 'Podaj nazwę kawy.',
@@ -45,6 +46,7 @@ export function BeanForm({ initial, submitLabel, onSubmit }: BeanFormProps) {
     onSubmit({
       name: name.trim(),
       ...(roaster.trim() && { roaster: roaster.trim() }),
+      ...(/^\d{4}-\d{2}-\d{2}$/.test(roastedOn) && { roastedOn }),
       profile: {
         roast,
         // Kolejność nut jak na liście, niezależnie od kolejności klikania.
@@ -67,6 +69,7 @@ export function BeanForm({ initial, submitLabel, onSubmit }: BeanFormProps) {
     if (guess.roast) setRoast((current) => current || guess.roast!);
     if (guess.notes.length > 0) setNotes((current) => [...new Set([...current, ...guess.notes])]);
     if (guess.kind) setKind(guess.kind);
+    setRoastedOn(fill(guess.roastDate));
   };
 
   return (
@@ -139,6 +142,19 @@ export function BeanForm({ initial, submitLabel, onSubmit }: BeanFormProps) {
           onChange={(e) => setOrigin(e.target.value)}
           placeholder="np. Etiopia, Brazylia"
           autoComplete="off"
+        />
+      </div>
+
+      <div>
+        <label htmlFor={ids.roastedOn} className="font-medium">
+          Data palenia <span className="font-normal text-ink-muted">(opcjonalnie)</span>
+        </label>
+        <input
+          id={ids.roastedOn}
+          type="date"
+          className={inputClass}
+          value={roastedOn}
+          onChange={(e) => setRoastedOn(e.target.value)}
         />
       </div>
 

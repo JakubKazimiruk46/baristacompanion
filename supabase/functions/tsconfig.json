@@ -1,0 +1,21 @@
+{
+  // Tylko do sprawdzania typów funkcji serwerowych (npm run typecheck:functions).
+  // Importy npm:/jsr: wskazują na te same pakiety w node_modules.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noUnusedLocals": true,
+    "types": [],
+    "paths": {
+      "npm:@anthropic-ai/sdk@0.128.0": ["../../node_modules/@anthropic-ai/sdk/index.d.ts"],
+      "jsr:@supabase/supabase-js@2": ["../../node_modules/@supabase/supabase-js/dist/index.d.mts"]
+    }
+  },
+  "include": ["deno.d.ts", "**/*.ts"]
+}

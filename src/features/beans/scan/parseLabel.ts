@@ -1,4 +1,4 @@
-import { NOTE_LABELS, ROAST_LABELS, type BeanProfile, type FlavorNote, type Roast } from '../../../data';
+import { BEAN_KIND_LABELS, NOTE_LABELS, ROAST_LABELS, type BeanProfile, type FlavorNote, type Roast } from '../../../data';
 
 /** Co udało się odczytać z etykiety. Pola bez pewności zostają puste. */
 export interface LabelGuess {
@@ -8,6 +8,8 @@ export interface LabelGuess {
   notes: FlavorNote[];
   origin?: string;
   kind?: BeanProfile['kind'];
+  /** Data palenia, RRRR-MM-DD (odczytuje ją tylko AI). */
+  roastDate?: string;
 }
 
 /** Małe litery bez polskich znaków: OCR często je gubi, a etykiety bywają po angielsku. */
@@ -150,6 +152,11 @@ export function parseLabel(text: string): LabelGuess {
   };
 }
 
+/** „3 października 2026” */
+export function formatRoastDate(date: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 /** Podsumowanie po polsku, co odczytano, albo null, gdy nic. */
 export function describeGuess(guess: LabelGuess): string | null {
   const parts = [
@@ -157,6 +164,9 @@ export function describeGuess(guess: LabelGuess): string | null {
     guess.roast && `palenie ${ROAST_LABELS[guess.roast]}`,
     guess.notes.length > 0 && `nuty: ${guess.notes.map((n) => NOTE_LABELS[n]).join(', ')}`,
     guess.origin && `pochodzenie: ${guess.origin}`,
+    guess.roaster && `palarnia: ${guess.roaster}`,
+    guess.kind && `rodzaj: ${BEAN_KIND_LABELS[guess.kind]}`,
+    guess.roastDate && `data palenia: ${formatRoastDate(guess.roastDate)}`,
   ].filter(Boolean);
   return parts.length > 0 ? `Z etykiety: ${parts.join('; ')}.` : null;
 }
