@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, ScrollRestoration, useLocation } from 'react-router';
+import { useColdBrewNotification } from '../features/coldbrew/useColdBrewNotification';
 import { BottomNav } from './BottomNav';
 
 export function AppLayout() {
   const { pathname } = useLocation();
   const firstRender = useRef(true);
+  // Gotowe cold brew przypomina się samo (aplikacja na Androida), na każdym ekranie.
+  useColdBrewNotification();
 
   // Po zmianie ekranu fokus trafia na nagłówek: czytnik ekranu odczyta, gdzie jesteśmy,
   // a nawigacja klawiaturą zaczyna od góry nowego ekranu. Przy pierwszym wejściu nie ruszamy.

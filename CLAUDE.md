@@ -14,6 +14,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 - Vitest 5 + jsdom + Testing Library (react, user-event, jest-dom); Playwright do E2E (w systemowym Edge)
 - vite-plugin-pwa 2 (`generateSW`, `autoUpdate`); wdrożenie na Vercel (`vercel.json`)
 - tesseract.js 7: rozpoznawanie tekstu na etykietach ziaren, w przeglądarce (bez backendu)
+- Capacitor 8: aplikacja na Androida z tej samej PWA (`android/`, `capacitor.config.ts`), lokalne powiadomienia (`@capacitor/local-notifications`)
 
 ## Komendy
 
@@ -25,6 +26,9 @@ npm test            # testy jednostkowe i komponentów (Vitest, tylko src/)
 npm run test:watch  # jw. w trybie obserwacji
 npm run test:e2e    # build + Playwright (e2e/) na npm run preview, w przeglądarce Edge
 npm run typecheck   # tylko tsc
+npm run android:sync  # build + kopia do projektu Androida (potem Run w Android Studio)
+npm run android:open  # otwiera android/ w Android Studio
+npm run android:apk   # APK do testów (wymaga Android Studio / JDK), docs/aplikacja-android.md
 ```
 
 Przed zakończeniem zmian: `npm run typecheck` i `npm test` muszą przechodzić. Po zmianach w ścieżce „Mam kawę” także `npm run test:e2e`.
@@ -59,11 +63,12 @@ src/
     flow/                 ścieżka „Mam kawę”: kroki, wymagania, zapis wyborów
     syrups/               przepis i okno „Kup albo zrób sam”
   lib/                    format (odmiana, czas), color (kontrast, HSL), download, localStore,
-                          useDialogParam, useNow, useWakeLock
+                          useDialogParam, useNow, useWakeLock, notifications (Capacitor, w PWA nic nie robi)
   pages/                  ekrany tras
   test/                   setup, renderApp, testy kontrastu i konfiguracji wdrożenia
 e2e/                      testy Playwright
-docs/                     publikacja i lista kontrolna testu na telefonie
+docs/                     publikacja, test na telefonie, aplikacja na Androida
+android/                  projekt Androida (Capacitor): manifest, ikony, ekran startowy, ikona powiadomień
 ```
 
 ## Trasy
@@ -122,10 +127,12 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - **Fałszywe timery:** user-event z `vi.useFakeTimers()` zawiesza test (Testing Library czeka na `setTimeout(0)`). Albo fałszuj tylko `Date` (`toFake: ['Date']`), albo używaj `fireEvent`. Powrót na kartę symuluje `document.dispatchEvent(new Event('visibilitychange'))`.
 - jsdom nie ma `showModal()`, `scrollTo()` ani `URL.createObjectURL`: pierwsze dwa uzupełnia `src/test/setup.ts`, trzecie podmieniaj w teście. Nie rysuje też na kanwie: eksport karty (`share/exportCard`) i OCR podmieniaj przez `vi.mock`.
 - Vitest podmienia importy CSS na pusty tekst: plik CSS w teście czytaj przez `fs` (patrz `contrast.test.ts`).
+- Wersję natywną testuj z podmienionymi `@capacitor/core` (`isNativePlatform`) i `@capacitor/local-notifications` (`vi.mock`, patrz `pages/notifications.test.tsx`). Wtyczkę między testami zapominaj przez `resetNotificationsForTests()`.
 
 ## PWA, telefon i publikacja
 
-- Service worker działa tylko w buildzie (`npm run build` + `npm run preview`); w `npm run dev` jest wyłączony.
+- Service worker działa tylko w buildzie (`npm run build` + `npm run preview`); w `npm run dev` jest wyłączony, a w aplikacji natywnej się nie rejestruje (`main.tsx`, `injectRegister: false`).
+- **Aplikacja na Androida:** powiadomienia planuj tylko przez `lib/notifications` (stałe id z `NOTIFICATION_IDS`, jeden kanał `parzenie`). Krok ze stoperem planuje powiadomienie w `useBrewSession`, a pauza, reset, zmiana kroku i wyjście je odwołują; cold brew planuje `useColdBrewNotification` w `AppLayout`. O zgodę pyta `<NotificationPrompt>` z wyjaśnieniem przed oknem systemu; bez zgody aplikacja działa jak PWA. Instrukcja i lista kontrolna: [docs/aplikacja-android.md](docs/aplikacja-android.md).
 - Precache: js/css/html, ikony z manifestu i `includeAssets` w `vite.config.ts`. Nowy plik z `public/` potrzebny offline dopisz do `includeAssets`.
 - Skan etykiety pobiera przy pierwszym użyciu worker, rdzeń WASM i modele `pol`+`eng` z cdn.jsdelivr.net (kilka MB). Service worker trzyma je w pamięci podręcznej `ocr` (`workbox.runtimeCaching`), a modele zostają też w IndexedDB. W testach `ocr.ts` podmieniaj przez `vi.mock`.
 - Ikony w `public/` są tymczasowe (PNG wygenerowane z `favicon.svg`).

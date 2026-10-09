@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 import { ChevronRightIcon } from '../../components/icons';
+import { NotificationPrompt } from '../../components/NotificationPrompt';
 import { PageHeader } from '../../components/PageHeader';
 import { drinksForMethod, type BrewMethod } from '../../data';
 import { useWakeLock } from '../../lib/useWakeLock';
@@ -83,6 +84,7 @@ export function BrewSession({ method, recipe, header, journal, onFinish }: BrewS
           back={recipe ? { to: recipePath(recipe), label: recipe.name } : { to: `/parzenie/${method.id}`, label: method.name }}
         />
       )}
+      <NotificationPrompt />
       <div className="-mt-2 mb-4">
         <p className="text-sm font-medium text-ink-muted">
           Krok {state.stepIndex + 1} z {total}

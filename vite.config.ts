@@ -10,6 +10,8 @@ export default defineConfig({
     VitePWA({
       // Nowa wersja service workera przejmuje aplikację od razu, bez pytania użytkownika.
       registerType: 'autoUpdate',
+      // Rejestracja w main.tsx: w aplikacji natywnej (Capacitor) service workera nie ma.
+      injectRegister: false,
       // Precache: domyślnie js/css/html + ikony z manifestu + pliki poniżej.
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
       workbox: {

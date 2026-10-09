@@ -1,5 +1,11 @@
 import { useEffect, useReducer, useState } from 'react';
 import type { BrewMethod } from '../../data';
+import {
+  cancelNotification,
+  NOTIFICATION_IDS,
+  removeDeliveredNotification,
+  scheduleNotification,
+} from '../../lib/notifications';
 import { initSession, sessionReducer } from './session';
 import { signalStepDone, unlockAudio } from './signals';
 import { isDone, isRunning, overtime, remaining } from './timer';
@@ -32,6 +38,31 @@ export function useBrewSession(method: BrewMethod) {
       dispatch({ type: 'alerted' });
     }
   }, [done, state.alerted]);
+
+  // Aplikacja na Androida: koniec kroku jako powiadomienie, które przyjdzie też przy zablokowanym
+  // ekranie. Pauza, reset, przejście do innego kroku i wyjście z ekranu je odwołują.
+  const { timer } = state;
+  const endAt = timer?.startedAt != null ? timer.startedAt + timer.durationMs - timer.elapsedBeforeMs : null;
+  const nextText = method.steps[state.stepIndex + 1]?.text;
+  useEffect(() => {
+    if (endAt === null || state.alerted) return;
+    void scheduleNotification({
+      id: NOTIFICATION_IDS.brewStep,
+      at: endAt,
+      title: 'Czas minął',
+      body: nextText ? `Teraz: ${nextText}` : 'Gotowe. Możesz nalewać.',
+    });
+    return () => void cancelNotification(NOTIFICATION_IDS.brewStep);
+  }, [endAt, nextText, state.alerted]);
+
+  // Po powrocie do aplikacji powiadomienie, które już przyszło, znika z ekranu.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void removeDeliveredNotification(NOTIFICATION_IDS.brewStep);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   const withGesture = (fn: () => void) => () => {
     unlockAudio();

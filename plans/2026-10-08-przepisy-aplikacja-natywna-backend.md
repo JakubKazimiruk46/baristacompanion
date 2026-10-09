@@ -50,7 +50,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | :- | :- | :-: | :- | :- |
 | P1 | Drinki z alkoholem (irish coffee, espresso martini) w katalogu? | 3 | Tak, z oznaczeniem „z alkoholem” i filtrem „Bez alkoholu” | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
 | P2 | Dalgona i frappé po grecku wymagają kawy rozpuszczalnej. Dodać ją jako bazę? | 3 | Tak, jako „metodę” bez parzenia (tylko rozpuszczenie), z notatką, że to wyjątek | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
-| P3 | Aplikacja natywna: tylko Android na start? Publikacja w Google Play (jednorazowo 25 USD) czy tylko plik APK do zainstalowania? | 4 | Android, na start APK do testów, Google Play później | |
+| P3 | Aplikacja natywna: tylko Android na start? Publikacja w Google Play (jednorazowo 25 USD) czy tylko plik APK do zainstalowania? | 4 | Android, na start APK do testów, Google Play później | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
 | P4 | Backend: Supabase (plan darmowy, region UE)? Kto zakłada konto i projekt? | 5 | Supabase; konto zakłada autor, sesja prowadzi krok po kroku | |
 | P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | |
 | P6 | Kto jest administratorem danych w polityce prywatności (autor jako osoba prywatna, firma)? | 5 | Do decyzji autora; sesja przygotuje szkic do uzupełnienia | |
@@ -74,7 +74,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 1. Ustawienie młynka | zrobione (gałąź `feature/mlynek`), czeka na akceptację autora |
 | 2. Własne przepisy | zrobione (gałąź `feature/wlasne-przepisy`, od `feature/mlynek`), czeka na akceptację autora |
 | 3. Szerszy katalog drinków | zrobione (gałąź `feature/katalog-drinkow`, od `feature/wlasne-przepisy`), czeka na akceptację autora |
-| 4. Powiadomienia w aplikacji na Androida | do zrobienia |
+| 4. Powiadomienia w aplikacji na Androida | kod gotowy (gałąź `feature/android`, od `feature/katalog-drinkow`); czeka na test autora na telefonie albo w emulatorze |
 | 5. Backend: konto i prywatność | do zrobienia |
 | 6. Synchronizacja danych | do zrobienia |
 | 7. Przepisy społeczności | do zrobienia |
@@ -118,6 +118,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - testy jednostkowe pokrywają planowanie i odwoływanie (moduł powiadomień podmieniony).
 
    Ograniczenie Androida: w trybie uśpienia (Doze) powiadomienia z `allowWhileIdle` przychodzą najwyżej raz na 9 minut, a dokładny czas wymaga uprawnienia `SCHEDULE_EXACT_ALARM` (Android 12+). Jeśli testy na telefonie pokażą opóźnienia, dodaj usługę pierwszoplanową z licznikiem w powiadomieniu (własna wtyczka). To osobny, opcjonalny commit.
+
+   Wykonanie (2026-10-09): Capacitor 8.5.2 i `@capacitor/local-notifications` 8.3.1 (wydane kilka tygodni wcześniej; 8.5.3 sprzed dwóch dni pominięta). Projekt `android/` (minSdk 24, target 36), identyfikator `pl.baristacompanion.app`, ikony i ekran startowy z ikon PWA, biała ikona szklanki na pasku stanu, `SystemBars` z `viewport-fit=cover`. Moduł `lib/notifications.ts` (wtyczka ładowana dynamicznie, kolejka operacji, kanał z dźwiękiem). Wtyczka przy domyślnym `isExactNotification` otwiera ustawienia alarmów przy każdym planowaniu, dlatego moduł sprawdza zgodę na dokładny czas i bez niej planuje przybliżone powiadomienie, a o dokładny czas prosi karta przed parzeniem. Powiadomienie, które przyszło w tle, zostaje na pasku do powrotu do aplikacji. Nie sprawdzone na urządzeniu: na tym komputerze nie ma Android Studio ani JDK, więc APK nie został zbudowany. Kryterium „autor potwierdził powiadomienie na telefonie albo w emulatorze” czeka na autora (lista kontrolna w `docs/aplikacja-android.md`).
 
 ### Etap C: backend
 

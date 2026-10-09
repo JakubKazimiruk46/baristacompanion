@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { ChoiceChip } from '../../components/ChoiceChip';
 import { PageHeader } from '../../components/PageHeader';
+import { NotificationPrompt } from '../../components/NotificationPrompt';
 import { ReviewNote } from '../../components/ReviewNote';
 import { Section } from '../../components/Section';
 import { Sheet } from '../../components/Sheet';
@@ -134,7 +135,10 @@ function ColdBrewSetup({ method, recipe }: { method: BrewMethod; recipe?: Sessio
         </ol>
       </Section>
 
-      <p className="mt-8 text-center text-ink-muted">
+      <div className="mt-8">
+        <NotificationPrompt />
+      </div>
+      <p className="text-center text-ink-muted">
         Jeśli zalejesz teraz, gotowe będzie{' '}
         <strong className="text-ink">{dayAndTime(readyAt(now, hours), now)}</strong>.
       </p>
