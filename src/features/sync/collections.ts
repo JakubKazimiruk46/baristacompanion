@@ -1,3 +1,4 @@
+import { myDrinksStore, parseMyDrink, type MyDrink } from '../assistant/myDrinks';
 import { beansStore, parseBeans, type SavedBean } from '../beans/store';
 import { dosesStore, parseDoses } from '../brewing/doseStore';
 import { favoritesStore, parseFavorites } from '../favorites/store';
@@ -190,6 +191,20 @@ const recipes: Collection<UserRecipe[]> = {
   },
 };
 
+/** „Moje napoje” od asystenta: rekord na napój, najnowsze pierwsze. */
+const myDrinks: Collection<MyDrink[]> = {
+  name: 'drinks',
+  subscribe: myDrinksStore.subscribe,
+  read: myDrinksStore.getSnapshot,
+  write: myDrinksStore.replaceAll,
+  toRecords: (items) => new Map(items.map((item) => [item.drink.id, item])),
+  fromRecords: (records) => records.map((r) => r.data as MyDrink).sort((a, b) => b.savedAt - a.savedAt),
+  parse: (id, data) => {
+    const item = parseMyDrink(data);
+    return item?.drink.id === id ? item : null;
+  },
+};
+
 /** Wszystkie synchronizowane kolekcje (bez stanu na jedno urządzenie: trwające cold brew, ścieżka „Mam kawę”). */
 export const collections: Collection[] = [
   beans,
@@ -200,6 +215,7 @@ export const collections: Collection[] = [
   doses,
   grinders,
   recipes,
+  myDrinks,
 ] as Collection[];
 
 export const getCollection = (name: CollectionName) => collections.find((c) => c.name === name)!;

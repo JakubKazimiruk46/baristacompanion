@@ -13,6 +13,7 @@ export const COLLECTIONS = [
   'doses',
   'grinders',
   'recipes',
+  'drinks',
 ] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
 
@@ -25,6 +26,7 @@ export const COLLECTION_LABELS: Record<CollectionName, string> = {
   doses: 'ilości z kalkulatora',
   grinders: 'młynki',
   recipes: 'własne przepisy',
+  drinks: 'moje napoje',
 };
 
 export interface SyncRecord {

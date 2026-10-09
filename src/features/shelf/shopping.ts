@@ -1,4 +1,5 @@
 import { getDrink, getIngredient } from '../../data';
+import { isMyDrinkId } from '../assistant/myDrinks';
 import { createLocalStore, useLocalStore } from '../../lib/localStore';
 import { shelfStore } from './store';
 
@@ -27,7 +28,11 @@ export function parseShopping(value: unknown): ShoppingItem[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter(isItem)
-    .map((item) => ({ ...item, drinkIds: item.drinkIds.filter((id) => getDrink(id) !== undefined) }));
+    .map((item) => ({
+      ...item,
+      // Napoje z katalogu i „Moje napoje” (te mogą być jeszcze nieprzesłane z innego urządzenia).
+      drinkIds: item.drinkIds.filter((id) => getDrink(id) !== undefined || isMyDrinkId(id)),
+    }));
 }
 
 const store = createLocalStore<ShoppingItem[]>(SHOPPING_KEY, parseShopping, []);

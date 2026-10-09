@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { drinks, getDrink } from '../../data';
+import { DRINK_LIMITS } from '../../../supabase/functions/_shared/drinkRules.ts';
+import { drinks, getDrink, type Drink } from '../../data';
+import { validateDrink } from '../../data/validate';
 import { contrastRatio } from '../../lib/color';
 import {
   accentColor,
@@ -56,6 +58,31 @@ describe('układ karty', () => {
   it('długa nazwa przechodzi do drugiej linii', () => {
     expect(layoutCard(getDrink('kawa-pomaranczowa')!).title.map((l) => l.text)).toEqual(['Kawa', 'pomarańczowa']);
     expect(layoutCard(getDrink('espresso-tonic')!).title.map((l) => l.text)).toEqual(['Espresso tonic']);
+  });
+
+  it('napój od asystenta na granicach limitów (najdłuższe teksty, skrajne kolory) mieści się na karcie', () => {
+    const base = getDrink('espresso-tonic')!;
+    const longest: Drink = {
+      ...base,
+      id: 'moj-najdluzszy-abcd',
+      name: 'W'.repeat(DRINK_LIMITS.name),
+      tagline: 'Mmmm '.repeat(DRINK_LIMITS.tagline / 5).trim(),
+      layers: base.layers.map((layer, i) => ({ ...layer, color: i % 2 ? '#ffffff' : '#ffff00' })),
+      serving: {
+        ...base.serving,
+        decorations: base.serving.decorations.map((d) => ({ ...d, name: 'Ś'.repeat(DRINK_LIMITS.decorationName), optional: false })),
+      },
+    };
+    expect(validateDrink(longest)).toEqual([]);
+    const layout = layoutCard(longest);
+    for (const line of layout.title) expect(textWidth(line.text, FONT.title, 'display')).toBeLessThanOrEqual(LINE_WIDTH);
+    for (const line of layout.tagline) expect(textWidth(line.text, FONT.tagline, 'sans')).toBeLessThanOrEqual(LINE_WIDTH);
+    for (const line of layout.serving) expect(textWidth(line.text, FONT.serving, 'sans')).toBeLessThanOrEqual(LINE_WIDTH);
+    expect(layout.title.length).toBeLessThanOrEqual(2);
+    expect(layout.bottom).toBeLessThan(FOOTER_Y - 60);
+    const colors = cardColors(longest);
+    expect(contrastRatio(CARD_TEXT, colors.top)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(PANEL_INK_MUTED, colors.panel)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('za długi tekst kończy się wielokropkiem', () => {

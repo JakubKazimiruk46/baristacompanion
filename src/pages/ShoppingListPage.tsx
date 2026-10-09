@@ -3,7 +3,8 @@ import { Link } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
 import { CartIcon, ShareIcon } from '../components/icons';
 import { PageHeader } from '../components/PageHeader';
-import { getDrink, getIngredient, getSyrup } from '../data';
+import { getIngredient, getSyrup } from '../data';
+import { drinkName } from '../features/assistant/myDrinks';
 import { shoppingStore, useShopping, type ShoppingItem } from '../features/shelf/shopping';
 import { capitalize } from '../lib/format';
 
@@ -86,7 +87,7 @@ export function ShoppingListPage() {
 function Item({ item }: { item: ShoppingItem }) {
   const ingredient = getIngredient(item.id)!;
   const syrup = getSyrup(item.id);
-  const drinkNames = item.drinkIds.map((id) => getDrink(id)!.name);
+  const drinkNames = item.drinkIds.flatMap((id) => drinkName(id) ?? []);
   return (
     <li className="flex items-start gap-3 px-4 py-3">
       <label className="flex min-h-11 flex-1 cursor-pointer items-start gap-3">

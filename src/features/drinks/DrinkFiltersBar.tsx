@@ -5,10 +5,12 @@ import { TIME_LIMITS, type DrinkFilters } from './filters';
 type DrinkFiltersBarProps = {
   filters: DrinkFilters;
   onChange: (filters: DrinkFilters) => void;
+  /** Filtr „Moje napoje” tylko wtedy, gdy jakieś są. */
+  showMine?: boolean;
 };
 
 /** Każda grupa działa jak przełącznik: drugi tap w aktywny chip go wyłącza. */
-export function DrinkFiltersBar({ filters, onChange }: DrinkFiltersBarProps) {
+export function DrinkFiltersBar({ filters, onChange, showMine = false }: DrinkFiltersBarProps) {
   const toggle = <K extends keyof DrinkFilters>(key: K, value: DrinkFilters[K]) =>
     onChange({ ...filters, [key]: filters[key] === value ? undefined : value });
 
@@ -23,6 +25,11 @@ export function DrinkFiltersBar({ filters, onChange }: DrinkFiltersBarProps) {
           <HeartIcon className="size-4" fill={filters.favorites ? 'currentColor' : 'none'} />
           Ulubione
         </Chip>
+        {(showMine || filters.mine) && (
+          <Chip pressed={filters.mine === true} onClick={() => toggle('mine', true)}>
+            Moje napoje
+          </Chip>
+        )}
       </div>
       <div role="group" aria-label="Temperatura" className="flex gap-2">
         <Chip pressed={filters.temperature === 'hot'} onClick={() => toggle('temperature', 'hot')}>

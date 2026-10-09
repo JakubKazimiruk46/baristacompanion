@@ -7,8 +7,6 @@ import {
   frothingMethods,
   getIngredient,
   getMethod,
-  getMilk,
-  getSyrup,
   grinderModels,
   GRIND_SIZES,
   ingredients,
@@ -18,6 +16,7 @@ import {
   syrups,
   vessels,
 } from '.';
+import { validateDrink } from './validate';
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -40,48 +39,17 @@ describe('identyfikatory', () => {
     for (const item of items) expect(item.id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
   });
 
-  it('id nie zajmują adresów innych ekranów', () => {
-    const drinkPages = ['mleko', 'spienianie', 'syropy', 'co-mam', 'zakupy'];
-    for (const drink of drinks) expect(drinkPages).not.toContain(drink.id);
+  it('id metod nie zajmują adresów innych ekranów (napoje sprawdza validateDrink)', () => {
     for (const method of methods) expect(method.id).not.toBe('dziennik');
   });
 });
 
 describe('odwołania', () => {
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: metody bazy istnieją', (_, drink) => {
-    expect(getMethod(drink.base.methodId)).toBeDefined();
-    for (const id of drink.base.alternativeMethodIds ?? []) expect(getMethod(id)).toBeDefined();
-  });
-
-  it.each(drinks.filter((d) => d.milk).map((d) => [d.id, d] as const))(
-    '%s: mleka istnieją',
-    (_, drink) => {
-      expect(drink.milk!.options.length).toBeGreaterThan(0);
-      for (const id of drink.milk!.options) expect(getMilk(id), id).toBeDefined();
-    },
-  );
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: syropy istnieją', (_, drink) => {
-    for (const extra of drink.extras) {
-      if (extra.kind === 'syrup') expect(getSyrup(extra.syrupId), extra.syrupId).toBeDefined();
-    }
-  });
-
   it('każdy syrop jest użyty w co najmniej jednym napoju', () => {
     const used = new Set(
       drinks.flatMap((d) => d.extras.flatMap((e) => (e.kind === 'syrup' ? [e.syrupId] : []))),
     );
     for (const syrup of syrups) expect(used, syrup.id).toContain(syrup.id);
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: dodatki wskazują składniki z katalogu', (_, drink) => {
-    for (const extra of drink.extras) {
-      if (extra.kind === 'syrup') continue;
-      const ingredient = getIngredient(extra.ingredientId);
-      expect(ingredient, extra.ingredientId).toBeDefined();
-      // Mleko idzie przez drink.milk, a syropy przez syrupId.
-      expect(['milk', 'syrup']).not.toContain(ingredient!.group);
-    }
   });
 
   it.each(ingredients.filter((i) => i.substitutes).map((i) => [i.id, i] as const))(
@@ -200,50 +168,16 @@ describe('młynki', () => {
 });
 
 describe('napoje', () => {
+  // Odwołania, objętości, kolory, ilości, podanie i długości tekstów: wspólne reguły z validate.ts
+  // (te same sprawdzają propozycje asystenta drinków i „Moje napoje”).
+  it.each(drinks.map((d) => [d.id, d] as const))('%s: przechodzi reguły spójności napoju', (_, drink) => {
+    expect(validateDrink(drink)).toEqual([]);
+  });
+
   it('jest co najmniej 35 napojów, ciepłych i zimnych', () => {
     expect(drinks.length).toBeGreaterThanOrEqual(35);
     expect(drinks.some((d) => d.temperature === 'hot')).toBe(true);
     expect(drinks.some((d) => d.temperature === 'cold')).toBe(true);
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: warstwy mają dodatnie objętości', (_, drink) => {
-    expect(drink.layers.length).toBeGreaterThan(0);
-    for (const layer of drink.layers) {
-      expect(layer.volumeMl).toBeGreaterThan(0);
-      expect(layer.color).toMatch(HEX);
-    }
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: mieści się w naczyniu', (_, drink) => {
-    const total = drink.layers.reduce((sum, layer) => sum + layer.volumeMl, 0);
-    expect(total).toBeLessThanOrEqual(vessels[drink.serving.vessel].capacityMl);
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: ma sposób podania', (_, drink) => {
-    expect(vessels[drink.serving.vessel]).toBeDefined();
-    expect(drink.serving.why.length).toBeGreaterThan(0);
-    for (const decoration of drink.serving.decorations) {
-      expect(decoration.instruction.length).toBeGreaterThan(0);
-      expect(decoration.color).toMatch(HEX);
-    }
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: ilości dodatków są dodatnie', (_, drink) => {
-    for (const extra of drink.extras) {
-      if (extra.kind === 'syrup') {
-        expect(extra.amountMl).toBeGreaterThan(0);
-      } else if (typeof extra.amount === 'string') {
-        expect(extra.amount.length, extra.name).toBeGreaterThan(0);
-      } else {
-        expect(extra.amount.value, extra.name).toBeGreaterThan(0);
-        if (extra.amount.max !== undefined) expect(extra.amount.max).toBeGreaterThan(extra.amount.value);
-      }
-    }
-  });
-
-  it.each(drinks.map((d) => [d.id, d] as const))('%s: ma kroki i czas', (_, drink) => {
-    expect(drink.steps.length).toBeGreaterThan(0);
-    expect(drink.prepTimeMin).toBeGreaterThan(0);
   });
 
   it('napoje na bazie espresso używają kawiarki', () => {
@@ -252,14 +186,7 @@ describe('napoje', () => {
     }
   });
 
-  it('alkohol: dodatki z alkoholem to składniki z grupy „alkohol” i odwrotnie', () => {
-    for (const drink of drinks) {
-      for (const extra of drink.extras) {
-        if (extra.kind === 'syrup') continue;
-        const group = getIngredient(extra.ingredientId)!.group;
-        expect(extra.kind === 'alcohol', `${drink.id}: ${extra.ingredientId}`).toBe(group === 'alcohol');
-      }
-    }
+  it('napoje z alkoholem (reguła kind „alcohol” ↔ grupa „alkohol” jest w validate.ts)', () => {
     expect(drinks.filter(hasAlcohol).map((d) => d.id).sort()).toEqual(['espresso-martini', 'irish-coffee']);
   });
 

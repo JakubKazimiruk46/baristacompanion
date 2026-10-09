@@ -433,7 +433,7 @@ function AssembleStep() {
       <FlowHeader step="napoj">
         <p className="mt-3 font-display text-2xl font-semibold">{drink.name}</p>
       </FlowHeader>
-      <DrinkFigure drinkId={drink.id} />
+      <DrinkFigure drink={drink} />
       <Section title="Składniki">
         <DrinkIngredients drink={drink} onSyrupClick={syrupDialog.open} />
       </Section>
@@ -461,7 +461,7 @@ function ServeStep() {
 
       {drink ? (
         <>
-          <DrinkFigure drinkId={drink.id} />
+          <DrinkFigure drink={drink} />
           <ServingSection drink={drink} />
         </>
       ) : (

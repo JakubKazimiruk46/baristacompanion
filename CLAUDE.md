@@ -43,11 +43,13 @@ src/
   index.css               Tailwind, tokeny wyglądu, animacje (nalewanie, przejścia ekranów)
   data/                   treści i model danych: metody, napoje, mleko, spienianie, syropy, składniki
                           z zamiennikami, naczynia, warianty cold brew, młynki, etykiety PL, typy;
-                          index.ts = katalog składników i wyszukiwanie
+                          index.ts = katalog składników i wyszukiwanie; validate.ts = reguły spójności napoju
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
                           Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
   features/
-    drinks/               filtry, karty, składniki, kroki, sekcja „Jak podać”
+    drinks/               filtry, karty, składniki, kroki, sekcja „Jak podać”, treść ekranu napoju (DrinkBody)
+    assistant/            asystent drinków (AI): zapytanie i sprawdzenie propozycji (api.ts), „Moje napoje” (zapis,
+                          useDrink, useAllDrinks), oznaczenie „Przepis od AI”
     glass/                <DrinkGlass>: geometria naczyń (czyste funkcje) i rysunek SVG z dekoracjami
     brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia,
                           kalkulator ilości (dose.ts: przeliczanie kroków, doseStore: wybrana ilość), lista kroków
@@ -87,10 +89,11 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | :- | :- |
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
-| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
-| `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
+| `/napoje` | katalog z „Moimi napojami” na początku i filtrami w adresie (`?ulubione=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
+| `/napoje/:id` | napój z katalogu albo z „Moich napojów” (id `moj-…`); `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
+| `/napoje/asystent` | asystent drinków (AI, z kontem): propozycja napoju z katalogu i półki, „Zapisz w Moich napojach” |
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
 | `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis`, `…/:przepis/edycja` | własne przepisy: nowy (kopia przepisu metody), ekran przepisu (kalkulator, mielenie, kroki, „Wyślij”, usuwanie), edycja |
 | `/przepis#dane` | przepis z linku: podgląd i „Zapisz u siebie” |
@@ -116,6 +119,8 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Kawa rozpuszczalna to jedyna metoda bez mielenia (`instant: true`, baza dalgony i frappé po grecku). Nie ma jej w rankingu metod dla ziaren ani w ustawieniach młynka (`beanMethods`), a ekran metody i parzenie nie pokazują mielenia.
 - Młynek (`grinders.ts`): jednostka (`click`/`mark`/`turn`), skala, krok i zakres dla każdego stopnia z `GRIND_SIZES`; `null` = tak drobno nie zmieli (tylko na drobnym końcu skali). Liczby odmieniaj przez `formatSetting()` (`features/grinder/format`), także ułamki („2,5 obrotu”).
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.
+- Reguły spójności napoju (odwołania, objętości, kolory, ilości, długości tekstów, id) są w czystym module `supabase/functions/_shared/drinkRules.ts` z katalogiem w parametrze; aplikacja woła je przez `validateDrink()` (`src/data/validate.ts`). Te same reguły sprawdzają katalog (`data.test.ts`), „Moje napoje” i propozycje asystenta, więc nową regułę napoju dopisuj tam, nie do testu. Nowy adres pod `/napoje/` dopisz do `DRINK_PAGES`.
+- „Moje napoje” (`features/assistant/myDrinks.ts`, zapis `barista-companion.my-drinks.v1`, kolekcja synchronizacji `drinks`): zapisane propozycje asystenta, id z przedrostkiem `moj-`. Napój po id bierz przez `useDrink()`/`drinkName()`, a listę przez `useAllDrinks()`, nie z samego `getDrink()`/`drinks`, gdy ekran ma działać też dla nich. Nie mają „Ulubionego” (ulubione to tylko katalog), za to mają „Usuń”.
 - `data.test.ts` pilnuje spójności (odwołania, objętości, czasy, kolory). Nowy napój albo metoda muszą przez nie przejść.
 
 ## Konwencje
@@ -152,7 +157,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
 - **Synchronizacja** (`features/sync`): magazyny w przeglądarce zostają źródłem prawdy offline. Śledzenie zmian (`local.ts`) zapisuje dla każdego rekordu czas zmiany, znacznik usunięcia i czy czeka na wysłanie (`barista-companion.sync.v1`), a `mergeRecords` scala według zasady „wygrywa nowsza zmiana” dla każdego rekordu osobno (usunięcie też jest zmianą). Serwer: tabela `user_data` i RPC `sync_push`. Nowy magazyn z danymi użytkownika dostaje adapter w `sync/collections.ts` (rekordy, kolejność, parser, ewentualnie klucz duplikatu i podmiana odwołań) i `replaceAll` w swoim magazynie. Zmian nie zapisuj z pominięciem magazynu: śledzenie widzi tylko `store.set`.
 - **Przepisy społeczności** (`features/community`, tabele `public_recipes`, `recipe_saves`, `recipe_reports`): przepis z serwera przechodzi `parseRecipeInput` jak własny, zanim się narysuje. Liczniki, stan i nick ustawia baza (funkcje `save_public_recipe`, `report_public_recipe`, `moderate_public_recipe`, `moderation_queue`), a autor zmienia tylko treść. Zgłoszenie ukrywa przepis do decyzji moderatora (P7), a przywrócony już nie znika po kolejnych zgłoszeniach. Kopia u siebie ma `origin` (od kogo); takiej kopii nie da się opublikować. Lista ładuje się, gdy sekcja pojawi się na ekranie.
-- **AI** (Claude tylko z funkcji serwerowych, klucz w sekretach Supabase): skan etykiety `scan-label`. Logikę, którą musi znać i serwer, i aplikacja (schemat odpowiedzi, prompt, walidacja wyniku), trzymaj w czystych modułach bez importów w `supabase/functions/_shared/` (np. `labelScan.ts`); aplikacja importuje je przez ścieżkę względną, a Vitest je testuje. Model `claude-opus-5-5`, JSON przez structured outputs (`output_config.format`; wymuszony `tool_choice` daje na tym modelu 400), `fallbacks: "default"` na odmowę. Każda funkcja AI: dzienny limit (`ai_usage`, `_shared/quota.ts`, P8), zgoda przed pierwszym wysłaniem danych, powrót do wersji bez AI po błędzie, limicie albo bez logowania. Funkcje Deno sprawdzaj `npm run typecheck:functions` (`supabase/functions/tsconfig.json` mapuje importy `npm:`/`jsr:` na `node_modules`; wersja w imporcie i w `devDependencies` musi być ta sama).
+- **AI** (Claude tylko z funkcji serwerowych, klucz w sekretach Supabase): skan etykiety `scan-label` i asystent drinków `drink-assistant` (P9: tylko id z katalogu, które wysyła aplikacja; wynik przechodzi reguły napoju na serwerze i jeszcze raz w aplikacji, przy błędach jedna prośba o poprawkę). Logikę, którą musi znać i serwer, i aplikacja (schemat odpowiedzi, prompt, walidacja wyniku), trzymaj w czystych modułach bez importów w `supabase/functions/_shared/` (np. `labelScan.ts`, `drinkAssistant.ts`, `drinkRules.ts`); aplikacja importuje je przez ścieżkę względną, a Vitest je testuje. Model `claude-opus-5-5`, JSON przez structured outputs (`output_config.format`; wymuszony `tool_choice` daje na tym modelu 400), `fallbacks: "default"` na odmowę. Każda funkcja AI: dzienny limit (`ai_usage`, `_shared/quota.ts`, P8), zgoda przed pierwszym wysłaniem danych, powrót do wersji bez AI po błędzie, limicie albo bez logowania. Funkcje Deno sprawdzaj `npm run typecheck:functions` (`supabase/functions/tsconfig.json` mapuje importy `npm:`/`jsr:` na `node_modules`; wersja w imporcie i w `devDependencies` musi być ta sama).
 - Kopia zapasowa (`sync/backup.ts`, ekran konta, działa bez konta): format `barista-companion.backup` w wersji 2, wczytanie scala z danymi na urządzeniu.
 - Nowa funkcja z serwerem dopisuje do polityki prywatności (`pages/PrivacyPage.tsx`), co zbiera, po co i gdzie. Instrukcja wdrożenia: [docs/backend.md](docs/backend.md).
 

@@ -94,6 +94,7 @@ Przed udostępnieniem aplikacji uzupełnij w polityce prywatności (`src/pages/P
 | :- | :- | :- |
 | `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i `SUPABASE_SERVICE_ROLE_KEY` sam) |
 | `scan-label` | odczyt etykiety ziaren przez Claude (zdjęcie → pola formularza), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_LABEL_SCANS` (domyślnie 20) |
+| `drink-assistant` | asystent drinków: Claude układa napój z katalogu aplikacji (P9), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_DRINKS` (domyślnie 10) |
 
 Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 
@@ -112,12 +113,15 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
    ```sh
    npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    npx supabase functions deploy scan-label
+   npx supabase functions deploy drink-assistant
    ```
 
 3. W konsoli Anthropic ustaw **miesięczny limit wydatków** (**Settings → Limits → Spend limit**). To twarda granica kosztów niezależna od limitów w aplikacji.
-4. Dzienne limity na użytkownika (decyzja P8): 20 skanów etykiet (zmiana: `npx supabase secrets set AI_DAILY_LABEL_SCANS=30`). Nieudana próba (błąd, odmowa modelu) nie zjada limitu.
+4. Dzienne limity na użytkownika (decyzja P8): 20 skanów etykiet i 10 propozycji drinków (zmiana: `npx supabase secrets set AI_DAILY_LABEL_SCANS=30 AI_DAILY_DRINKS=15`). Nieudana próba (błąd, odmowa modelu, przepis niepoprawny także po poprawce) nie zjada limitu.
 
 Model: `claude-opus-5-5` (aktualny model domyślny), odpowiedź w formacie JSON wymuszonym schematem (structured outputs), niski poziom wysiłku (`effort: "low"`), bo odczyt etykiety to prosta ekstrakcja. Szacunkowy koszt jednego skanu: zdjęcie 1600 px to ok. 2,5–3 tys. tokenów wejścia, razem z instrukcją ok. 3,5 tys. tokenów (ok. 0,014 USD przy 4 USD za milion), plus kilkaset tokenów wyjścia (ok. 0,01 USD przy 20 USD za milion): razem ok. 0,02–0,03 USD. Przy limicie 20 skanów dziennie to najwyżej ok. 0,5 USD na osobę dziennie. Sprawdź prawdziwe zużycie w logach funkcji (liczba tokenów) i w konsoli Anthropic.
+
+Asystent drinków (`drink-assistant`): ten sam model ze średnim wysiłkiem (`effort: "medium"`), bo układanie przepisu wymaga więcej namysłu niż odczyt etykiety. Odpowiedź ma schemat z listami dozwolonych id (metody, mleka, składniki, syropy, naczynia), a potem przechodzi te same reguły co napoje z katalogu (`supabase/functions/_shared/drinkRules.ts`); przy błędach funkcja raz prosi o poprawkę. Szacunkowy koszt jednej propozycji: instrukcja, katalog i schemat to ok. 3–3,5 tys. tokenów wejścia (ok. 0,014 USD; instrukcja i katalog są w pamięci podręcznej, więc kolejne zapytania są tańsze), plus myślenie i przepis ok. 2–4 tys. tokenów wyjścia (0,04–0,08 USD): razem ok. 0,05–0,10 USD, z poprawką do ok. 0,2 USD. Przy limicie 10 propozycji dziennie to najwyżej ok. 1–2 USD na osobę dziennie. Jeśli to za dużo, zmniejsz `AI_DAILY_DRINKS` albo wysiłek na `low` w `supabase/functions/drink-assistant/index.ts`.
 
 ## 10. Moderator przepisów społeczności
 

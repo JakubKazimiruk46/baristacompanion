@@ -10,7 +10,7 @@ import {
   SyrupIcon,
 } from '../components/icons';
 import { PageHeader } from '../components/PageHeader';
-import { drinks } from '../data';
+import { useAllDrinks, useMyDrinks } from '../features/assistant/myDrinks';
 import { DrinkCard } from '../features/drinks/DrinkCard';
 import { DrinkFiltersBar } from '../features/drinks/DrinkFiltersBar';
 import {
@@ -37,6 +37,8 @@ export function DrinksPage() {
   const [params, setParams] = useSearchParams();
   const favoriteIds = useFavorites();
   const shelf = useShelf();
+  const mine = useMyDrinks();
+  const drinks = useAllDrinks();
   const filters = filtersFromParams(params);
   const results = filterDrinks(drinks, filters, { favoriteIds, shelf });
   const active = hasActiveFilters(filters);
@@ -56,6 +58,17 @@ export function DrinksPage() {
 
       <KitchenLinks />
 
+      <Link
+        to="/napoje/asystent"
+        className="mb-3 flex min-h-16 items-center gap-3 rounded-2xl border border-accent bg-surface p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >
+        <DrinkIcon className="size-7 shrink-0 text-accent" />
+        <span className="min-w-0">
+          <span className="block leading-tight font-semibold">Asystent drinków</span>
+          <span className="block text-xs text-ink-muted">Opisz, na co masz ochotę, a AI ułoży nowy napój</span>
+        </span>
+      </Link>
+
       <nav aria-label="Poradniki" className="mb-6 grid grid-cols-3 gap-2">
         {GUIDES.map(({ to, label, Icon }) => (
           <Link
@@ -69,7 +82,7 @@ export function DrinksPage() {
         ))}
       </nav>
 
-      <DrinkFiltersBar filters={filters} onChange={update} />
+      <DrinkFiltersBar filters={filters} onChange={update} showMine={mine.length > 0} />
 
       <div className="mt-4 flex h-10 items-center justify-between">
         <p role="status" className="text-sm text-ink-muted">
@@ -119,7 +132,7 @@ const kitchenLink =
 function KitchenLinks() {
   const shelf = useShelf();
   const shopping = useShopping().filter((item) => !item.bought);
-  const ready = drinks.filter((drink) => canMake(drink, shelf)).length;
+  const ready = useAllDrinks().filter((drink) => canMake(drink, shelf)).length;
   return (
     <nav aria-label="Twoja kuchnia" className="mb-3 grid grid-cols-2 gap-2">
       <Link to="/napoje/co-mam" className={kitchenLink}>

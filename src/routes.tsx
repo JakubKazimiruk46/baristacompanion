@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router';
 import { AppLayout } from './components/AppLayout';
 import { AccountPage } from './pages/AccountPage';
+import { AssistantPage } from './pages/AssistantPage';
 import { BeanFormPage } from './pages/BeanFormPage';
 import { BeanPage } from './pages/BeanPage';
 import { BeansPage } from './pages/BeansPage';
@@ -43,6 +44,7 @@ export const routes: RouteObject[] = [
       { path: 'napoje/syropy', element: <SyrupsPage /> },
       { path: 'napoje/co-mam', element: <ShelfPage /> },
       { path: 'napoje/zakupy', element: <ShoppingListPage /> },
+      { path: 'napoje/asystent', element: <AssistantPage /> },
       { path: 'napoje/:drinkId', element: <DrinkPage /> },
       { path: 'parzenie', element: <BrewingPage /> },
       { path: 'parzenie/dziennik', element: <JournalPage /> },

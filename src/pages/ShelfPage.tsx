@@ -3,7 +3,8 @@ import { ChoiceChip } from '../components/ChoiceChip';
 import { ChevronRightIcon } from '../components/icons';
 import { PageHeader } from '../components/PageHeader';
 import { Section } from '../components/Section';
-import { drinks, ingredients, INGREDIENT_GROUP_LABELS, INGREDIENT_GROUPS, methods } from '../data';
+import { ingredients, INGREDIENT_GROUP_LABELS, INGREDIENT_GROUPS, methods } from '../data';
+import { useAllDrinks } from '../features/assistant/myDrinks';
 import { DrinkCard } from '../features/drinks/DrinkCard';
 import { checkDrink } from '../features/shelf/availability';
 import { MissingItems } from '../features/shelf/DrinkAvailability';
@@ -24,7 +25,7 @@ export function ShelfPage() {
   const shelf = useShelf();
   const location = useLocation();
   const shopping = useShopping().filter((item) => !item.bought);
-  const checked = drinks.map((drink) => ({ drink, availability: checkDrink(drink, shelf) }));
+  const checked = useAllDrinks().map((drink) => ({ drink, availability: checkDrink(drink, shelf) }));
   const ready = checked.filter(({ availability }) => availability.status !== 'missing');
   const almost = checked.filter(({ availability }) => availability.missing.length === 1);
 

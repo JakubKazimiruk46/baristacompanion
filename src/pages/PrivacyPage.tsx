@@ -52,7 +52,7 @@ export function PrivacyPage() {
           </li>
           <li>
             <strong>Twoje dane z aplikacji</strong> (ziarna, dziennik parzeń z notatkami, ulubione, półka, lista
-            zakupów, ilości z kalkulatora, młynki, własne przepisy): kopia na serwerze, żeby były takie same na każdym
+            zakupów, ilości z kalkulatora, młynki, własne przepisy, moje napoje): kopia na serwerze, żeby były takie same na każdym
             Twoim urządzeniu. Widzisz je tylko Ty.
           </li>
           <li>
@@ -78,6 +78,12 @@ export function PrivacyPage() {
             <strong>Zdjęcie etykiety</strong>: przy pierwszym skanie aplikacja pyta o zgodę. Zdjęcie trafia przez nasz
             serwer do Anthropic (dostawca modelu Claude, USA) tylko po to, żeby odczytać etykietę. Nie zapisujemy go,
             a logi nie zawierają zdjęcia ani odczytanego tekstu. Bez zgody etykietę odczytuje telefon.
+          </li>
+          <li>
+            <strong>Asystent drinków</strong>: opis, na co masz ochotę, Twoje wybory (temperatura, mleko, wersja
+            roślinna, alkohol) i to, co zaznaczysz w „Co mam w domu”, trafiają przez nasz serwer do Anthropic, żeby AI
+            ułożyło przepis. Nie zapisujemy ich na serwerze; zapisany napój trafia do „Moich napojów” (i do
+            synchronizacji, jeśli masz konto).
           </li>
           <li>
             <strong>Licznik użyć</strong>: ile razy danego dnia skorzystano z AI (dzienny limit). Usuwamy go razem z
