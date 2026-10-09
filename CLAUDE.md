@@ -56,6 +56,8 @@ src/
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
                           scan/: skan etykiety (OCR w przeglądarce + parser tekstu, czysta funkcja)
     account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
+    sync/                 synchronizacja i kopia zapasowa: format rekordów, scalanie (czyste funkcje), adaptery
+                          magazynów, śledzenie zmian (metadane), wysyłka i pobieranie, plik JSON
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
                           panel przy skali mielenia i wiersz w parzeniu, odmiana jednostek
     favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
@@ -142,6 +144,8 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 - Sekrety (klucz `service_role`, klucz Claude) tylko w sekretach funkcji (`npx supabase secrets set`), nigdy w repozytorium ani w `VITE_*`. Funkcje serwerowe w Deno korzystają z `supabase/functions/_shared/http.ts` (CORS, zalogowany użytkownik, błędy po polsku) i nie logują treści od użytkowników.
 - Teksty od użytkowników zawsze jako tekst (React), nigdy jako HTML.
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
+- **Synchronizacja** (`features/sync`): magazyny w przeglądarce zostają źródłem prawdy offline. Śledzenie zmian (`local.ts`) zapisuje dla każdego rekordu czas zmiany, znacznik usunięcia i czy czeka na wysłanie (`barista-companion.sync.v1`), a `mergeRecords` scala według zasady „wygrywa nowsza zmiana” dla każdego rekordu osobno (usunięcie też jest zmianą). Serwer: tabela `user_data` i RPC `sync_push`. Nowy magazyn z danymi użytkownika dostaje adapter w `sync/collections.ts` (rekordy, kolejność, parser, ewentualnie klucz duplikatu i podmiana odwołań) i `replaceAll` w swoim magazynie. Zmian nie zapisuj z pominięciem magazynu: śledzenie widzi tylko `store.set`.
+- Kopia zapasowa (`sync/backup.ts`, ekran konta, działa bez konta): format `barista-companion.backup` w wersji 2, wczytanie scala z danymi na urządzeniu.
 - Nowa funkcja z serwerem dopisuje do polityki prywatności (`pages/PrivacyPage.tsx`), co zbiera, po co i gdzie. Instrukcja wdrożenia: [docs/backend.md](docs/backend.md).
 
 ## PWA, telefon i publikacja

@@ -30,7 +30,7 @@ function isSavedBean(value: unknown): value is SavedBean {
 }
 
 // Uszkodzone wpisy pomijamy, zamiast wysypywać całą listę.
-const parseBeans = (value: unknown): SavedBean[] => (Array.isArray(value) ? value.filter(isSavedBean) : []);
+export const parseBeans = (value: unknown): SavedBean[] => (Array.isArray(value) ? value.filter(isSavedBean) : []);
 
 const store = createLocalStore<SavedBean[]>(STORAGE_KEY, parseBeans, []);
 
@@ -55,6 +55,8 @@ export const beansStore = {
   remove(id: string) {
     store.set(store.getSnapshot().filter((bean) => bean.id !== id));
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 /** Do testów zapisu i odczytu w izolacji. */

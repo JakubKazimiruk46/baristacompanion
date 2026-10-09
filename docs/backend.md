@@ -94,4 +94,11 @@ Przed udostępnieniem aplikacji uzupełnij w polityce prywatności (`src/pages/P
 | :- | :- | :- |
 | `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i `SUPABASE_SERVICE_ROLE_KEY` sam) |
 
+Migracje po kolei (`npx supabase db push` wgrywa brakujące):
+
+| Migracja | Co dodaje |
+| :- | :- |
+| `20261009120000_profiles.sql` | profil (nick), RLS, profil zakładany z kontem |
+| `20261009130000_user_data.sql` | synchronizacja: tabela `user_data` (rekord na wiersz, RLS tylko dla właściciela, limit 20 000 wierszy) i funkcja `sync_push` (zapisuje tylko nowsze wersje) |
+
 Logi funkcji: **Edge Functions → nazwa → Logs**. Funkcje nie zapisują w logach adresów e-mail ani treści od użytkowników.

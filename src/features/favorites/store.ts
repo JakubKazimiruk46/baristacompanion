@@ -5,7 +5,7 @@ import { createLocalStore, useLocalStore } from '../../lib/localStore';
 export const FAVORITES_KEY = 'barista-companion.favorites.v1';
 
 // Bez powtórzeń i tylko napoje, które wciąż są w danych.
-const parseFavorites = (value: unknown): string[] =>
+export const parseFavorites = (value: unknown): string[] =>
   Array.isArray(value)
     ? [...new Set(value.filter((id): id is string => typeof id === 'string' && getDrink(id) !== undefined))]
     : [];
@@ -20,6 +20,8 @@ export const favoritesStore = {
     const current = store.getSnapshot();
     store.set(current.includes(drinkId) ? current.filter((id) => id !== drinkId) : [drinkId, ...current]);
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 export function useFavorites(): string[] {

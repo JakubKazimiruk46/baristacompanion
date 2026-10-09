@@ -63,7 +63,7 @@ function isEntry(value: unknown): value is JournalEntry {
 }
 
 // Uszkodzone wpisy pomijamy, zamiast tracić cały dziennik.
-const parseJournal = (value: unknown): JournalEntry[] => (Array.isArray(value) ? value.filter(isEntry) : []);
+export const parseJournal = (value: unknown): JournalEntry[] => (Array.isArray(value) ? value.filter(isEntry) : []);
 
 const store = createLocalStore<JournalEntry[]>(JOURNAL_KEY, parseJournal, []);
 
@@ -102,6 +102,8 @@ export const journalStore = {
   get(id: string): JournalEntry | undefined {
     return store.getSnapshot().find((entry) => entry.id === id);
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 /** Wszystkie wpisy, najnowsze pierwsze. */

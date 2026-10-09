@@ -337,6 +337,33 @@ export function createFakeSupabase() {
     },
   };
 
+  // Jak funkcja sync_push w bazie: zapisuje tylko wersje nowsze (albo równe) od tych w tabeli.
+  let syncedSeq = 0;
+  rpcs.set('sync_push', (args, current) => {
+    if (!current) throw { message: 'not authenticated', code: '42501' } satisfies FakeError;
+    const rows = table('user_data');
+    const written: Row[] = [];
+    for (const r of args.records as Row[]) {
+      const existing = rows.find(
+        (row) => row.user_id === current.id && row.collection === r.collection && row.record_id === r.record_id,
+      );
+      if (existing && (r.updated_at as string) < (existing.updated_at as string)) continue;
+      const row: Row = {
+        user_id: current.id,
+        collection: r.collection,
+        record_id: r.record_id,
+        payload: r.deleted ? null : r.payload,
+        updated_at: r.updated_at,
+        deleted: r.deleted,
+        synced_at: new Date(Date.now() + syncedSeq++).toISOString(),
+      };
+      if (existing) Object.assign(existing, row);
+      else rows.push(row);
+      written.push(row);
+    }
+    return written;
+  });
+
   const fake = {
     client,
     tables,

@@ -13,7 +13,7 @@ export const recipeDoseKey = (recipeId: string) => `${RECIPE_PREFIX}${recipeId}`
 const RECIPE_WATER = { min: 1, max: 5000 };
 
 // Tylko znane metody i ilości, które mieści ich sprzęt.
-function parseDoses(value: unknown): Record<string, number> {
+export function parseDoses(value: unknown): Record<string, number> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
   return Object.fromEntries(
     Object.entries(value).filter(([key, waterMl]) => {
@@ -38,6 +38,8 @@ export const dosesStore = {
     const { [key]: _, ...rest } = store.getSnapshot();
     store.set(rest);
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 /** Ilość wody do parzenia tą metodą (albo przepisem): ostatnio wybrana albo z przepisu. */

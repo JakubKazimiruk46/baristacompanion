@@ -8,7 +8,7 @@ export const RECIPES_KEY = 'barista-companion.recipes.v1';
 export const MAX_RECIPES = 200;
 
 // Uszkodzone przepisy pomijamy, zamiast tracić wszystkie.
-const parseRecipes = (value: unknown): UserRecipe[] =>
+export const parseRecipes = (value: unknown): UserRecipe[] =>
   Array.isArray(value) ? value.map(parseRecipe).filter((r): r is UserRecipe => r !== null) : [];
 
 const store = createLocalStore<UserRecipe[]>(RECIPES_KEY, parseRecipes, []);
@@ -44,6 +44,8 @@ export const recipesStore = {
   get(id: string): UserRecipe | undefined {
     return store.getSnapshot().find((recipe) => recipe.id === id);
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 export function useRecipes(): UserRecipe[] {

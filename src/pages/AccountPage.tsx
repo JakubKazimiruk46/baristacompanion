@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
 import { UserIcon } from '../components/icons';
@@ -15,7 +15,13 @@ import {
   type AccountUser,
 } from '../features/account/auth';
 import { downloadAccountExport, loadProfile, NICK_LIMITS, nickError, saveNick, type Profile } from '../features/account/profile';
+import { dayAndTime } from '../features/coldbrew/time';
+import { downloadBackup, importBackup } from '../features/sync/backup';
+import { syncNow, useSyncStatus } from '../features/sync/engine';
+import { COLLECTION_LABELS, COLLECTIONS } from '../features/sync/records';
+import { count } from '../lib/format';
 import { isNativeApp } from '../lib/notifications';
+import { useNow } from '../lib/useNow';
 import { useOnline } from '../lib/useOnline';
 
 const inputClass =
@@ -67,6 +73,7 @@ export function AccountPage() {
       )}
       {auth.status === 'signed-out' && <SignIn />}
       {auth.status === 'signed-in' && <AccountDetails user={auth.user} onDeleted={() => setNotice('Konto zostało usunięte razem z danymi na serwerze.')} />}
+      <BackupSection />
       <p className="mt-8 text-sm text-ink-muted">
         <Link to="/prywatnosc" className="font-medium text-accent underline">
           Polityka prywatności
@@ -119,7 +126,7 @@ function SignIn() {
     <>
       <Section title="Po co konto">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          <li>te same ziarna, dziennik i przepisy na telefonie i komputerze,</li>
+          <li>te same ziarna, dziennik, przepisy i młynki na telefonie i komputerze,</li>
           <li>publikowanie własnych przepisów,</li>
           <li>dokładniejsze rozpoznawanie etykiet i asystent drinków.</li>
         </ul>
@@ -252,6 +259,8 @@ function AccountDetails({ user, onDeleted }: { user: AccountUser; onDeleted: () 
         </p>
       </div>
 
+      <SyncSection />
+
       <Section title="Nick">
         {profile === undefined ? (
           <p role="status" className="text-sm text-ink-muted">
@@ -329,6 +338,98 @@ function AccountDetails({ user, onDeleted }: { user: AccountUser; onDeleted: () 
         </div>
       </Sheet>
     </>
+  );
+}
+
+/** Stan synchronizacji: kiedy ostatnio, błąd i „Synchronizuj teraz”. */
+function SyncSection() {
+  const status = useSyncStatus();
+  const online = useOnline();
+  const now = useNow(60_000);
+  const labels = COLLECTIONS.map((name) => COLLECTION_LABELS[name]);
+
+  return (
+    <Section title="Synchronizacja">
+      <p className="text-sm text-ink-muted">
+        Na każdym urządzeniu, na którym się zalogujesz, masz te same dane: {labels.join(', ')}. Bez internetu wszystko
+        działa, a zmiany wyślą się później.
+      </p>
+      <p role="status" className="mt-3 font-medium">
+        {status.state === 'syncing'
+          ? 'Synchronizuję…'
+          : status.lastSyncAt !== null
+            ? `Ostatnia synchronizacja: ${dayAndTime(status.lastSyncAt, now)}`
+            : 'Jeszcze nie synchronizowano.'}
+      </p>
+      {status.state === 'error' && (
+        <p role="alert" className="mt-2 rounded-2xl border border-red-700/40 bg-red-700/10 p-3 text-sm">
+          {status.message}
+        </p>
+      )}
+      <button
+        type="button"
+        className={`mt-3 ${secondary}`}
+        disabled={!online || status.state === 'syncing'}
+        onClick={() => void syncNow()}
+      >
+        Synchronizuj teraz
+      </button>
+    </Section>
+  );
+}
+
+const ADDED: [string, string, string] = ['nowy rekord', 'nowe rekordy', 'nowych rekordów'];
+const UPDATED: [string, string, string] = ['zaktualizowany', 'zaktualizowane', 'zaktualizowanych'];
+const SKIPPED: [string, string, string] = ['pominięty', 'pominięte', 'pominiętych'];
+
+/** Kopia zapasowa w pliku JSON: działa też bez konta i bez backendu. */
+function BackupSection() {
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const load = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Ten sam plik można wczytać jeszcze raz.
+    event.target.value = '';
+    if (!file) return;
+    let summary = null;
+    try {
+      summary = importBackup(JSON.parse(await file.text()));
+    } catch {
+      summary = null;
+    }
+    if (!summary) {
+      setMessage({ ok: false, text: 'To nie jest kopia Barista Companion albo plik jest uszkodzony.' });
+      return;
+    }
+    const parts = [count(summary.added, ADDED), count(summary.updated, UPDATED)];
+    if (summary.skipped > 0) parts.push(count(summary.skipped, SKIPPED));
+    setMessage({ ok: true, text: `Wczytano kopię: ${parts.join(', ')}.` });
+  };
+
+  return (
+    <Section title="Kopia zapasowa">
+      <p className="text-sm text-ink-muted">
+        Wszystkie dane z tej przeglądarki w jednym pliku: zachowasz je przy zmianie telefonu, także bez konta. Wczytanie
+        kopii łączy ją z danymi tutaj: dla każdego rekordu zostaje nowsza wersja.
+      </p>
+      <div className="mt-3 flex flex-col gap-3">
+        <button type="button" className={secondary} onClick={() => downloadBackup()}>
+          Zapisz kopię
+        </button>
+        <label className={`${secondary} cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent`}>
+          Wczytaj kopię
+          <input type="file" accept="application/json,.json" className="sr-only" onChange={load} />
+        </label>
+      </div>
+      {message && (
+        <p
+          role={message.ok ? 'status' : 'alert'}
+          className={`mt-3 rounded-2xl p-3 text-sm ${message.ok ? 'bg-accent-soft' : 'border border-red-700/40 bg-red-700/10'}`}
+        >
+          {message.text}
+        </p>
+      )}
+    </Section>
   );
 }
 

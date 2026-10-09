@@ -51,6 +51,11 @@ export function PrivacyPage() {
             <strong>Nick</strong> (opcjonalnie): widoczny przy przepisach, które sam opublikujesz.
           </li>
           <li>
+            <strong>Twoje dane z aplikacji</strong> (ziarna, dziennik parzeń z notatkami, ulubione, półka, lista
+            zakupów, ilości z kalkulatora, młynki, własne przepisy): kopia na serwerze, żeby były takie same na każdym
+            Twoim urządzeniu. Widzisz je tylko Ty.
+          </li>
+          <li>
             <strong>Daty założenia konta i zmian</strong> oraz <strong>logi techniczne</strong> serwera (adres IP, czas,
             błędy): bezpieczeństwo i usuwanie awarii (uzasadniony interes, art. 6 ust. 1 lit. f RODO).
           </li>

@@ -76,7 +76,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 3. Szerszy katalog drinków | zrobione (gałąź `feature/katalog-drinkow`, od `feature/wlasne-przepisy`), czeka na akceptację autora |
 | 4. Powiadomienia w aplikacji na Androida | kod gotowy (gałąź `feature/android`, od `feature/katalog-drinkow`); czeka na test autora na telefonie albo w emulatorze |
 | 5. Backend: konto i prywatność | kod gotowy (gałąź `feature/konto`, od `feature/android`); czeka na projekt Supabase autora i test logowania na podglądzie Vercela |
-| 6. Synchronizacja danych | do zrobienia |
+| 6. Synchronizacja danych | kod gotowy (gałąź `feature/synchronizacja`, od `feature/konto`); czeka na sprawdzenie autora na dwóch urządzeniach |
 | 7. Przepisy społeczności | do zrobienia |
 | 8. AI: rozpoznawanie etykiet | do zrobienia |
 | 9. AI: asystent drinków | do zrobienia |
@@ -136,6 +136,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - pierwsze logowanie łączy dane lokalne z kontem bez duplikatów,
    - logika scalania jest czystą funkcją z testami (konflikty, usunięcia, stare zapisy `.v1`),
    - Row Level Security nie pozwala czytać cudzych danych (test na bazie albo skrypt SQL).
+
+   Wykonanie (2026-10-09): `src/features/sync` (zamiast `lib/sync`: korzysta z magazynów funkcji). Odstępstwo od planu: zamiast migrować każdy magazyn do `.v2`, czasy zmian i znaczniki usunięcia są w osobnym zapisie metadanych (`barista-companion.sync.v1`), uzupełnianym automatycznie przy każdej zmianie magazynu. Mniej zmian w kodzie, ten sam efekt; dane `.v1` zostają, a przy pierwszym uruchomieniu dostają czas 0 (każda wersja z konta jest od nich nowsza, ale nic nie ginie). Wysyłka przez RPC `sync_push`, które także w bazie zapisuje tylko nowsze wersje; pobieranie przyrostowe po `synced_at` (z zakładką 10 s). Pierwsze logowanie łączy duplikaty po treści (ziarna, młynki, przepisy) i podmienia odwołania w dzienniku i przepisach, a półkę łączy (suma). Synchronizacja po zalogowaniu i starcie, po powrocie do aplikacji, po odzyskaniu internetu i 2 s po zmianie. Kopia zapasowa JSON (format w wersji 2) na ekranie konta, także bez backendu. Testy: scalanie (konflikty, usunięcia, stare zapisy), dwa urządzenia na atrapie serwera, offline, duplikaty, kopia; RLS w `supabase/tests/user_data_rls.test.sql`. Nie sprawdzone na prawdziwym projekcie Supabase (czeka na autora).
 7. **Przepisy społeczności.** Własny przepis da się opublikować. Ekran metody ma „Przepisy społeczności” (najnowsze i najczęściej zapisywane), a każdy przepis można zapisać u siebie i zgłosić. Gotowe, gdy:
    - publikowanie, przeglądanie, zapisywanie i zgłaszanie działają,
    - zgłoszony przepis znika zgodnie z P7, a moderator może go ukryć albo przywrócić,

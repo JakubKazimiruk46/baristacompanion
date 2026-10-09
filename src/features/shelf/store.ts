@@ -21,7 +21,7 @@ const knownIds = (value: unknown, known: (id: string) => unknown): string[] =>
     ? [...new Set(value.filter((id): id is string => typeof id === 'string' && known(id) !== undefined))]
     : [];
 
-function parseShelf(value: unknown): Shelf | null {
+export function parseShelf(value: unknown): Shelf | null {
   if (typeof value !== 'object' || value === null) return null;
   const v = value as Record<string, unknown>;
   return { ingredients: knownIds(v.ingredients, getIngredient), methods: knownIds(v.methods, getMethod) };

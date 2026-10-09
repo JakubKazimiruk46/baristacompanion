@@ -89,7 +89,7 @@ function normalize(grinders: SavedGrinder[], activeId: unknown): GrindersState {
   return { grinders, activeId: active?.id ?? null };
 }
 
-function parseState(value: unknown): GrindersState {
+export function parseGrinders(value: unknown): GrindersState {
   if (typeof value !== 'object' || value === null) return EMPTY;
   const state = value as Record<string, unknown>;
   const grinders = Array.isArray(state.grinders)
@@ -98,7 +98,7 @@ function parseState(value: unknown): GrindersState {
   return normalize(grinders, state.activeId);
 }
 
-const store = createLocalStore<GrindersState>(GRINDERS_KEY, parseState, EMPTY);
+const store = createLocalStore<GrindersState>(GRINDERS_KEY, parseGrinders, EMPTY);
 
 // crypto.randomUUID działa tylko przez HTTPS (patrz beans/store.ts).
 const newId = () =>
@@ -154,6 +154,8 @@ export const grindersStore = {
     grindersStore.setActive(record.grinderId);
     return true;
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 export function activeGrinder(state: GrindersState): SavedGrinder | null {

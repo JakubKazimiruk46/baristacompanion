@@ -23,7 +23,7 @@ function isItem(value: unknown): value is ShoppingItem {
   );
 }
 
-function parseShopping(value: unknown): ShoppingItem[] {
+export function parseShopping(value: unknown): ShoppingItem[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter(isItem)
@@ -64,6 +64,8 @@ export const shoppingStore = {
   clearBought() {
     store.set(store.getSnapshot().filter((item) => !item.bought));
   },
+  /** Całość naraz (synchronizacja, kopia zapasowa). */
+  replaceAll: store.set,
 };
 
 export function useShopping(): ShoppingItem[] {
