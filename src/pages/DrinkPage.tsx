@@ -7,6 +7,7 @@ import { PencilIcon, ShareIcon, TrashIcon } from '../components/icons';
 import { hasAlcohol, type Drink } from '../data';
 import { AiBadge } from '../features/assistant/AiBadge';
 import { isMyDrinkId, myDrinksStore, useDrink, useMyDrinkRecord, type MyDrink } from '../features/assistant/myDrinks';
+import { PublishDrinkSection } from '../features/community/PublishDrinkSection';
 import { DrinkBody } from '../features/drinks/DrinkBody';
 import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { FavoriteButton } from '../features/favorites/FavoriteButton';
@@ -67,6 +68,7 @@ function DrinkView({ drink }: { drink: Drink }) {
       </PageHeader>
 
       <DrinkBody drink={drink} />
+      {record && <PublishDrinkSection item={record} />}
     </article>
   );
 }

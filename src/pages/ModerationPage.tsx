@@ -6,7 +6,10 @@ import { PageHeader } from '../components/PageHeader';
 import { getMethod } from '../data';
 import { useAuth } from '../features/account/auth';
 import { isModerator, moderateRecipe, moderationQueue, REPORT_REASONS, type QueueItem } from '../features/community/api';
-import { communityPath } from '../features/community/CommunitySection';
+import { communityDrinkPath, moderateDrink } from '../features/community/drinks';
+
+const itemPath = (item: QueueItem) =>
+  item.kind === 'drink' ? communityDrinkPath(item.id) : `/spolecznosc/przepisy/${item.id}`;
 
 const STATUS_LABELS: Record<QueueItem['status'], string> = {
   published: 'widoczny',
@@ -19,7 +22,7 @@ const button =
 
 type State = { status: 'loading' } | { status: 'denied' } | { status: 'ready'; items: QueueItem[] } | { status: 'error'; message: string };
 
-/** Moderacja przepisów społeczności (/moderacja): zgłoszone i ukryte, decyzja: ukryj albo przywróć. */
+/** Moderacja społeczności (/moderacja): zgłoszone i ukryte przepisy i napoje, decyzja: ukryj albo przywróć. */
 export function ModerationPage() {
   const auth = useAuth({ load: true });
   const [state, setState] = useState<State>({ status: 'loading' });
@@ -42,10 +45,10 @@ export function ModerationPage() {
     if (signedIn) void load();
   }, [signedIn, load]);
 
-  const decide = async (id: string, decision: 'hide' | 'restore') => {
-    setBusy(id);
+  const decide = async (item: QueueItem, decision: 'hide' | 'restore') => {
+    setBusy(item.id);
     try {
-      await moderateRecipe(id, decision);
+      await (item.kind === 'drink' ? moderateDrink(item.id, decision) : moderateRecipe(item.id, decision));
       await load();
     } catch (error) {
       setState({ status: 'error', message: error instanceof Error ? error.message : 'Nie udało się.' });
@@ -57,7 +60,7 @@ export function ModerationPage() {
   const header = (
     <PageHeader
       title="Moderacja"
-      lead="Zgłoszone przepisy społeczności. Przywrócony przepis po kolejnym zgłoszeniu już nie znika, tylko wraca tutaj."
+      lead="Zgłoszone przepisy i napoje społeczności. Przywrócone po kolejnym zgłoszeniu już nie znikają, tylko wracają tutaj."
       back={{ to: '/konto', label: 'Konto' }}
     />
   );
@@ -94,14 +97,15 @@ export function ModerationPage() {
         ) : (
           <ul className="space-y-4">
             {state.items.map((item) => (
-              <li key={item.id} className="rounded-2xl border border-line bg-surface p-4">
+              <li key={`${item.kind}-${item.id}`} className="rounded-2xl border border-line bg-surface p-4">
                 <h2 className="font-display text-lg font-semibold">
-                  <Link to={communityPath(item.methodId, item.id)} className="underline">
+                  <Link to={itemPath(item)} className="underline">
                     {item.name}
                   </Link>
                 </h2>
                 <p className="text-sm text-ink-muted">
-                  od {item.author} · {getMethod(item.methodId)?.name ?? item.methodId} · {STATUS_LABELS[item.status]}
+                  od {item.author} · {item.kind === 'drink' ? 'napój' : (getMethod(item.methodId ?? '')?.name ?? item.methodId)} ·{' '}
+                  {STATUS_LABELS[item.status]}
                   {item.approved && ' · wcześniej przywrócony'}
                 </p>
                 <ul aria-label="Zgłoszenia" className="mt-2 space-y-1 text-sm">
@@ -113,10 +117,10 @@ export function ModerationPage() {
                   ))}
                 </ul>
                 <div className="mt-3 flex gap-2">
-                  <button type="button" className={button} disabled={busy === item.id} onClick={() => void decide(item.id, 'hide')}>
+                  <button type="button" className={button} disabled={busy === item.id} onClick={() => void decide(item, 'hide')}>
                     Ukryj
                   </button>
-                  <button type="button" className={button} disabled={busy === item.id} onClick={() => void decide(item.id, 'restore')}>
+                  <button type="button" className={button} disabled={busy === item.id} onClick={() => void decide(item, 'restore')}>
                     Przywróć
                   </button>
                 </div>

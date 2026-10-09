@@ -73,9 +73,11 @@ function failure(error: { message?: string; code?: string }): CommunityError {
   return new CommunityError('Nie udało się połączyć z serwerem. Spróbuj ponownie.');
 }
 
-export async function listRecipes(methodId: string, sort: CommunitySort, page = 0): Promise<CommunityRecipe[]> {
+/** Przepisy jednej metody albo wszystkich (methodId: null, zakładka Społeczność). */
+export async function listRecipes(methodId: string | null, sort: CommunitySort, page = 0): Promise<CommunityRecipe[]> {
   const supabase = await getSupabase();
-  let query = supabase.from('public_recipes').select(COLUMNS).eq('method_id', methodId).eq('status', 'published');
+  let query = supabase.from('public_recipes').select(COLUMNS).eq('status', 'published');
+  if (methodId) query = query.eq('method_id', methodId);
   query =
     sort === 'popular'
       ? query.order('saves_count', { ascending: false }).order('created_at', { ascending: false })
@@ -163,8 +165,11 @@ export async function reportRecipe(recipeId: string, reason: ReportReason, comme
 // ── Moderacja ───────────────────────────────────────────────────────────
 
 export interface QueueItem {
+  /** Przepis parzenia albo napój. */
+  kind: 'recipe' | 'drink';
   id: string;
-  methodId: string;
+  /** Tylko przepisy. */
+  methodId: string | null;
   name: string;
   author: string;
   status: CommunityRecipe['status'];
@@ -183,8 +188,9 @@ export async function moderationQueue(): Promise<QueueItem[]> {
   const { data, error } = await supabase.rpc('moderation_queue');
   if (error) throw failure(error);
   return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
+    kind: row.kind === 'drink' ? 'drink' : 'recipe',
     id: row.id as string,
-    methodId: row.method_id as string,
+    methodId: (row.method_id as string | null) ?? null,
     name: row.name as string,
     author: row.author_nick as string,
     status: row.status as CommunityRecipe['status'],

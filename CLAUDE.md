@@ -63,8 +63,8 @@ src/
                           scan/: skan etykiety (AI przez scan-label albo OCR w przeglądarce + parser tekstu,
                           zgoda na AI, przygotowanie zdjęcia)
     account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
-    community/            przepisy społeczności: zapytania (api.ts, walidacja jak własny przepis), sekcja na
-                          ekranie metody, publikowanie przy własnym przepisie
+    community/            społeczność: przepisy (api.ts, walidacja jak własny przepis) i napoje (drinks.ts, walidacja jak
+                          katalog), sekcja na ekranie metody, publikowanie przepisu i napoju, zgłoszenie, listy stronami
     sync/                 synchronizacja i kopia zapasowa: format rekordów, scalanie (czyste funkcje), adaptery
                           magazynów, śledzenie zmian (metadane), wysyłka i pobieranie, plik JSON
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
@@ -106,15 +106,17 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody jako kafelki (`?widok=ostatnie\|ulubione`, domyślnie A–Z), szczegóły z „Ulubiona”, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
 | `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis`, `…/:przepis/edycja` | własne przepisy: nowy (kopia przepisu metody), ekran przepisu (kalkulator, mielenie, kroki, „Wyślij”, usuwanie), edycja |
 | `/przepis#dane` | przepis z linku: podgląd i „Zapisz u siebie” |
-| `/parzenie/:id/spolecznosc/:przepis` | przepis społeczności: „Parz według tego przepisu”, „Zapisz u siebie”, „Zgłoś” |
-| `/moderacja` | kolejka moderatora: zgłoszone i ukryte przepisy, „Ukryj” i „Przywróć” |
+| `/parzenie/:id/spolecznosc/:przepis`, `/spolecznosc/przepisy/:przepis` | przepis społeczności (z ekranu metody albo z zakładki): „Parz według tego przepisu”, „Zapisz u siebie”, „Zgłoś” |
+| `/spolecznosc` | Społeczność: pasek konta, `?sekcja=napoje\|przepisy\|moje` (napoje: siatka z rysunkiem; przepisy: filtr metody; moje: opublikowane i do opublikowania) |
+| `/spolecznosc/napoje/:id` | napój społeczności: „Zapisz u siebie” (kopia w „Moich napojach” z `origin`), karta, „Wyślij link”, „Zgłoś” |
+| `/moderacja` | kolejka moderatora: zgłoszone i ukryte przepisy i napoje, „Ukryj” i „Przywróć” |
 | `/parzenie/dziennik`, `/parzenie/dziennik/:id` | dziennik parzeń: lista i wpis (ocena, notatka, ziarna, „Zaparz tak samo”) |
 | `/baribar` | Baribar: `?sekcja=ziarna\|mleka\|syropy\|dodatki\|sprzet`, ziarna z `?q=&palenie=jasne&rodzaj=single`; podsumowanie „zrobisz teraz” |
 | `/ziarna/nowe`, `/ziarna/:id`, `/ziarna/:id/edycja` | ziarna (część Baribaru; `/ziarna` przekierowuje na `/baribar`) |
-| `/konto`, `/prywatnosc` | konto (logowanie linkiem albo kodem z e-maila i przez Google, nick, eksport, usunięcie) i polityka prywatności |
+| `/konto`, `/prywatnosc` | konto (logowanie linkiem albo kodem z e-maila i przez Google, nick, eksport, usunięcie; `?wroc=/adres` wraca tam po zalogowaniu) i polityka prywatności |
 | `/ziarna/mlynek`, `/ziarna/mlynek/nowy` | Mój młynek: ustawienia dla metod, wybór używanego młynka, nowy młynek; `?mielenie=id-metody` otwiera okno ustawienia (też na ekranie metody, w „Mam kawę” i w parzeniu) |
 
-Dolna nawigacja: Start, Napoje, Parzenie, Baribar. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę”, konto, polityka prywatności i moderacja należą do Startu, przepis z linku (`/przepis`) do Parzenia, a ziarna i młynek (`/ziarna/...`) do Baribaru.
+Dolna nawigacja: Start, Napoje, Parzenie, Baribar, Społeczność. Zakładka jest aktywna także na podstronach; ścieżka „Mam kawę” należy do Startu, przepis z linku (`/przepis`) do Parzenia, ziarna i młynek (`/ziarna/...`) do Baribaru, a konto, polityka prywatności i moderacja do Społeczności.
 
 ## Dane (`src/data`)
 
@@ -167,6 +169,8 @@ Dolna nawigacja: Start, Napoje, Parzenie, Baribar. Zakładka jest aktywna także
 - Teksty od użytkowników zawsze jako tekst (React), nigdy jako HTML.
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).
 - **Synchronizacja** (`features/sync`): magazyny w przeglądarce zostają źródłem prawdy offline. Śledzenie zmian (`local.ts`) zapisuje dla każdego rekordu czas zmiany, znacznik usunięcia i czy czeka na wysłanie (`barista-companion.sync.v1`), a `mergeRecords` scala według zasady „wygrywa nowsza zmiana” dla każdego rekordu osobno (usunięcie też jest zmianą). Serwer: tabela `user_data` i RPC `sync_push`. Nowy magazyn z danymi użytkownika dostaje adapter w `sync/collections.ts` (rekordy, kolejność, parser, ewentualnie klucz duplikatu i podmiana odwołań) i `replaceAll` w swoim magazynie. Zmian nie zapisuj z pominięciem magazynu: śledzenie widzi tylko `store.set`.
+- **Społeczność** (zakładka `/spolecznosc`): przegląda każdy, bez konta; konto jest potrzebne do publikowania, zgłaszania i liczenia zapisów („Zapisz u siebie” działa bez konta). Zachęta do logowania prowadzi na `/konto?wroc=…` (powrót po zalogowaniu, `features/account/returnTo.ts`).
+- **Napoje społeczności** (`features/community/drinks.ts`, tabele `public_drinks`, `drink_saves`, `drink_reports`): napój jest dokumentem jsonb w schemacie `Drink`; baza pilnuje kształtu i rozmiaru (`valid_drink_document`), a nazwę i temperaturę bierze z dokumentu. Napój z serwera przechodzi `normalizeDrink` + `validateDrink`, zanim się narysuje (inaczej jest pomijany), i dostaje id `spolecznosc-…`. Publikować można tylko „Moje napoje” ze źródłem `own` (bez `origin`); kopia u siebie ma `source: 'community'` i `origin`.
 - **Przepisy społeczności** (`features/community`, tabele `public_recipes`, `recipe_saves`, `recipe_reports`): przepis z serwera przechodzi `parseRecipeInput` jak własny, zanim się narysuje. Liczniki, stan i nick ustawia baza (funkcje `save_public_recipe`, `report_public_recipe`, `moderate_public_recipe`, `moderation_queue`), a autor zmienia tylko treść. Zgłoszenie ukrywa przepis do decyzji moderatora (P7), a przywrócony już nie znika po kolejnych zgłoszeniach. Kopia u siebie ma `origin` (od kogo); takiej kopii nie da się opublikować. Lista ładuje się, gdy sekcja pojawi się na ekranie.
 - **AI** (Claude tylko z funkcji serwerowych, klucz w sekretach Supabase) jest wyłączone, dopóki build nie ma `VITE_AI_ENABLED=true` (`aiEnabled()` z `lib/supabase`; dziś autor nie ma klucza API). Każde wejście w AI sprawdza `aiEnabled()`, nie samo `backendEnabled()`, a testy AI włączają je przez `vi.stubEnv`. Funkcje: skan etykiety `scan-label` i asystent drinków `drink-assistant` (P9: tylko id z katalogu, które wysyła aplikacja; wynik przechodzi reguły napoju na serwerze i jeszcze raz w aplikacji, przy błędach jedna prośba o poprawkę). Logikę, którą musi znać i serwer, i aplikacja (schemat odpowiedzi, prompt, walidacja wyniku), trzymaj w czystych modułach bez importów w `supabase/functions/_shared/` (np. `labelScan.ts`, `drinkAssistant.ts`, `drinkRules.ts`); aplikacja importuje je przez ścieżkę względną, a Vitest je testuje. Model `claude-opus-5-5`, JSON przez structured outputs (`output_config.format`; wymuszony `tool_choice` daje na tym modelu 400), `fallbacks: "default"` na odmowę. Każda funkcja AI: dzienny limit (`ai_usage`, `_shared/quota.ts`, P8), zgoda przed pierwszym wysłaniem danych, powrót do wersji bez AI po błędzie, limicie albo bez logowania. Funkcje Deno sprawdzaj `npm run typecheck:functions` (`supabase/functions/tsconfig.json` mapuje importy `npm:`/`jsr:` na `node_modules`; wersja w imporcie i w `devDependencies` musi być ta sama).
 - Kopia zapasowa (`sync/backup.ts`, ekran konta, działa bez konta): format `barista-companion.backup` w wersji 2, wczytanie scala z danymi na urządzeniu.

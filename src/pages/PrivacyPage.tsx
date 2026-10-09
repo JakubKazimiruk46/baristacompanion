@@ -57,13 +57,14 @@ export function PrivacyPage() {
             Twoim urządzeniu. Widzisz je tylko Ty.
           </li>
           <li>
-            <strong>Opublikowane przepisy</strong>: przepis, który sam opublikujesz, widzi każdy, razem z Twoim nickiem
-            (bez adresu e-mail). Możesz go w każdej chwili wycofać. Liczymy też, ile osób zapisało go u siebie (bez
-            pokazywania, kto).
+            <strong>Opublikowane przepisy i napoje</strong>: przepis parzenia albo napój (składniki, warstwy, naczynie,
+            dekoracje, kroki), który sam opublikujesz, widzi każdy, także bez konta, razem z Twoim nickiem (bez adresu
+            e-mail). Możesz go w każdej chwili wycofać. Liczymy też, ile osób zapisało go u siebie (bez pokazywania,
+            kto).
           </li>
           <li>
-            <strong>Zgłoszenia przepisów</strong>: powód, komentarz i to, kto zgłosił. Widzi je tylko moderator, żeby
-            rozpatrzyć zgłoszenie i zapobiegać nadużyciom.
+            <strong>Zgłoszenia przepisów i napojów</strong>: powód, komentarz i to, kto zgłosił. Widzi je tylko
+            moderator, żeby rozpatrzyć zgłoszenie i zapobiegać nadużyciom.
           </li>
           <li>
             <strong>Daty założenia konta i zmian</strong> oraz <strong>logi techniczne</strong> serwera (adres IP, czas,

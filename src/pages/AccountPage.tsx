@@ -15,6 +15,7 @@ import {
   type AccountUser,
 } from '../features/account/auth';
 import { downloadAccountExport, loadProfile, NICK_LIMITS, nickError, saveNick, type Profile } from '../features/account/profile';
+import { returnStore, safeReturnPath } from '../features/account/returnTo';
 import { isModerator } from '../features/community/api';
 import { dayAndTime } from '../features/coldbrew/time';
 import { downloadBackup, importBackup } from '../features/sync/backup';
@@ -40,9 +41,21 @@ export function AccountPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const redirectError = params.get('error_description') ?? params.get('error');
 
+  // Wejście z zachęty do logowania (?wroc=/spolecznosc): po zalogowaniu wracamy tam. Adres
+  // zapisujemy, bo link z e-maila otwiera aplikację od nowa i ?wroc= przepada.
+  const requested = safeReturnPath(params.get('wroc'));
+  useEffect(() => {
+    if (requested) returnStore.set(requested);
+  }, [requested]);
+
   // Po powrocie z linku albo z Google adres ma ?code=: po zalogowaniu go sprzątamy.
   useEffect(() => {
-    if (auth.status === 'signed-in' && params.has('code')) navigate('/konto', { replace: true });
+    if (auth.status !== 'signed-in') return;
+    const target = returnStore.getSnapshot();
+    if (target) {
+      returnStore.set(null);
+      navigate(target, { replace: true });
+    } else if (params.has('code')) navigate('/konto', { replace: true });
   }, [auth.status, params, navigate]);
 
   return (

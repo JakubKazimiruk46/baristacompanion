@@ -7,6 +7,8 @@ import { BeanFormPage } from './pages/BeanFormPage';
 import { BeanPage } from './pages/BeanPage';
 import { BrewingPage } from './pages/BrewingPage';
 import { BrewSessionPage } from './pages/BrewSessionPage';
+import { CommunityDrinkPage } from './pages/CommunityDrinkPage';
+import { CommunityPage } from './pages/CommunityPage';
 import { CommunityRecipePage } from './pages/CommunityRecipePage';
 import { DrinkFormPage } from './pages/DrinkFormPage';
 import { DrinkPage } from './pages/DrinkPage';
@@ -63,6 +65,9 @@ export const routes: RouteObject[] = [
       { path: 'parzenie/:methodId/przepisy/:recipeId/edycja', element: <RecipeFormPage /> },
       { path: 'parzenie/:methodId/spolecznosc/:recipeId', element: <CommunityRecipePage /> },
       { path: 'przepis', element: <SharedRecipePage /> },
+      { path: 'spolecznosc', element: <CommunityPage /> },
+      { path: 'spolecznosc/napoje/:communityId', element: <CommunityDrinkPage /> },
+      { path: 'spolecznosc/przepisy/:recipeId', element: <CommunityRecipePage /> },
       { path: 'baribar', element: <BaribarPage /> },
       { path: 'ziarna', element: <Navigate to="/baribar" replace /> },
       { path: 'ziarna/nowe', element: <BeanFormPage /> },
