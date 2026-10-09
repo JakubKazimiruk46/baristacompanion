@@ -26,8 +26,9 @@ export function clampWater(method: BrewMethod, waterMl: number): number {
   return Math.min(max, Math.max(min, waterMl));
 }
 
-/** Ilość kawy dla podanej ilości wody, z proporcji metody. */
+/** Ilość kawy dla podanej ilości wody, z proporcji metody. Przy ilości z przepisu: dokładnie przepis. */
 export function doseFor(method: BrewMethod, waterMl: number): Dose {
+  if (waterMl === method.dose.waterMl) return { coffeeG: method.dose.coffeeG, waterMl };
   const ratio = method.dose.coffeeG / method.dose.waterMl;
   return { coffeeG: roundCoffee(waterMl * ratio), waterMl };
 }
@@ -40,6 +41,11 @@ export function fillAmounts(text: string, dose: Dose): string {
     if (what === 'coffee') return formatGrams(dose.coffeeG);
     return String(factor ? roundWater(dose.waterMl * Number(factor)) : dose.waterMl);
   });
+}
+
+/** Znaczniki w nawiasach klamrowych, których kalkulator nie zna (np. {kawa}). */
+export function invalidTokens(text: string): string[] {
+  return (text.match(/\{[^{}]*\}/g) ?? []).filter((token) => !new RegExp(`^${TOKEN.source}$`).test(token));
 }
 
 /** Metoda przeliczona na podaną ilość wody: dawka i kroki z liczbami zamiast znaczników. */

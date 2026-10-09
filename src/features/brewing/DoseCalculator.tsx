@@ -12,14 +12,14 @@ const PEOPLE: [string, string, string] = ['osoba', 'osoby', 'osób'];
 
 /**
  * Ile zaparzyć: liczba osób albo mililitry wody (w kawiarce rozmiar). Wybór zapisuje się dla
- * metody, więc prowadzone parzenie pokazuje te same ilości.
+ * metody (albo własnego przepisu: doseKey), więc prowadzone parzenie pokazuje te same ilości.
  */
-export function DoseCalculator({ method }: { method: BrewMethod }) {
-  const waterMl = useWaterMl(method);
+export function DoseCalculator({ method, doseKey = method.id }: { method: BrewMethod; doseKey?: string }) {
+  const waterMl = useWaterMl(method, doseKey);
   const [mode, setMode] = useState<Mode>('people');
   const { scaling } = method;
   const dose = doseFor(method, waterMl);
-  const set = (ml: number) => dosesStore.set(method.id, clampWater(method, ml));
+  const set = (ml: number) => dosesStore.set(doseKey, clampWater(method, ml));
 
   return (
     <div className="rounded-2xl border border-line bg-surface p-4">
@@ -31,7 +31,7 @@ export function DoseCalculator({ method }: { method: BrewMethod }) {
               <ChoiceChip
                 key={size.waterMl}
                 type="radio"
-                name={`${method.id}-size`}
+                name={`${doseKey}-size`}
                 checked={waterMl === size.waterMl}
                 onChange={() => set(size.waterMl)}
               >
@@ -45,10 +45,10 @@ export function DoseCalculator({ method }: { method: BrewMethod }) {
           <fieldset>
             <legend className="text-sm font-medium text-ink-muted">Licz według</legend>
             <div className="mt-2 flex gap-2">
-              <ChoiceChip type="radio" name={`${method.id}-mode`} checked={mode === 'people'} onChange={() => setMode('people')}>
+              <ChoiceChip type="radio" name={`${doseKey}-mode`} checked={mode === 'people'} onChange={() => setMode('people')}>
                 liczby osób
               </ChoiceChip>
-              <ChoiceChip type="radio" name={`${method.id}-mode`} checked={mode === 'ml'} onChange={() => setMode('ml')}>
+              <ChoiceChip type="radio" name={`${doseKey}-mode`} checked={mode === 'ml'} onChange={() => setMode('ml')}>
                 mililitrów
               </ChoiceChip>
             </div>
@@ -86,7 +86,7 @@ export function DoseCalculator({ method }: { method: BrewMethod }) {
       {waterMl !== method.dose.waterMl && (
         <button
           type="button"
-          onClick={() => dosesStore.clear(method.id)}
+          onClick={() => dosesStore.clear(doseKey)}
           className="mt-2 inline-flex h-10 items-center text-sm font-medium text-accent"
         >
           Wróć do przepisu ({method.dose.waterMl} ml)

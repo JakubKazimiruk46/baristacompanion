@@ -11,6 +11,7 @@ import { grindersStore, grindRecordFor } from '../grinder/store';
 import { EntryEditor } from '../journal/EntryEditor';
 import { entryGrind } from '../journal/format';
 import { journalStore, useJournal } from '../journal/store';
+import { recipePath, type UserRecipe } from '../recipes/recipe';
 import { formatGrams } from './dose';
 import { formatClock } from './timer';
 import { useBrewSession } from './useBrewSession';
@@ -20,8 +21,12 @@ const primary =
 const secondary =
   'flex h-14 items-center justify-center rounded-full border border-line bg-surface px-5 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40';
 
+/** Własny przepis, według którego się parzy (method to wtedy przepis przeliczony na metodę). */
+export type SessionRecipe = Pick<UserRecipe, 'id' | 'methodId' | 'name' | 'grinder'>;
+
 type BrewSessionProps = {
   method: BrewMethod;
+  recipe?: SessionRecipe;
   /** Własny nagłówek (np. w ścieżce „Mam kawę”). Domyślnie: nazwa metody z powrotem do niej. */
   header?: ReactNode;
   /** Ziarna i napój do wpisu w dzienniku (ścieżka „Mam kawę”). */
@@ -30,7 +35,7 @@ type BrewSessionProps = {
   onFinish?: (entryId: string) => void;
 };
 
-export function BrewSession({ method, header, journal, onFinish }: BrewSessionProps) {
+export function BrewSession({ method, recipe, header, journal, onFinish }: BrewSessionProps) {
   const session = useBrewSession(method);
   const { state, step, nextStep } = session;
   const beans = useBeans();
@@ -42,11 +47,13 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
     let id = entryId;
     if (!id || !journalStore.get(id)) {
       const bean = beans.find((b) => b.id === journal?.beanId);
-      const grind = grindRecordFor(grindersStore.getSnapshot(), method.id);
+      // Przepis ma własne mielenie i ustawienie młynka, więc ustawienie dla metody go nie dotyczy.
+      const grind = recipe ? recipe.grinder : grindRecordFor(grindersStore.getSnapshot(), method.id);
       id = journalStore.add({
         methodId: method.id,
         coffeeG: method.dose.coffeeG,
         waterMl: method.dose.waterMl,
+        ...(recipe && { recipeId: recipe.id, recipeName: recipe.name }),
         ...(bean && { beanId: bean.id, beanName: bean.name }),
         ...(grind && { grind }),
         ...(journal?.drinkId && { drinkId: journal.drinkId }),
@@ -62,7 +69,7 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
     session.restart();
   };
 
-  if (state.finished) return <Finished method={method} entryId={entryId} onRestart={restart} />;
+  if (state.finished) return <Finished method={method} recipe={recipe} entryId={entryId} onRestart={restart} />;
 
   const total = method.steps.length;
   const isLast = state.stepIndex === total - 1;
@@ -73,7 +80,7 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
         <PageHeader
           title={method.name}
           lead={doseLine(method)}
-          back={{ to: `/parzenie/${method.id}`, label: method.name }}
+          back={recipe ? { to: recipePath(recipe), label: recipe.name } : { to: `/parzenie/${method.id}`, label: method.name }}
         />
       )}
       <div className="-mt-2 mb-4">
@@ -83,7 +90,7 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
         <div aria-hidden="true" className="mt-2 flex gap-1">
           {method.steps.map((s, i) => (
             <span
-              key={s.text}
+              key={`${i}-${s.text}`}
               className={`h-1.5 flex-1 rounded-full ${i <= state.stepIndex ? 'bg-accent' : 'bg-line'}`}
             />
           ))}
@@ -93,7 +100,7 @@ export function BrewSession({ method, header, journal, onFinish }: BrewSessionPr
       {/* Mieli się na początku, więc ustawienie młynka widać przy pierwszym kroku. */}
       {state.stepIndex === 0 && (
         <div className="mb-4">
-          <GrinderLine method={method} />
+          <GrinderLine method={method} {...(recipe && { fixed: recipe.grinder ?? null })} />
         </div>
       )}
 
@@ -188,22 +195,25 @@ export const doseLine = (method: BrewMethod) =>
 
 function Finished({
   method,
+  recipe,
   entryId,
   onRestart,
 }: {
   method: BrewMethod;
+  recipe?: SessionRecipe;
   entryId: string | null;
   onRestart: () => void;
 }) {
   const location = useLocation();
   const drinks = drinksForMethod(method.id);
   const entry = useJournal().find((e) => e.id === entryId);
+  const back = recipe ? { to: recipePath(recipe), label: recipe.name } : { to: `/parzenie/${method.id}`, label: method.name };
   return (
     <>
       <PageHeader
         title="Gotowe! Smacznej kawy"
-        lead={`Kawa z metody ${method.name} czeka. Pij ją tak albo zrób z niej coś więcej.`}
-        back={{ to: `/parzenie/${method.id}`, label: method.name }}
+        lead={`${recipe ? `Kawa według przepisu „${recipe.name}”` : `Kawa z metody ${method.name}`} czeka. Pij ją tak albo zrób z niej coś więcej.`}
+        back={back}
       />
       {entry && (
         <section aria-labelledby="dziennik" className="mb-8 rounded-3xl bg-surface p-5">
@@ -239,8 +249,8 @@ function Finished({
         <button type="button" className={primary} onClick={onRestart}>
           Zaparz jeszcze raz
         </button>
-        <Link to={`/parzenie/${method.id}`} className={secondary}>
-          Wróć do metody
+        <Link to={back.to} className={secondary}>
+          {recipe ? 'Wróć do przepisu' : 'Wróć do metody'}
         </Link>
       </div>
     </>

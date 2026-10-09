@@ -5,12 +5,14 @@ import { PageHeader } from '../components/PageHeader';
 import { Sheet } from '../components/Sheet';
 import { getDrink, getMethod } from '../data';
 import { clampWater } from '../features/brewing/dose';
-import { dosesStore } from '../features/brewing/doseStore';
+import { dosesStore, recipeDoseKey } from '../features/brewing/doseStore';
 import { dayAndTime } from '../features/coldbrew/time';
 import { grindersStore } from '../features/grinder/store';
 import { EntryEditor } from '../features/journal/EntryEditor';
 import { entryDose, entryGrind, entryTitle } from '../features/journal/format';
 import { journalStore, useJournal } from '../features/journal/store';
+import { recipePath } from '../features/recipes/recipe';
+import { useRecipe } from '../features/recipes/store';
 import { capitalize } from '../lib/format';
 import { useNow } from '../lib/useNow';
 import { isLongBrew } from './BrewSessionPage';
@@ -27,13 +29,18 @@ export function JournalEntryPage() {
   const now = useNow(60_000);
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const savedRecipe = useRecipe(entry?.recipeId);
   if (!entry) return <NotFoundPage />;
 
   const method = getMethod(entry.methodId)!;
   const drink = entry.drinkId ? getDrink(entry.drinkId) : undefined;
-  const start = isLongBrew(method.steps)
-    ? `/parzenie/${method.id}/start${entry.variantId ? `?wariant=${entry.variantId}` : ''}`
-    : `/parzenie/${method.id}/start`;
+  // Przepis mógł zniknąć (usunięty): wtedy parzymy według metody.
+  const recipe = savedRecipe?.methodId === method.id ? savedRecipe : undefined;
+  const search = new URLSearchParams({
+    ...(recipe && { przepis: recipe.id }),
+    ...(isLongBrew(method.steps) && entry.variantId && { wariant: entry.variantId }),
+  }).toString();
+  const start = `/parzenie/${method.id}/start${search ? `?${search}` : ''}`;
 
   return (
     <>
@@ -43,6 +50,18 @@ export function JournalEntryPage() {
         back={{ to: '/parzenie/dziennik', label: 'Dziennik' }}
         icon={<MethodIcon methodId={method.id} className="size-9" />}
       >
+        {entry.recipeName && (
+          <p className="mt-2 text-sm">
+            Przepis:{' '}
+            {recipe ? (
+              <Link to={recipePath(recipe)} className="font-medium text-accent underline">
+                {recipe.name}
+              </Link>
+            ) : (
+              <span className="font-medium">{entry.recipeName} (usunięty)</span>
+            )}
+          </p>
+        )}
         {entry.grind && (
           <p className="mt-2 text-sm">
             Młynek: <span className="font-medium">{entryGrind(entry)}</span>
@@ -66,8 +85,9 @@ export function JournalEntryPage() {
           to={start}
           className={primary}
           onClick={() => {
-            dosesStore.set(method.id, clampWater(method, entry.waterMl));
-            if (entry.grind) grindersStore.restore(entry.grind, method.id);
+            dosesStore.set(recipe ? recipeDoseKey(recipe.id) : method.id, clampWater(method, entry.waterMl));
+            // Przepis ma własne ustawienie młynka, więc ustawienia metody nie zmieniamy.
+            if (entry.grind && !recipe) grindersStore.restore(entry.grind, method.id);
           }}
         >
           Zaparz tak samo

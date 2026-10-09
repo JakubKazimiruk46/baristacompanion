@@ -12,7 +12,7 @@ type Tab = {
 const tabs: Tab[] = [
   { to: '/', label: 'Start', Icon: HomeIcon, also: ['/mam-kawe'] },
   { to: '/napoje', label: 'Napoje', Icon: DrinkIcon },
-  { to: '/parzenie', label: 'Parzenie', Icon: BrewIcon },
+  { to: '/parzenie', label: 'Parzenie', Icon: BrewIcon, also: ['/przepis'] },
   { to: '/ziarna', label: 'Moje ziarna', Icon: BeanIcon },
 ];
 

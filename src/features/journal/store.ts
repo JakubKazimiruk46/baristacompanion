@@ -20,6 +20,9 @@ export interface JournalEntry {
   beanName?: string;
   /** Napój wybrany w ścieżce „Mam kawę”. */
   drinkId?: string;
+  /** Własny przepis. Nazwa zostaje, nawet gdy przepis zostanie usunięty. */
+  recipeId?: string;
+  recipeName?: string;
   /** Młynek i jego ustawienie w chwili parzenia. */
   grind?: GrindRecord;
   rating?: Rating;
@@ -52,6 +55,8 @@ function isEntry(value: unknown): value is JournalEntry {
     optionalString(e.beanId) &&
     optionalString(e.beanName) &&
     optionalString(e.drinkId) &&
+    optionalString(e.recipeId) &&
+    optionalString(e.recipeName) &&
     (e.grind === undefined || isGrindRecord(e.grind)) &&
     optionalString(e.note)
   );

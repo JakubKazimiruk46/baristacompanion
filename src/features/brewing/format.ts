@@ -3,7 +3,7 @@ import type { BrewMethod } from '../../data';
 const decimal = new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 1 });
 
 /** Proporcja kawa:woda, np. „1:16,7”. */
-export function formatRatio(method: BrewMethod): string {
+export function formatRatio(method: Pick<BrewMethod, 'dose'>): string {
   return `1:${decimal.format(method.dose.waterMl / method.dose.coffeeG)}`;
 }
 

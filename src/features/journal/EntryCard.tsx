@@ -32,6 +32,7 @@ export function EntryCard({ entry, now, heading: Heading = 'h2' }: EntryCardProp
         <p className="mt-0.5 text-sm text-ink-muted">
           {capitalize(dayAndTime(entry.brewedAt, now))} · {entryDose(entry)}
         </p>
+        {entry.recipeName && <p className="mt-0.5 text-sm">Przepis: {entry.recipeName}</p>}
         {entry.beanName && <p className="mt-0.5 text-sm">{entry.beanName}</p>}
         {entry.grind && <p className="mt-0.5 text-sm text-ink-muted">{entryGrind(entry)}</p>}
         {entry.note && <p className="mt-1 line-clamp-2 text-sm">{entry.note}</p>}

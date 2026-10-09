@@ -16,6 +16,9 @@ import { JournalPage } from './pages/JournalPage';
 import { MethodPage } from './pages/MethodPage';
 import { MilkPage } from './pages/MilkPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { RecipeFormPage } from './pages/RecipeFormPage';
+import { RecipePage } from './pages/RecipePage';
+import { SharedRecipePage } from './pages/SharedRecipePage';
 import { ShelfPage } from './pages/ShelfPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { StartPage } from './pages/StartPage';
@@ -42,6 +45,10 @@ export const routes: RouteObject[] = [
       { path: 'parzenie/dziennik/:entryId', element: <JournalEntryPage /> },
       { path: 'parzenie/:methodId', element: <MethodPage /> },
       { path: 'parzenie/:methodId/start', element: <BrewSessionPage /> },
+      { path: 'parzenie/:methodId/przepisy/nowy', element: <RecipeFormPage /> },
+      { path: 'parzenie/:methodId/przepisy/:recipeId', element: <RecipePage /> },
+      { path: 'parzenie/:methodId/przepisy/:recipeId/edycja', element: <RecipeFormPage /> },
+      { path: 'przepis', element: <SharedRecipePage /> },
       { path: 'ziarna', element: <BeansPage /> },
       { path: 'ziarna/nowe', element: <BeanFormPage /> },
       { path: 'ziarna/mlynek', element: <GrindersPage /> },

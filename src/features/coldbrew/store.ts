@@ -12,6 +12,9 @@ export interface ColdBrewRun {
   waterMl?: number;
   /** Ustawienie młynka w chwili zalania (do dziennika). */
   grind?: GrindRecord;
+  /** Własny przepis, według którego zalano (do dziennika). */
+  recipeId?: string;
+  recipeName?: string;
 }
 
 export const COLD_BREW_KEY = 'barista-companion.cold-brew.v1';
@@ -30,7 +33,9 @@ function parseRun(value: unknown): ColdBrewRun | null {
     getColdBrewVariant(run.variantId) !== undefined &&
     optionalNumber(run.coffeeG) &&
     optionalNumber(run.waterMl) &&
-    (run.grind === undefined || isGrindRecord(run.grind));
+    (run.grind === undefined || isGrindRecord(run.grind)) &&
+    (run.recipeId === undefined || typeof run.recipeId === 'string') &&
+    (run.recipeName === undefined || typeof run.recipeName === 'string');
   return valid ? (run as ColdBrewRun) : null;
 }
 

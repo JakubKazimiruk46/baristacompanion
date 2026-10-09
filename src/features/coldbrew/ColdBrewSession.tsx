@@ -22,7 +22,9 @@ import { formatRatio } from '../brewing/format';
 import { DrinkCard } from '../drinks/DrinkCard';
 import { GrinderLine } from '../grinder/GrinderSetting';
 import { grindersStore, grindRecordFor } from '../grinder/store';
+import type { SessionRecipe } from '../brewing/BrewSession';
 import { journalStore } from '../journal/store';
+import { recipePath } from '../recipes/recipe';
 import { createIcs, downloadIcs } from './ics';
 import { coldBrewStore, useColdBrew, type ColdBrewRun } from './store';
 import { dayAndTime, formatRemaining, isReady, progress, readyAt } from './time';
@@ -38,13 +40,16 @@ function splitSteps(method: BrewMethod) {
   return { before: method.steps.slice(0, index), after: method.steps.slice(index + 1) };
 }
 
-/** Cold brew maceruje się 12–24 h: zamiast stopera zapisujemy start i pokazujemy godzinę gotowości. */
-export function ColdBrewSession({ method }: { method: BrewMethod }) {
+/**
+ * Cold brew maceruje się 12–24 h: zamiast stopera zapisujemy start i pokazujemy godzinę gotowości.
+ * recipe: zalewasz według własnego przepisu (method to wtedy przepis przeliczony na metodę).
+ */
+export function ColdBrewSession({ method, recipe }: { method: BrewMethod; recipe?: SessionRecipe }) {
   const run = useColdBrew();
-  return run ? <ColdBrewStatus method={method} run={run} /> : <ColdBrewSetup method={method} />;
+  return run ? <ColdBrewStatus method={method} run={run} /> : <ColdBrewSetup method={method} recipe={recipe} />;
 }
 
-function ColdBrewSetup({ method }: { method: BrewMethod }) {
+function ColdBrewSetup({ method, recipe }: { method: BrewMethod; recipe?: SessionRecipe }) {
   const [params] = useSearchParams();
   const [variantId, setVariantId] = useState(
     () => getColdBrewVariant(params.get('wariant') ?? '')?.id ?? 'klasyczne',
@@ -63,8 +68,8 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
     <>
       <PageHeader
         title="Cold brew"
-        lead="Wybierz wariant i czas maceracji. Aplikacja zapamięta start, nawet jeśli ją zamkniesz."
-        back={{ to: `/parzenie/${method.id}`, label: method.name }}
+        lead={`${recipe ? `Według przepisu „${recipe.name}”. ` : ''}Wybierz wariant i czas maceracji. Aplikacja zapamięta start, nawet jeśli ją zamkniesz.`}
+        back={recipe ? { to: recipePath(recipe), label: recipe.name } : { to: `/parzenie/${method.id}`, label: method.name }}
       />
 
       <dl className="grid grid-cols-2 gap-3">
@@ -74,7 +79,7 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
         <Fact label="Do picia" value="rozcieńcz 1:1" />
       </dl>
       <div className="mt-3">
-        <GrinderLine method={method} />
+        <GrinderLine method={method} {...(recipe && { fixed: recipe.grinder ?? null })} />
       </div>
 
       <fieldset className="mt-6">
@@ -113,7 +118,7 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
       <Section title="Przygotuj">
         <ol className="space-y-3">
           {steps.map((step, index) => (
-            <li key={step.text} className="flex gap-3">
+            <li key={`${index}-${step.text}`} className="flex gap-3">
               <span
                 aria-hidden="true"
                 className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent"
@@ -137,7 +142,7 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
         type="button"
         className={`mt-3 ${primary}`}
         onClick={() => {
-          const grind = grindRecordFor(grindersStore.getSnapshot(), method.id);
+          const grind = recipe ? recipe.grinder : grindRecordFor(grindersStore.getSnapshot(), method.id);
           coldBrewStore.set({
             startedAt: Date.now(),
             hours,
@@ -145,6 +150,7 @@ function ColdBrewSetup({ method }: { method: BrewMethod }) {
             coffeeG: method.dose.coffeeG,
             waterMl: method.dose.waterMl,
             ...(grind && { grind }),
+            ...(recipe && { recipeId: recipe.id, recipeName: recipe.name }),
           });
         }}
       >
@@ -178,6 +184,7 @@ function ColdBrewStatus({ method, run }: { method: BrewMethod; run: ColdBrewRun 
       waterMl: run.waterMl ?? method.dose.waterMl,
       variantId: run.variantId,
       ...(run.grind && { grind: run.grind }),
+      ...(run.recipeId && run.recipeName && { recipeId: run.recipeId, recipeName: run.recipeName }),
     });
     coldBrewStore.set(null);
     navigate(`/parzenie/dziennik/${entry.id}`, { replace: true });
@@ -197,7 +204,7 @@ function ColdBrewStatus({ method, run }: { method: BrewMethod; run: ColdBrewRun 
         />
         <ol className="space-y-3">
           {after.map((step, index) => (
-            <li key={step.text} className="flex gap-3 rounded-2xl bg-surface p-4">
+            <li key={`${index}-${step.text}`} className="flex gap-3 rounded-2xl bg-surface p-4">
               <span className="font-semibold text-accent">{index + 1}.</span>
               <div>
                 <p className="font-medium">{step.text}</p>

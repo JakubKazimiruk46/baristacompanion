@@ -72,7 +72,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | Krok | Stan |
 | :- | :- |
 | 1. Ustawienie młynka | zrobione (gałąź `feature/mlynek`), czeka na akceptację autora |
-| 2. Własne przepisy | do zrobienia |
+| 2. Własne przepisy | zrobione (gałąź `feature/wlasne-przepisy`, od `feature/mlynek`), czeka na akceptację autora |
 | 3. Szerszy katalog drinków | do zrobienia |
 | 4. Powiadomienia w aplikacji na Androida | do zrobienia |
 | 5. Backend: konto i prywatność | do zrobienia |
@@ -96,6 +96,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - prowadzone parzenie i kalkulator działają z własnym przepisem,
    - dziennik zapisuje, z którego przepisu było parzenie,
    - przepis da się wysłać linkiem (dane w adresie, bez serwera) i zapisać u siebie z linku.
+
+   Wykonanie (2026-10-09): `src/features/recipes` (model i walidacja, formularz jako czyste funkcje, zapis `barista-companion.recipes.v1`, edytor, link). Trasy: `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis` (+ `/edycja`), `/parzenie/:id/start?przepis=`, `/przepis#dane`. Decyzje: temperatura jako zakres „od–do” (jak w metodzie), czas kroku w minutach i sekundach (cold brew ma kroki w godzinach), przepis ma własne mielenie i ustawienie młynka (parzenie nie zmienia ustawienia młynka dla metody), kalkulator trzyma ilość przepisu osobno od metody. Link ma dane po `#` (nie trafiają na serwer), nie zawiera ustawienia młynka i przechodzi tę samą walidację co zapis. Działa też cold brew według przepisu. Ścieżka „Mam kawę” parzy dalej według przepisu metody.
 3. **Szerszy katalog drinków.** Co najmniej 35 napojów (dziś 21): m.in. frappé (zmiksowana mrożona kawa), smoothie kawowe z bananem, shake z masłem orzechowym, mazagran (kawa z cytryną i lodem), kawa z miodem i cynamonem, latte piernikowa, latte dyniowa, latte lawendowa, biała mocha, kawa po wietnamsku z jajkiem (phin). Do tego, zależnie od P1 i P2: irish coffee, espresso martini z kawiarki, dalgona, frappé po grecku. Gotowe, gdy:
    - nowe napoje przechodzą `data.test.ts`,
    - nowe syropy (np. piernikowy, dyniowy, lawendowy) mają przepisy i zamienniki,

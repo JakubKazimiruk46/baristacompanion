@@ -1,12 +1,13 @@
+import type { ReactNode } from 'react';
 import { GRIND_HINTS, GRIND_LABELS, GRIND_SIZES, type BrewMethod } from '../../data';
 import { capitalize } from '../../lib/format';
 import { GrinderPanel } from '../grinder/GrinderSetting';
 
 /**
  * Skala mielenia od bardzo drobnego do grubego: ziarenka rosną, wybrany stopień jest wyróżniony.
- * Pod skalą ustawienie Twojego młynka dla tej metody.
+ * Pod skalą ustawienie Twojego młynka dla tej metody (albo własny panel, np. z przepisu).
  */
-export function GrindScale({ method }: { method: BrewMethod }) {
+export function GrindScale({ method, panel }: { method: BrewMethod; panel?: ReactNode }) {
   const { grind } = method;
   const active = GRIND_SIZES.indexOf(grind);
 
@@ -37,7 +38,7 @@ export function GrindScale({ method }: { method: BrewMethod }) {
         <span>grubo</span>
       </div>
 
-      <GrinderPanel method={method} />
+      {panel ?? <GrinderPanel method={method} />}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { ChevronRightIcon } from '../../components/icons';
 import { GRIND_HINTS, GRIND_LABELS, type BrewMethod } from '../../data';
 import { formatSetting, formatSettingRange } from './format';
 import { useGrindSettingDialog } from './GrindSettingSheet';
-import { grinderModel, useActiveGrinder } from './store';
+import { grinderModel, useActiveGrinder, type GrindRecord } from './store';
 
 const smallButton =
   'flex h-10 shrink-0 items-center justify-center rounded-full border border-line bg-surface px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
@@ -66,11 +66,34 @@ export function GrinderPanel({ method }: { method: BrewMethod }) {
   );
 }
 
-/** Mielenie w jednym wierszu, z ustawieniem Twojego młynka (prowadzone parzenie, cold brew). */
-export function GrinderLine({ method }: { method: BrewMethod }) {
+/**
+ * Mielenie w jednym wierszu, z ustawieniem Twojego młynka (prowadzone parzenie, cold brew).
+ * fixed: ustawienie z własnego przepisu (null: przepis go nie ma), bez zmiany w oknie.
+ */
+export function GrinderLine({ method, fixed }: { method: BrewMethod; fixed?: GrindRecord | null }) {
   const grinder = useActiveGrinder();
   const dialog = useGrindSettingDialog(grinder);
   const setting = grinder?.settings[method.id];
+
+  if (fixed !== undefined) {
+    return (
+      <div className="flex min-h-14 items-center rounded-2xl border border-line bg-surface px-4 py-2">
+        <p className="text-sm">
+          <span className="text-ink-muted">Mielenie: </span>
+          <span className="font-semibold">{GRIND_LABELS[method.grind]}</span>
+          {fixed ? (
+            <>
+              {' · '}
+              {fixed.grinderName}:{' '}
+              <span className="font-semibold whitespace-nowrap tabular-nums">{formatSetting(fixed.setting, fixed.unit)}</span>
+            </>
+          ) : (
+            <span className="text-ink-muted">, {GRIND_HINTS[method.grind]}</span>
+          )}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-2">
