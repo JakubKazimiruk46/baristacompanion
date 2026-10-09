@@ -29,6 +29,7 @@ Zasady projektu (język, kolory, testy, dostępność, telefon najpierw) są w [
 
 - Interesują go: ustawienie młynka, własne przepisy, szerszy katalog drinków, powiadomienia przy zablokowanym ekranie, konta z synchronizacją, przepisy społeczności, AI (etykiety i asystent drinków), zewnętrzna baza ziaren i palarni.
 - Plan kontynuuje w osobnych sesjach.
+- 2026-10-09: na razie bez dostępu do API Claude, więc AI (kroki 8 i 9) jest wyłączone przełącznikiem `VITE_AI_ENABLED` (kod zostaje, włączenie w `docs/backend.md`, sekcja 9). Krok 10 odłożony.
 
 ## Moje założenia
 
@@ -78,9 +79,9 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | 5. Backend: konto i prywatność | kod gotowy (gałąź `feature/konto`, od `feature/android`); czeka na projekt Supabase autora i test logowania na podglądzie Vercela |
 | 6. Synchronizacja danych | kod gotowy (gałąź `feature/synchronizacja`, od `feature/konto`); czeka na sprawdzenie autora na dwóch urządzeniach |
 | 7. Przepisy społeczności | kod gotowy (gałąź `feature/spolecznosc`, od `feature/synchronizacja`); czeka na projekt Supabase autora |
-| 8. AI: rozpoznawanie etykiet | kod gotowy (gałąź `feature/ai-etykiety`, od `feature/spolecznosc`); czeka na klucz API autora i test na prawdziwych opakowaniach |
-| 9. AI: asystent drinków | kod gotowy (gałąź `feature/ai-asystent`, od `feature/ai-etykiety`); czeka na klucz API autora i próbę na prawdziwym modelu |
-| 10. Baza ziaren i palarni | do zrobienia |
+| 8. AI: rozpoznawanie etykiet | kod gotowy (gałąź `feature/ai-etykiety`, od `feature/spolecznosc`), wyłączony (`VITE_AI_ENABLED`) do czasu klucza API autora i testu na prawdziwych opakowaniach |
+| 9. AI: asystent drinków | kod gotowy (gałąź `feature/ai-asystent`, od `feature/ai-etykiety`), wyłączony (`VITE_AI_ENABLED`) do czasu klucza API autora i próby na prawdziwym modelu |
+| 10. Baza ziaren i palarni | odłożony (decyzja autora, 2026-10-09) |
 
 ### Etap A: bez backendu
 

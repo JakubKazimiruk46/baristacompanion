@@ -116,8 +116,9 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
    npx supabase functions deploy drink-assistant
    ```
 
-3. W konsoli Anthropic ustaw **miesięczny limit wydatków** (**Settings → Limits → Spend limit**). To twarda granica kosztów niezależna od limitów w aplikacji.
-4. Dzienne limity na użytkownika (decyzja P8): 20 skanów etykiet i 10 propozycji drinków (zmiana: `npx supabase secrets set AI_DAILY_LABEL_SCANS=30 AI_DAILY_DRINKS=15`). Nieudana próba (błąd, odmowa modelu, przepis niepoprawny także po poprawce) nie zjada limitu.
+3. Włącz AI w aplikacji: `VITE_AI_ENABLED=true` w `.env.local` i w Vercelu (**Settings → Environment Variables**, Production i Preview), potem nowy build. Bez tej zmiennej aplikacja w ogóle nie wywołuje funkcji AI: etykietę odczytuje telefon, a asystenta drinków nie ma (ani wejścia w katalogu, ani opisu AI w polityce prywatności).
+4. W konsoli Anthropic ustaw **miesięczny limit wydatków** (**Settings → Limits → Spend limit**). To twarda granica kosztów niezależna od limitów w aplikacji.
+5. Dzienne limity na użytkownika (decyzja P8): 20 skanów etykiet i 10 propozycji drinków (zmiana: `npx supabase secrets set AI_DAILY_LABEL_SCANS=30 AI_DAILY_DRINKS=15`). Nieudana próba (błąd, odmowa modelu, przepis niepoprawny także po poprawce) nie zjada limitu.
 
 Model: `claude-opus-5-5` (aktualny model domyślny), odpowiedź w formacie JSON wymuszonym schematem (structured outputs), niski poziom wysiłku (`effort: "low"`), bo odczyt etykiety to prosta ekstrakcja. Szacunkowy koszt jednego skanu: zdjęcie 1600 px to ok. 2,5–3 tys. tokenów wejścia, razem z instrukcją ok. 3,5 tys. tokenów (ok. 0,014 USD przy 4 USD za milion), plus kilkaset tokenów wyjścia (ok. 0,01 USD przy 20 USD za milion): razem ok. 0,02–0,03 USD. Przy limicie 20 skanów dziennie to najwyżej ok. 0,5 USD na osobę dziennie. Sprawdź prawdziwe zużycie w logach funkcji (liczba tokenów) i w konsoli Anthropic.
 

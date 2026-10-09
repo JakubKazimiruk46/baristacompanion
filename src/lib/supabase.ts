@@ -17,6 +17,12 @@ export function backendConfig(): { url: string; anonKey: string } | null {
 
 export const backendEnabled = () => backendConfig() !== null;
 
+/**
+ * Funkcje AI (odczyt etykiety przez Claude, asystent drinków) potrzebują backendu i klucza API Claude
+ * w sekretach funkcji. Włącza je VITE_AI_ENABLED=true; bez tego skan robi telefon, a asystenta nie ma.
+ */
+export const aiEnabled = () => backendEnabled() && import.meta.env.VITE_AI_ENABLED === 'true';
+
 let client: Promise<SupabaseClient> | null = null;
 
 export function getSupabase(): Promise<SupabaseClient> {

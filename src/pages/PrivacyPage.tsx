@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import { Section } from '../components/Section';
+import { aiEnabled } from '../lib/supabase';
 
 /** Miejsce do uzupełnienia przez autora (np. administrator danych, kontakt). */
 function Fill({ children }: { children: ReactNode }) {
@@ -72,29 +73,32 @@ export function PrivacyPage() {
         <p className="mt-3">Nie sprzedajemy danych, nie wyświetlamy reklam i nie śledzimy Cię między stronami.</p>
       </Section>
 
-      <Section title="AI (tylko z kontem i za Twoją zgodą)">
-        <ul className="list-disc space-y-2 pl-5">
-          <li>
-            <strong>Zdjęcie etykiety</strong>: przy pierwszym skanie aplikacja pyta o zgodę. Zdjęcie trafia przez nasz
-            serwer do Anthropic (dostawca modelu Claude, USA) tylko po to, żeby odczytać etykietę. Nie zapisujemy go,
-            a logi nie zawierają zdjęcia ani odczytanego tekstu. Bez zgody etykietę odczytuje telefon.
-          </li>
-          <li>
-            <strong>Asystent drinków</strong>: opis, na co masz ochotę, Twoje wybory (temperatura, mleko, wersja
-            roślinna, alkohol) i to, co zaznaczysz w „Co mam w domu”, trafiają przez nasz serwer do Anthropic, żeby AI
-            ułożyło przepis. Nie zapisujemy ich na serwerze; zapisany napój trafia do „Moich napojów” (i do
-            synchronizacji, jeśli masz konto).
-          </li>
-          <li>
-            <strong>Licznik użyć</strong>: ile razy danego dnia skorzystano z AI (dzienny limit). Usuwamy go razem z
-            kontem.
-          </li>
-          <li>
-            Anthropic przetwarza dane w naszym imieniu i nie używa ich do trenowania modeli.{' '}
-            <Fill>okres przechowywania danych przez Anthropic według umowy i podstawa transferu do USA</Fill>.
-          </li>
-        </ul>
-      </Section>
+      {/* Opis AI tylko wtedy, gdy ta wersja aplikacji go używa (VITE_AI_ENABLED). */}
+      {aiEnabled() && (
+        <Section title="AI (tylko z kontem i za Twoją zgodą)">
+          <ul className="list-disc space-y-2 pl-5">
+            <li>
+              <strong>Zdjęcie etykiety</strong>: przy pierwszym skanie aplikacja pyta o zgodę. Zdjęcie trafia przez nasz
+              serwer do Anthropic (dostawca modelu Claude, USA) tylko po to, żeby odczytać etykietę. Nie zapisujemy go,
+              a logi nie zawierają zdjęcia ani odczytanego tekstu. Bez zgody etykietę odczytuje telefon.
+            </li>
+            <li>
+              <strong>Asystent drinków</strong>: opis, na co masz ochotę, Twoje wybory (temperatura, mleko, wersja
+              roślinna, alkohol) i to, co zaznaczysz w „Co mam w domu”, trafiają przez nasz serwer do Anthropic, żeby AI
+              ułożyło przepis. Nie zapisujemy ich na serwerze; zapisany napój trafia do „Moich napojów” (i do
+              synchronizacji, jeśli masz konto).
+            </li>
+            <li>
+              <strong>Licznik użyć</strong>: ile razy danego dnia skorzystano z AI (dzienny limit). Usuwamy go razem z
+              kontem.
+            </li>
+            <li>
+              Anthropic przetwarza dane w naszym imieniu i nie używa ich do trenowania modeli.{' '}
+              <Fill>okres przechowywania danych przez Anthropic według umowy i podstawa transferu do USA</Fill>.
+            </li>
+          </ul>
+        </Section>
+      )}
 
       <Section title="Gdzie są dane">
         <ul className="list-disc space-y-2 pl-5">

@@ -55,6 +55,7 @@ beforeEach(() => {
   resetAuthForTests();
   resetSupabaseForTests();
   fake = installFakeSupabase();
+  vi.stubEnv('VITE_AI_ENABLED', 'true');
   requests = [];
   fake.onFunction('drink-assistant', (body) => {
     requests.push(body as Record<string, unknown>);
@@ -67,6 +68,24 @@ afterEach(() => {
 });
 
 describe('asystent drinków', () => {
+  it('AI wyłączone w tej wersji (bez VITE_AI_ENABLED): bez wejścia w katalogu, bez opisu AI w polityce', async () => {
+    vi.stubEnv('VITE_AI_ENABLED', '');
+    fake.signIn('ania@example.com');
+    const { router } = renderApp('/napoje');
+    expect(screen.queryByRole('link', { name: /Asystent drinków/ })).not.toBeInTheDocument();
+
+    await router.navigate('/napoje/asystent');
+    expect(await screen.findByText('Asystent nie jest dostępny w tej wersji')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zaproponuj napój' })).not.toBeInTheDocument();
+
+    await router.navigate('/prywatnosc');
+    expect(screen.queryByRole('heading', { name: /^AI/ })).not.toBeInTheDocument();
+    vi.stubEnv('VITE_AI_ENABLED', 'true');
+    await router.navigate('/napoje');
+    await router.navigate('/prywatnosc');
+    expect(await screen.findByRole('heading', { name: /^AI/ })).toBeInTheDocument();
+  });
+
   it('bez konta: zachęta do zalogowania', async () => {
     renderApp('/napoje/asystent');
     expect(await screen.findByRole('link', { name: 'Zaloguj się' })).toHaveAttribute('href', '/konto');

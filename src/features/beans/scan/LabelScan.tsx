@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { CameraIcon } from '../../../components/icons';
 import { Sheet } from '../../../components/Sheet';
-import { backendEnabled } from '../../../lib/supabase';
+import { aiEnabled } from '../../../lib/supabase';
 import { useOnline } from '../../../lib/useOnline';
 import { useAuth } from '../../account/auth';
 import { DAILY_LABEL_SCANS, scanWithAi, setLabelScanConsent, useLabelScanConsent } from './aiScan';
@@ -40,7 +40,7 @@ export function LabelScan({ onResult }: { onResult: (guess: LabelGuess) => void 
   const auth = useAuth();
   const online = useOnline();
   const consent = useLabelScanConsent();
-  const aiAvailable = backendEnabled() && auth.status === 'signed-in' && online;
+  const aiAvailable = aiEnabled() && auth.status === 'signed-in' && online;
   const working = state.status === 'working';
 
   const scanOnPhone = async (file: File, note?: string) => {

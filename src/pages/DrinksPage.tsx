@@ -25,6 +25,7 @@ import { canMake } from '../features/shelf/availability';
 import { useShopping } from '../features/shelf/shopping';
 import { useShelf } from '../features/shelf/store';
 import { count } from '../lib/format';
+import { aiEnabled } from '../lib/supabase';
 
 const GUIDES = [
   { to: '/napoje/mleko', label: 'Mleko', Icon: MilkIcon },
@@ -58,16 +59,18 @@ export function DrinksPage() {
 
       <KitchenLinks />
 
-      <Link
-        to="/napoje/asystent"
-        className="mb-3 flex min-h-16 items-center gap-3 rounded-2xl border border-accent bg-surface p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        <DrinkIcon className="size-7 shrink-0 text-accent" />
-        <span className="min-w-0">
-          <span className="block leading-tight font-semibold">Asystent drinków</span>
-          <span className="block text-xs text-ink-muted">Opisz, na co masz ochotę, a AI ułoży nowy napój</span>
-        </span>
-      </Link>
+      {aiEnabled() && (
+        <Link
+          to="/napoje/asystent"
+          className="mb-3 flex min-h-16 items-center gap-3 rounded-2xl border border-accent bg-surface p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <DrinkIcon className="size-7 shrink-0 text-accent" />
+          <span className="min-w-0">
+            <span className="block leading-tight font-semibold">Asystent drinków</span>
+            <span className="block text-xs text-ink-muted">Opisz, na co masz ochotę, a AI ułoży nowy napój</span>
+          </span>
+        </Link>
+      )}
 
       <nav aria-label="Poradniki" className="mb-6 grid grid-cols-3 gap-2">
         {GUIDES.map(({ to, label, Icon }) => (

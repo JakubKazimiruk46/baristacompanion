@@ -12,7 +12,7 @@ import { myDrinksStore } from '../features/assistant/myDrinks';
 import { DrinkBody } from '../features/drinks/DrinkBody';
 import { DrinkMeta } from '../features/drinks/DrinkMeta';
 import { useSavedShelf } from '../features/shelf/store';
-import { backendEnabled } from '../lib/supabase';
+import { aiEnabled } from '../lib/supabase';
 import { useOnline } from '../lib/useOnline';
 import { MOOD_LIMIT } from '../../supabase/functions/_shared/drinkAssistant.ts';
 
@@ -39,12 +39,12 @@ export function AssistantPage() {
     />
   );
 
-  if (!backendEnabled()) {
+  if (!aiEnabled()) {
     return (
       <>
         {header}
         <EmptyState icon={DrinkIcon} title="Asystent nie jest dostępny w tej wersji">
-          Ta wersja aplikacji nie łączy się z serwerem. Wszystkie napoje z katalogu działają bez niego.
+          W tej wersji aplikacji AI jest wyłączone. Wszystkie napoje z katalogu i „Moje napoje” działają bez niego.
         </EmptyState>
       </>
     );

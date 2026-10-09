@@ -43,6 +43,7 @@ beforeEach(() => {
   resetAuthForTests();
   resetSupabaseForTests();
   fake = installFakeSupabase();
+  vi.stubEnv('VITE_AI_ENABLED', 'true');
   sent.length = 0;
   prepare.mockResolvedValue({ image: 'QUJD', mediaType: 'image/jpeg' });
   read.mockResolvedValue('ETIOPIA GUJI\njasno palona\nnuty: jaśmin');
@@ -61,6 +62,19 @@ afterEach(() => {
 const consentDialog = () => screen.getByRole('dialog', { name: 'Odczyt etykiety przez AI' });
 
 describe('skan etykiety: AI dla zalogowanych', () => {
+  it('AI wyłączone w tej wersji (bez VITE_AI_ENABLED): telefon, bez pytania o zgodę', async () => {
+    vi.stubEnv('VITE_AI_ENABLED', '');
+    fake.signIn('ania@example.com');
+    const { user } = renderApp('/ziarna/nowe');
+    await user.upload(await screen.findByLabelText('Zeskanuj etykietę'), photo());
+
+    expect(await screen.findByText(/Odczytał telefon\./)).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Odczyt etykiety przez AI' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Odczytuj przez AI' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Zdjęcie zostaje w telefonie/)).toBeInTheDocument();
+    expect(sent).toHaveLength(0);
+  });
+
   it('przed pierwszym zdjęciem zgoda z informacją, dokąd trafia; potem AI wypełnia formularz', async () => {
     fake.signIn('ania@example.com');
     const { user } = renderApp('/ziarna/nowe');
