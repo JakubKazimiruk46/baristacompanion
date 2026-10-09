@@ -65,6 +65,17 @@ export function CommunityPage() {
         <EmptyState icon={PeopleIcon} title="Społeczność nie jest dostępna w tej wersji">
           Ta wersja aplikacji nie łączy się z serwerem. Twoje napoje, przepisy i reszta aplikacji działają bez niego.
         </EmptyState>
+        {/* Kopia zapasowa działa bez serwera: ekran konta musi być osiągalny i tutaj. */}
+        <Link to="/konto" className={`mt-6 ${card}`}>
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+            <UserIcon className="size-6" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">Kopia zapasowa i prywatność</span>
+            <span className="block text-sm text-ink-muted">Zapisz swoje dane do pliku albo wczytaj je z pliku</span>
+          </span>
+          <ChevronRightIcon className="size-5 shrink-0 text-ink-muted" />
+        </Link>
       </>
     );
   }

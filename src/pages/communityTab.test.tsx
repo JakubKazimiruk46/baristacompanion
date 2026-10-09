@@ -172,10 +172,13 @@ describe('zakładka Społeczność', () => {
     online.mockRestore();
   });
 
-  it('bez backendu: zakładka mówi, że społeczności nie ma w tej wersji', () => {
+  it('bez backendu: zakładka mówi, że społeczności nie ma, a kopia zapasowa jest osiągalna', async () => {
     vi.unstubAllEnvs();
-    renderApp('/spolecznosc');
+    const { user } = renderApp('/spolecznosc');
     expect(screen.getByRole('heading', { name: 'Społeczność nie jest dostępna w tej wersji' })).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: /Kopia zapasowa i prywatność/ }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Konto' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zapisz kopię' })).toBeInTheDocument();
   });
 });
 
