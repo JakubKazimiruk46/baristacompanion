@@ -45,14 +45,14 @@ src/
                           z zamiennikami, naczynia, warianty cold brew, młynki, etykiety PL, typy;
                           index.ts = katalog składników i wyszukiwanie; validate.ts = reguły spójności napoju
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
-                          Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
+                          Chip, ChoiceChip, Segmented (przełącznik widoków), Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
   features/
     drinks/               filtry i wyszukiwanie, losowanie (random.ts), kafelki i karty, okno filtrów i losowania,
                           składniki, kroki, sekcja „Jak podać”, treść ekranu napoju (DrinkBody)
     assistant/            asystent drinków (AI): zapytanie i sprawdzenie propozycji (api.ts), „Moje napoje” (zapis,
                           useDrink, useAllDrinks), oznaczenie „Przepis od AI”
     glass/                <DrinkGlass>: geometria naczyń (czyste funkcje) i rysunek SVG z dekoracjami
-    brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia,
+    brewing/              stoper i sesja parzenia (czyste funkcje), sygnały, ekran sesji, skala mielenia, widoki listy metod (methodList.ts),
                           kalkulator ilości (dose.ts: przeliczanie kroków, doseStore: wybrana ilość), lista kroków
     recipes/              własne przepisy: model i walidacja (recipe.ts), formularz (draft.ts), oba czyste funkcje;
                           zapis, edytor kroków, sekcja „Twoje przepisy”, link z przepisem (share.ts)
@@ -67,7 +67,7 @@ src/
                           magazynów, śledzenie zmian (metadane), wysyłka i pobieranie, plik JSON
     grinder/              Mój młynek: zapis młynków i ustawień dla metod, formularz, okno ustawienia,
                           panel przy skali mielenia i wiersz w parzeniu, odmiana jednostek
-    favorites/            ulubione napoje: zapis i przycisk „Ulubiony”
+    favorites/            ulubione napoje i ulubione metody: zapis i przyciski „Ulubiony”/„Ulubiona”
     wishlist/             „Chcę spróbować”: lista napojów do spróbowania (zapis i przycisk)
     journal/              dziennik parzeń: zapis wpisów, ocena (gwiazdki), edycja, karta wpisu
     shelf/                „Co mam w domu”: półka, dostępność napoju (czysta funkcja), lista zakupów
@@ -98,7 +98,7 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
 | `/napoje/asystent` | asystent drinków (AI, z kontem): propozycja napoju z katalogu i półki, „Zapisz w Moich napojach” |
-| `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody, szczegóły, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
+| `/parzenie`, `/parzenie/:id`, `/parzenie/:id/start` | metody jako kafelki (`?widok=ostatnie\|ulubione`, domyślnie A–Z), szczegóły z „Ulubiona”, prowadzone parzenie (cold brew: długi timer, `?wariant=`; własny przepis: `?przepis=id`) |
 | `/parzenie/:id/przepisy/nowy`, `/parzenie/:id/przepisy/:przepis`, `…/:przepis/edycja` | własne przepisy: nowy (kopia przepisu metody), ekran przepisu (kalkulator, mielenie, kroki, „Wyślij”, usuwanie), edycja |
 | `/przepis#dane` | przepis z linku: podgląd i „Zapisz u siebie” |
 | `/parzenie/:id/spolecznosc/:przepis` | przepis społeczności: „Parz według tego przepisu”, „Zapisz u siebie”, „Zgłoś” |

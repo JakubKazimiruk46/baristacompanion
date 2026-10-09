@@ -1,6 +1,7 @@
 import { myDrinksStore, parseMyDrink, type MyDrink } from '../assistant/myDrinks';
 import { beansStore, parseBeans, type SavedBean } from '../beans/store';
 import { dosesStore, parseDoses } from '../brewing/doseStore';
+import { methodFavoritesStore, parseMethodFavorites } from '../favorites/methods';
 import { favoritesStore, parseFavorites } from '../favorites/store';
 import { grindersStore, parseGrinders, type GrindersState, type SavedGrinder } from '../grinder/store';
 import { journalStore, MAX_ENTRIES, parseJournal, type JournalEntry } from '../journal/store';
@@ -91,6 +92,17 @@ const favorites: Collection<string[]> = {
   // Sortowanie jest stabilne: rekordy bez czasu (stary zapis) zostają w dotychczasowej kolejności.
   fromRecords: (records) => [...records].sort((a, b) => b.updatedAt - a.updatedAt).map((r) => r.id),
   parse: (id, data) => (data === true && parseFavorites([id]).length === 1 ? true : null),
+};
+
+/** Ulubione metody: rekord na metodę, ostatnio dodane pierwsze. */
+const methodFavorites: Collection<string[]> = {
+  name: 'method-favorites',
+  subscribe: methodFavoritesStore.subscribe,
+  read: methodFavoritesStore.getSnapshot,
+  write: methodFavoritesStore.replaceAll,
+  toRecords: (ids) => new Map(ids.map((id) => [id, true])),
+  fromRecords: (records) => [...records].sort((a, b) => b.updatedAt - a.updatedAt).map((r) => r.id),
+  parse: (id, data) => (data === true && parseMethodFavorites([id]).length === 1 ? true : null),
 };
 
 /** „Do spróbowania”: rekord na napój, ostatnio dodane pierwsze (jak ulubione). */
@@ -229,6 +241,7 @@ export const collections: Collection[] = [
   recipes,
   myDrinks,
   wishlist,
+  methodFavorites,
 ] as Collection[];
 
 export const getCollection = (name: CollectionName) => collections.find((c) => c.name === name)!;

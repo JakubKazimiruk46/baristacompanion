@@ -1,20 +1,53 @@
 import { screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { beanMethods, drinks, drinksForMethod, getMethod, GRIND_LABELS, methods } from '../data';
+import { methodFavoritesStore } from '../features/favorites/methods';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
-import { capitalize, formatSeconds } from '../lib/format';
-import { renderApp } from '../test/renderApp';
+import { journalStore } from '../features/journal/store';
+import { capitalize } from '../lib/format';
+import { currentUrl, renderApp } from '../test/renderApp';
+
+beforeEach(() => {
+  localStorage.clear();
+  methodFavoritesStore.reset();
+  journalStore.reset();
+});
+
+const tileNames = () =>
+  within(screen.getByRole('list', { name: 'Metody parzenia' }))
+    .getAllByRole('link')
+    .map((link) => getMethodName(link.getAttribute('href')!));
+const getMethodName = (href: string) => getMethod(href.replace('/parzenie/', ''))!.name;
 
 describe('lista metod', () => {
-  it('pokazuje każdą metodę z czasem, trudnością i sprzętem', () => {
+  it('kafelki ze wszystkimi metodami, alfabetycznie', () => {
     renderApp('/parzenie');
-    for (const method of methods) {
-      const escaped = method.name.replace(/[()]/g, '\\$&');
-      const link = screen.getByRole('link', { name: new RegExp(`^${escaped}`) });
-      expect(link).toHaveAttribute('href', `/parzenie/${method.id}`);
-      expect(link).toHaveTextContent(formatSeconds(method.totalTimeSec));
-      expect(link).toHaveTextContent(method.equipment[0]!);
-    }
+    const names = tileNames();
+    expect(names).toHaveLength(methods.length);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'pl')));
+    expect(screen.getByRole('radio', { name: 'A–Z' })).toBeChecked();
+  });
+
+  it('ostatnio parzone: metody z dziennika na początku, z datą', async () => {
+    journalStore.add({ methodId: 'syfon', coffeeG: 20, waterMl: 300 });
+    const { user, router } = renderApp('/parzenie');
+    await user.click(screen.getByRole('radio', { name: 'Ostatnio parzone' }));
+    expect(currentUrl(router)).toBe('/parzenie?widok=ostatnie');
+    expect(tileNames()[0]).toBe('Syfon');
+    expect(screen.getByRole('link', { name: /^Syfon/ })).toHaveTextContent('dziś');
+  });
+
+  it('ulubione: serce na ekranie metody, potem tylko ulubione na liście', async () => {
+    const { user, router } = renderApp('/parzenie?widok=ulubione');
+    expect(screen.getByRole('heading', { name: 'Nie masz jeszcze ulubionych metod' })).toBeInTheDocument();
+
+    await router.navigate('/parzenie/chemex');
+    await user.click(await screen.findByRole('button', { name: 'Ulubiona' }));
+    expect(screen.getByRole('button', { name: 'Ulubiona' })).toHaveAttribute('aria-pressed', 'true');
+
+    await router.navigate('/parzenie?widok=ulubione');
+    expect(await screen.findByRole('link', { name: /^Chemex.*Ulubiona/ })).toBeInTheDocument();
+    expect(tileNames()).toEqual(['Chemex']);
   });
 });
 

@@ -48,6 +48,16 @@ export function dayAndTime(at: number, now: number): string {
   return `${day} o ${clockTime(date)}`;
 }
 
+/** Krótko, kiedy coś było: „dziś”, „wczoraj”, „3 dni temu”, „12.09”. */
+export function shortDay(at: number, now: number): string {
+  const date = new Date(at);
+  const days = calendarDaysBetween(date, new Date(now));
+  if (days <= 0) return 'dziś';
+  if (days === 1) return 'wczoraj';
+  if (days < 7) return `${days} dni temu`;
+  return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
 /** „11 h 20 min”, „45 min”, „mniej niż minuta”. */
 export function formatRemaining(ms: number): string {
   const totalMin = Math.ceil(ms / 60_000);
