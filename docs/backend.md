@@ -52,10 +52,11 @@ Kolejne kroki planu dokładają migracje i funkcje: po pobraniu zmian powtórz `
   - `http://localhost:4173/konto`
   - `https://barista-companion.vercel.app/konto`
   - `https://*-TWOJ-ZESPOL.vercel.app/konto` (podglądy Vercela; nazwa zespołu jest w adresie podglądu)
+  - `pl.baristacompanion.app://konto` (aplikacja na Androida: link z e-maila i Google wracają do aplikacji)
 
 ## 5. Logowanie e-mailem: link i kod
 
-Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeglądarce, a kod także w aplikacji na Androida (tam link otworzyłby przeglądarkę zamiast aplikacji).
+Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeglądarce i w aplikacji na Androida (otwiera aplikację adresem `pl.baristacompanion.app://konto`, jeśli jest na liście z punktu 4), a kod jest zapasem, gdy link otworzy się na innym urządzeniu albo w przeglądarce.
 
 **Authentication → Emails → Templates → Magic Link**: temat `Logowanie do Barista Companion`, treść:
 
@@ -77,7 +78,7 @@ Wbudowana poczta Supabase wysyła tylko kilka wiadomości na godzinę: wystarczy
 3. **Credentials → Create credentials → OAuth client ID** → typ **Web application** → **Authorized redirect URIs**: `https://TWOJ_REF.supabase.co/auth/v1/callback`.
 4. Skopiuj **Client ID** i **Client secret** do Supabase: **Authentication → Sign In / Providers → Google** → włącz i wklej.
 
-W aplikacji na Androida przycisk Google jest ukryty (Google blokuje logowanie w osadzonej przeglądarce): tam logowanie kodem z e-maila.
+W aplikacji na Androida Google otwiera się w karcie systemowej (Custom Tabs, `@capacitor/browser`), bo w osadzonym WebView Google logowania nie pozwala. Po zalogowaniu karta wraca do aplikacji adresem `pl.baristacompanion.app://konto?code=…`, a aplikacja wymienia kod na sesję. W Google Cloud nic dodatkowego nie trzeba: przekierowanie z Google i tak trafia do Supabase.
 
 ## 7. Sprawdzenie
 

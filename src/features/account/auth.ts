@@ -1,6 +1,8 @@
 import type { AuthError, User } from '@supabase/supabase-js';
 import { useEffect, useSyncExternalStore } from 'react';
+import { isNativeApp } from '../../lib/notifications';
 import { backendEnabled, getSupabase, hasStoredSession } from '../../lib/supabase';
+import { authRedirect, openNativeOAuth } from './nativeAuth';
 
 /** Zalogowany użytkownik: tylko to, czego potrzebuje aplikacja. */
 export interface AccountUser {
@@ -101,7 +103,25 @@ export function errorMessage(error: Pick<AuthError, 'message'> & { code?: string
   }
 }
 
-const redirectTo = () => `${window.location.origin}/konto`;
+// Komunikat o nieudanym logowaniu z aplikacji natywnej (link wygasł), do pokazania na ekranie konta.
+let notice: string | null = null;
+const noticeListeners = new Set<() => void>();
+
+export const authNoticeStore = {
+  subscribe(listener: () => void) {
+    noticeListeners.add(listener);
+    return () => noticeListeners.delete(listener);
+  },
+  getSnapshot: () => notice,
+  set(next: string | null) {
+    notice = next;
+    noticeListeners.forEach((listener) => listener());
+  },
+};
+
+export function useAuthNotice(): string | null {
+  return useSyncExternalStore(authNoticeStore.subscribe, authNoticeStore.getSnapshot);
+}
 
 async function run(action: () => Promise<{ error: AuthError | null }>): Promise<ActionResult> {
   try {
@@ -115,8 +135,9 @@ async function run(action: () => Promise<{ error: AuthError | null }>): Promise<
 /** Wiadomość z linkiem i kodem do logowania. Konto powstaje przy pierwszym logowaniu. */
 export async function sendLoginEmail(email: string): Promise<ActionResult> {
   const supabase = await getSupabase();
+  authNoticeStore.set(null);
   return run(() =>
-    supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo(), shouldCreateUser: true } }),
+    supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: authRedirect(), shouldCreateUser: true } }),
   );
 }
 
@@ -126,9 +147,42 @@ export async function verifyLoginCode(email: string, code: string): Promise<Acti
   return run(() => supabase.auth.verifyOtp({ email, token: code, type: 'email' }));
 }
 
+/**
+ * Google. W PWA przekierowanie strony; w aplikacji natywnej adres logowania otwiera karta systemowa,
+ * a powrót (pl.baristacompanion.app://konto?code=…) obsługuje useNativeAuthReturn.
+ */
 export async function signInWithGoogle(): Promise<ActionResult> {
   const supabase = await getSupabase();
-  return run(() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo() } }));
+  authNoticeStore.set(null);
+  if (!isNativeApp()) {
+    return run(() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: authRedirect() } }));
+  }
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: authRedirect(), skipBrowserRedirect: true },
+    });
+    if (error || !data.url) return { ok: false, message: errorMessage(error ?? { message: 'no url' }) };
+    await openNativeOAuth(data.url);
+    return { ok: true };
+  } catch {
+    return { ok: false, message: errorMessage({ message: 'network' }) };
+  }
+}
+
+/** Aplikacja natywna: kod z adresu powrotu (link z e-maila, Google) na sesję w tej aplikacji. */
+export async function completeNativeSignIn(code: string): Promise<ActionResult> {
+  try {
+    const supabase = await getSupabase();
+    await startAuth();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      return { ok: false, message: 'Logowanie się nie udało: link wygasł albo był otwarty na innym urządzeniu. Wpisz kod z e-maila.' };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, message: errorMessage({ message: 'network' }) };
+  }
 }
 
 export async function signOut(): Promise<ActionResult> {
@@ -155,4 +209,5 @@ export async function deleteAccount(): Promise<ActionResult> {
 export function resetAuthForTests() {
   state = null;
   started = null;
+  notice = null;
 }

@@ -82,6 +82,18 @@ Ikona na pasku stanu to biała szklanka, a nazwa i ikona aplikacji są takie jak
 - **Doze:** przybliżone powiadomienia z `allowWhileIdle` przychodzą w uśpieniu najwyżej raz na ok. 9 minut.
 - Jeśli test pokaże opóźnienia także ze zgodą na dokładny czas, następnym krokiem jest usługa pierwszoplanowa z licznikiem w powiadomieniu (własna wtyczka). To osobna, opcjonalna zmiana.
 
+## 5b. Test logowania (lista kontrolna)
+
+Wymaga projektu Supabase (`docs/backend.md`) z adresem `pl.baristacompanion.app://konto` na liście **Redirect URLs** i zmiennymi `VITE_SUPABASE_*` w `.env.local` przed `npm run android:sync`.
+
+1. **Konto → Wyślij link do logowania** na swój adres. Na tym samym telefonie otwórz e-mail i stuknij link: Android pyta, czym otworzyć (albo od razu otwiera) **Barista Companion**, a aplikacja pokazuje „Zalogowano jako …”.
+2. To samo przy zamkniętej aplikacji (usuń ją z ostatnich): link ją uruchamia i loguje.
+3. **Zaloguj przez Google**: otwiera się karta Chrome, po wyborze konta wraca do aplikacji, zalogowany.
+4. Ze **Społeczności → Zaloguj się, żeby udostępniać**: po zalogowaniu (link albo Google) aplikacja wraca do Społeczności.
+5. Link otwarty drugi raz (już użyty): ekran konta pokazuje komunikat, że link wygasł; kod z e-maila dalej działa.
+
+Schemat adresu jest w `AndroidManifest.xml` (`intent-filter` z `@string/custom_url_scheme` i hostem `konto`), a obsługa w `src/features/account/nativeAuth.ts` i `useNativeAuthReturn.ts`.
+
 ## 6. Ikony i ekran startowy
 
 Ikony w `android/app/src/main/res/mipmap-*` wygenerowano z ikon PWA (`public/pwa-512x512.png`, `public/maskable-icon-512x512.png`), tło ikony adaptacyjnej to `#3B2A20`, a ekran startowy ma tło `#faf6f1` z manifestu. Po zmianie ikon PWA wygeneruj je ponownie: Android Studio → prawy klik na `res` → **New → Image Asset**.

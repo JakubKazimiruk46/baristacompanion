@@ -311,10 +311,18 @@ export function createFakeSupabase() {
         signIn(email);
         return { data: { session }, error: null };
       }),
-      signInWithOAuth: vi.fn(async (_options: { provider: string; options?: Record<string, unknown> }) => ({
-        data: {},
+      signInWithOAuth: vi.fn(async (options: { provider: string; options?: Record<string, unknown> }) => ({
+        data: { provider: options.provider, url: `https://test.supabase.co/auth/v1/authorize?provider=${options.provider}` },
         error: null,
       })),
+      // Powrót z logowania z kodem (PKCE): poprawny kod loguje użytkownika z fake.codeEmail.
+      exchangeCodeForSession: vi.fn(async (code: string) => {
+        if (code !== fake.validAuthCode) {
+          return { data: { session: null }, error: { message: 'invalid flow state', code: 'bad_code_verifier', status: 400 } };
+        }
+        signIn(fake.codeEmail);
+        return { data: { session }, error: null };
+      }),
       signOut: vi.fn(async (_options?: { scope?: string }) => {
         signOutLocal();
         return { error: null };
@@ -386,6 +394,9 @@ export function createFakeSupabase() {
     table,
     /** Kod z e-maila, który przechodzi weryfikację. */
     validCode: '123456',
+    /** Kod z adresu powrotu (link z e-maila, Google), który exchangeCodeForSession przyjmuje. */
+    validAuthCode: 'kod-pkce',
+    codeEmail: 'ania@example.com',
     signIn,
     signOutLocal,
     get session() {

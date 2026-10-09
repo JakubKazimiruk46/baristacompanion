@@ -15,7 +15,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 - PGlite (Postgres w WASM) + pgTAP w testach: migracje i reguły dostępu sprawdzane na prawdziwym Postgresie, bez Dockera
 - vite-plugin-pwa 2 (`generateSW`, `autoUpdate`); wdrożenie na Vercel (`vercel.json`)
 - tesseract.js 7: rozpoznawanie tekstu na etykietach ziaren, w przeglądarce (bez backendu)
-- Capacitor 8: aplikacja na Androida z tej samej PWA (`android/`, `capacitor.config.ts`), lokalne powiadomienia (`@capacitor/local-notifications`)
+- Capacitor 8: aplikacja na Androida z tej samej PWA (`android/`, `capacitor.config.ts`), lokalne powiadomienia (`@capacitor/local-notifications`), powrót z logowania (`@capacitor/app`, `@capacitor/browser`)
 - Supabase (`@supabase/supabase-js` 2, ładowany dynamicznie): konto, baza z RLS, funkcje serwerowe w Deno (`supabase/`)
 
 ## Komendy
@@ -63,7 +63,8 @@ src/
     beans/                Moje ziarna: zapis, formularz, dopasowanie metod (czysta funkcja),
                           scan/: skan etykiety (AI przez scan-label albo OCR w przeglądarce + parser tekstu,
                           zgoda na AI, przygotowanie zdjęcia)
-    account/              konto: stan logowania (auth.ts), profil i nick, eksport danych konta
+    account/              konto: stan logowania (auth.ts), logowanie w aplikacji natywnej (nativeAuth.ts, useNativeAuthReturn),
+                          powrót po zalogowaniu (returnTo.ts), profil i nick, eksport danych konta
     community/            społeczność: przepisy (api.ts, walidacja jak własny przepis) i napoje (drinks.ts, walidacja jak
                           katalog), sekcja na ekranie metody, publikowanie przepisu i napoju, zgłoszenie, listy stronami
     sync/                 synchronizacja i kopia zapasowa: format rekordów, scalanie (czyste funkcje), adaptery
@@ -181,6 +182,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Baribar, Społeczność. Zakładka jes
 ## PWA, telefon i publikacja
 
 - Service worker działa tylko w buildzie (`npm run build` + `npm run preview`); w `npm run dev` jest wyłączony, a w aplikacji natywnej się nie rejestruje (`main.tsx`, `injectRegister: false`).
+- **Logowanie w aplikacji na Androida:** link z e-maila i Google wracają adresem `pl.baristacompanion.app://konto?code=…` (intent-filter w manifeście, na liście Redirect URLs w Supabase). `useNativeAuthReturn` w `AppLayout` słucha `appUrlOpen` i `getLaunchUrl` (bez ładowania Supabase, dopóki nie przyjdzie kod), wymienia kod (`exchangeCodeForSession`) i wraca pod adres z `returnTo`. Google w Custom Tabs (`skipBrowserRedirect` + `Browser.open`). Adres powrotu bierz z `authRedirect()`, nie składaj go ręcznie. W testach podmieniaj `@capacitor/app`, `@capacitor/browser` i `@capacitor/local-notifications` (patrz `pages/nativeAuth.test.tsx`).
 - **Aplikacja na Androida:** powiadomienia planuj tylko przez `lib/notifications` (stałe id z `NOTIFICATION_IDS`, jeden kanał `parzenie`). Krok ze stoperem planuje powiadomienie w `useBrewSession`, a pauza, reset, zmiana kroku i wyjście je odwołują; cold brew planuje `useColdBrewNotification` w `AppLayout`. O zgodę pyta `<NotificationPrompt>` z wyjaśnieniem przed oknem systemu; bez zgody aplikacja działa jak PWA. Instrukcja i lista kontrolna: [docs/aplikacja-android.md](docs/aplikacja-android.md).
 - Precache: js/css/html, ikony z manifestu i `includeAssets` w `vite.config.ts`. Nowy plik z `public/` potrzebny offline dopisz do `includeAssets`.
 - Skan etykiety pobiera przy pierwszym użyciu worker, rdzeń WASM i modele `pol`+`eng` z cdn.jsdelivr.net (kilka MB). Service worker trzyma je w pamięci podręcznej `ocr` (`workbox.runtimeCaching`), a modele zostają też w IndexedDB. W testach `ocr.ts` podmieniaj przez `vi.mock`.
