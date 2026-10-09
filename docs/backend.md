@@ -104,6 +104,7 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 | `20261009130000_user_data.sql` | synchronizacja: tabela `user_data` (rekord na wiersz, RLS tylko dla właściciela, limit 20 000 wierszy) i funkcja `sync_push` (zapisuje tylko nowsze wersje) |
 | `20261009150000_ai_usage.sql` | dzienne liczniki AI (`ai_usage`) i funkcje `consume_ai_quota` / `release_ai_quota` (tylko dla funkcji serwerowych) |
 | `20261009140000_community_recipes.sql` | przepisy społeczności: `public_recipes` (ograniczenia długości i kroków, RLS), zapisy, zgłoszenia, moderatorzy i funkcje do zapisu, zgłoszeń i moderacji |
+| `20261010095000_anon_is_moderator.sql` | poprawka: `anon` może wykonać `is_moderator()` (bez tego niezalogowany nie widział przepisów społeczności: reguła odczytu woła tę funkcję) |
 | `20261010090000_user_data_collections.sql` | nowe kolekcje synchronizacji: lista „Do spróbowania” (`wishlist`) i ulubione metody (`method-favorites`) |
 | `20261010100000_community_drinks.sql` | napoje społeczności: `public_drinks` (napój jako dokument jsonb, kształt i rozmiar pilnowane w bazie, nazwa i temperatura z dokumentu, RLS), zapisy, zgłoszenia, funkcje `save_public_drink`, `report_public_drink`, `moderate_public_drink`; kolejka moderatora wspólna dla przepisów i napojów (kolumna `kind`) |
 

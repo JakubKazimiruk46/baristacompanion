@@ -12,6 +12,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 - Tailwind CSS 4: konfiguracja w CSS (`src/index.css`), nie ma `tailwind.config.js`
 - React Router 8 w trybie data router. Wszystko importuj z `react-router` (pakiet `react-router-dom` już nie istnieje), tylko `RouterProvider` z `react-router/dom`
 - Vitest 5 + jsdom + Testing Library (react, user-event, jest-dom); Playwright do E2E (w systemowym Edge)
+- PGlite (Postgres w WASM) + pgTAP w testach: migracje i reguły dostępu sprawdzane na prawdziwym Postgresie, bez Dockera
 - vite-plugin-pwa 2 (`generateSW`, `autoUpdate`); wdrożenie na Vercel (`vercel.json`)
 - tesseract.js 7: rozpoznawanie tekstu na etykietach ziaren, w przeglądarce (bez backendu)
 - Capacitor 8: aplikacja na Androida z tej samej PWA (`android/`, `capacitor.config.ts`), lokalne powiadomienia (`@capacitor/local-notifications`)
@@ -23,7 +24,7 @@ Wymaga Node `^22.22 || >=24` (React Router 8, Vitest 5).
 npm run dev         # serwer deweloperski, dostępny też w sieci lokalnej (adres „Network”)
 npm run build       # typecheck + build produkcyjny do dist/
 npm run preview     # podgląd builda (z service workerem), też w sieci lokalnej
-npm test            # testy jednostkowe i komponentów (Vitest, tylko src/)
+npm test            # testy jednostkowe i komponentów (Vitest, tylko src/), w tym baza: migracje + pgTAP na PGlite
 npm run test:watch  # jw. w trybie obserwacji
 npm run test:e2e    # build + Playwright (e2e/) na npm run preview, w przeglądarce Edge
 npm run typecheck   # tylko tsc
@@ -82,7 +83,7 @@ src/
                           useDialogParam, useNow, useOnline, useWakeLock, notifications (Capacitor, w PWA nic nie robi),
                           supabase (klient ładowany dynamicznie, wyłączony bez zmiennych VITE_SUPABASE_*)
   pages/                  ekrany tras
-  test/                   setup, renderApp, fakeSupabase (Supabase w pamięci), testy kontrastu i konfiguracji
+  test/                   setup, renderApp, fakeSupabase (Supabase w pamięci), testy kontrastu i konfiguracji, baza (PGlite + pgTAP)
 e2e/                      testy Playwright
 docs/                     publikacja, test na telefonie, aplikacja na Androida
 android/                  projekt Androida (Capacitor): manifest, ikony, ekran startowy, ikona powiadomień
@@ -165,6 +166,7 @@ Dolna nawigacja: Start, Napoje, Parzenie, Baribar, Społeczność. Zakładka jes
 - **Bez konta działa wszystko, co działało.** Funkcje z serwerem są dodatkiem i chowają się bez internetu (`useOnline`) albo bez zmiennych `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (`backendEnabled()`).
 - Klienta bierz tylko z `getSupabase()` (`lib/supabase`): ładuje bibliotekę dynamicznie. Start aplikacji jej nie ładuje, chyba że w przeglądarce jest zapisana sesja (`barista-companion.auth`). Stan konta: `useAuth()` (`features/account/auth`).
 - Każda tabela: `enable row level security`, reguły tylko dla właściciela (`(select auth.uid()) = …`), klucz obcy do `auth.users` z `on delete cascade` (usunięcie konta usuwa wszystko). Nowa tabela to nowa migracja w `supabase/migrations` (nazwa z datą) i test pgTAP w `supabase/tests`.
+- **Baza w testach:** `src/test/database.test.ts` stawia świeży PGlite z atrapą Supabase (role `anon`/`authenticated`/`service_role`, schemat `auth`, `auth.uid()` z `request.jwt.claims`, domyślne uprawnienia), wgrywa wszystkie migracje po kolei i uruchamia każdy plik `supabase/tests/*.test.sql` (pgTAP). Sprawdza też, że każda tabela w `public` ma RLS. Funkcja wołana w regule RLS musi mieć `execute` dla każdej roli z tej reguły (także `anon`), inaczej odczyt kończy się „permission denied”. Wgranej migracji nie zmieniaj: poprawka to nowa migracja.
 - Sekrety (klucz `service_role`, klucz Claude) tylko w sekretach funkcji (`npx supabase secrets set`), nigdy w repozytorium ani w `VITE_*`. Funkcje serwerowe w Deno korzystają z `supabase/functions/_shared/http.ts` (CORS, zalogowany użytkownik, błędy po polsku) i nie logują treści od użytkowników.
 - Teksty od użytkowników zawsze jako tekst (React), nigdy jako HTML.
 - W testach podmieniaj `@supabase/supabase-js` atrapą z `src/test/fakeSupabase.ts` (`installFakeSupabase()`, w `beforeEach` też `resetSupabaseForTests()` i `resetAuthForTests()`, w `afterEach` `vi.unstubAllEnvs()`).

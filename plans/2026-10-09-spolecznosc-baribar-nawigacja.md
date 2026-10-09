@@ -48,9 +48,9 @@ Aplikacja ma być wygodna na telefonie bez konta i z kontem. Konto otwiera społ
 | 3. Parzenie: kafelki, widoki, ulubione metody | zrobione |
 | 4. Baribar | zrobione |
 | 5. Kreator napoju (własne napoje bez konta) | zrobione |
-| 6. Społeczność: zakładka, napoje społeczności, konto | zrobione (migracja niesprawdzona na prawdziwej bazie: krok 8) |
+| 6. Społeczność: zakładka, napoje społeczności, konto | zrobione |
 | 7. Konto w aplikacji na Androida | do zrobienia |
-| 8. Baza: migracje i RLS sprawdzane na PGlite | do zrobienia |
+| 8. Baza: migracje i RLS sprawdzane na PGlite | zrobione |
 
 1. **„Chcę spróbować” i menu „Mam kawę”** (pkt 6). Zapis `barista-companion.to-try.v1` (id napojów z katalogu i Moich napojów, kolekcja synchronizacji `to-try`, migracja dopuszcza nową kolekcję). Przełącznik „Chcę spróbować” na ekranie napoju obok „Ulubiony”, znacznik na karcie, filtr `?sprobuj=1`. Menu `/mam-kawe` z trzema wyborami; „Do spróbowania” (lista, pusty stan z linkiem do Napojów), „Zaskocz mnie” (losowy napój z „Losuj jeszcze raz” i „Robię ten napój”), „Wybiorę sam” (7 kroków). Ścieżka od napoju: 4 kroki, metoda bazy z alternatywami. Na podaniu: „Spróbowane, usuń z listy”. Gotowe, gdy: testy menu, ścieżki od napoju i zapisu, E2E przechodzi (z nowym menu), a stara ścieżka działa jak dotąd.
 
@@ -72,6 +72,8 @@ Aplikacja ma być wygodna na telefonie bez konta i z kontem. Konto otwiera społ
    Wykonanie: migracja `20261010100000_community_drinks.sql` + test pgTAP `community_drinks_rls.test.sql`; `features/community/drinks.ts`, `PublishDrinkSection`, `ReportForm` (wspólny dla przepisów i napojów), `usePagedList`; ekrany `CommunityPage`, `CommunityDrinkPage`, alias `/spolecznosc/przepisy/:id` w `CommunityRecipePage`; `features/account/returnTo.ts`; piąta zakładka (etykiety 11 px, żeby „Społeczność” mieściła się przy 360 px). Konto, prywatność i moderacja należą teraz do zakładki Społeczność, a na Starcie skrót „Konto” zastąpiła „Społeczność”. Udostępnianie napoju: karta PNG (jak w katalogu) i „Wyślij link” (systemowe udostępnianie albo schowek). Zdjęć nie ma (D3).
 7. **Konto w aplikacji na Androida** (pkt 1). `@capacitor/app` i `@capacitor/browser`, schemat `pl.baristacompanion.app` w manifeście, w wersji natywnej `redirectTo` na ten schemat, Google przez Custom Tabs, wymiana kodu po powrocie (`exchangeCodeForSession`). Dokumentacja (adres powrotu w Supabase). Gotowe, gdy: testy z podmienionymi wtyczkami; sprawdzenie na telefonie czeka na autora.
 8. **Baza na PGlite** (PS autora). `npm run test:db`: PGlite z atrapą schematu `auth` i ról Supabase, wszystkie migracje po kolei, testy reguł dostępu (właściciel, inny użytkownik, anon) dla nowych tabel. Gotowe, gdy: migracje wchodzą bez błędów, testy RLS przechodzą.
+
+   Wykonanie: `@electric-sql/pglite` 0.5.8 i `@electric-sql/pglite-pgtap` 0.0.9 (dev, wersje dokładne: pgTAP wymaga tej samej wersji PGlite), test `src/test/database.test.ts` w zwykłym `npm test` (środowisko node; `src/test/setup.ts` pomija część z DOM). Zamiast osobnego `npm run test:db`: baza sprawdza się przy każdym `npm test` (ok. 3 s). **Znaleziony błąd z poprzedniego etapu:** reguła odczytu `public_recipes` woła `is_moderator()`, a `anon` nie miał prawa jej wykonać, więc na prawdziwym Supabase niezalogowany dostawał „permission denied” zamiast listy przepisów. Poprawka: migracja `20261010095000_anon_is_moderator.sql`. Nowy test `user_data_collections.test.sql` (kolekcje `wishlist` i `method-favorites`).
 
 ## Jak pracować
 
