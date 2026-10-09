@@ -47,7 +47,8 @@ src/
   components/             wspólne UI: AppLayout, BottomNav, PageHeader, Section, Sheet (dialog),
                           Chip, ChoiceChip, Stepper (−/+), EmptyState, BackLink, ReviewNote, ikony
   features/
-    drinks/               filtry, karty, składniki, kroki, sekcja „Jak podać”, treść ekranu napoju (DrinkBody)
+    drinks/               filtry i wyszukiwanie, losowanie (random.ts), kafelki i karty, okno filtrów i losowania,
+                          składniki, kroki, sekcja „Jak podać”, treść ekranu napoju (DrinkBody)
     assistant/            asystent drinków (AI): zapytanie i sprawdzenie propozycji (api.ts), „Moje napoje” (zapis,
                           useDrink, useAllDrinks), oznaczenie „Przepis od AI”
     glass/                <DrinkGlass>: geometria naczyń (czyste funkcje) i rysunek SVG z dekoracjami
@@ -92,7 +93,7 @@ supabase/                 migracje SQL (RLS), testy pgTAP, funkcje serwerowe (De
 | `/mam-kawe` | menu: „Napoje do spróbowania”, „Zaskocz mnie”, „Wybiorę sam” |
 | `/mam-kawe/do-sprobowania`, `/mam-kawe/zaskocz` | lista „Chcę spróbować” i losowy napój (`?napoj=id&temp=&mam=1`); wybór zaczyna ścieżkę od napoju |
 | `/mam-kawe/:krok` | ścieżka „Wybiorę sam”: ziarna → metody → metoda → napoje → parzenie → napoj → podanie; od napoju: metoda → parzenie → napoj → podanie |
-| `/napoje` | katalog z „Moimi napojami” na początku i filtrami w adresie (`?ulubione=1&sprobuj=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
+| `/napoje` | katalog (siatka kafelków) z „Moimi napojami” na początku, wyszukiwaniem `?q=` i filtrami w adresie (`?ulubione=1&sprobuj=1&moje=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`); szybkie filtry w rzędzie, reszta w oknie `?filtry=1`, „Wylosuj kawę” `?los=id` losuje spośród wyników |
 | `/napoje/:id` | napój z katalogu albo z „Moich napojów” (id `moj-…`); `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |

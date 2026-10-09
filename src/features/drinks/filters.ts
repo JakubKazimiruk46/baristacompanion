@@ -1,6 +1,7 @@
 import { hasAlcohol, hasMilk, isPlantBasedPossible, type Drink, type Temperature } from '../../data';
 import { isMyDrinkId } from '../assistant/myDrinks';
 import { canMake } from '../shelf/availability';
+import { matchesQuery } from '../../lib/format';
 import { DEFAULT_SHELF, type Shelf } from '../shelf/store';
 
 export const TIME_LIMITS = [10, 15, 30] as const;
@@ -88,4 +89,16 @@ export function filtersToParams(filters: DrinkFilters): URLSearchParams {
   if (filters.noAlcohol) params.set('alkohol', 'bez');
   if (filters.maxTimeMin) params.set('czas', String(filters.maxTimeMin));
   return params;
+}
+
+/** Wyszukiwanie po nazwie i haśle napoju (bez polskich znaków i wielkości liter). */
+export function searchDrinks(list: Drink[], query: string): Drink[] {
+  return query.trim() ? list.filter((drink) => matchesQuery(query, [drink.name, drink.tagline])) : list;
+}
+
+/** Filtry z okna „Filtry” (szybkie są w rzędzie nad listą): ile z nich jest włączonych. */
+export const SHEET_FILTERS = ['milk', 'plantBased', 'noAlcohol', 'maxTimeMin'] as const satisfies readonly (keyof DrinkFilters)[];
+
+export function sheetFilterCount(filters: DrinkFilters): number {
+  return SHEET_FILTERS.filter((key) => filters[key] !== undefined && filters[key] !== false).length;
 }

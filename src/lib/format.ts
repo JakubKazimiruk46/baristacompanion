@@ -28,3 +28,20 @@ export function formatSeconds(sec: number): string {
 export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/** Tekst do wyszukiwania: małe litery, bez polskich znaków („Pomarańczowa” → „pomaranczowa”). */
+export function foldText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ł/g, 'l')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
+/** Czy każde słowo zapytania występuje w którymś z tekstów (puste zapytanie pasuje do wszystkiego). */
+export function matchesQuery(query: string, texts: (string | undefined)[]): boolean {
+  const words = foldText(query).split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const haystack = foldText(texts.filter(Boolean).join(' '));
+  return words.every((word) => haystack.includes(word));
+}
