@@ -34,6 +34,18 @@ describe('lista napojów', () => {
     expect(currentUrl(router)).toBe('/napoje?temp=zimne&roslinne=1');
   });
 
+  it('„Bez alkoholu” ukrywa napoje z alkoholem, które na liście mają oznaczenie', async () => {
+    const { user, router } = renderApp('/napoje');
+    expect(screen.getByRole('link', { name: /Irish coffee/ })).toHaveTextContent('z alkoholem 18+');
+    expect(screen.getByRole('link', { name: /Espresso tonic/ })).not.toHaveTextContent('z alkoholem');
+
+    await user.click(screen.getByRole('button', { name: 'Bez alkoholu' }));
+    expect(currentUrl(router)).toBe('/napoje?alkohol=bez');
+    expect(listedNames()).not.toContain('Irish coffee');
+    expect(listedNames()).not.toContain('Espresso martini');
+    expect(listedNames()).toHaveLength(drinks.length - 2);
+  });
+
   it('drugi tap wyłącza filtr, a w grupie działa jeden wybór', async () => {
     const { user } = renderApp('/napoje');
     const temperature = screen.getByRole('group', { name: 'Temperatura' });
@@ -73,6 +85,17 @@ describe('ekran napoju', () => {
     );
     expect(screen.getByRole('heading', { level: 2, name: 'Składniki' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Przygotowanie' })).toBeInTheDocument();
+  });
+
+  it('napój z alkoholem ma ostrzeżenie, a bez alkoholu go nie ma', () => {
+    renderApp('/napoje/espresso-martini');
+    expect(screen.getByText(/Napój z alkoholem, tylko dla dorosłych/)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Espresso martini, kieliszek do martini/ })).toBeInTheDocument();
+  });
+
+  it('napój bez alkoholu nie ma ostrzeżenia', () => {
+    renderApp('/napoje/mazagran');
+    expect(screen.queryByText(/Napój z alkoholem/)).not.toBeInTheDocument();
   });
 
   it('link do metody prowadzi do jej ekranu', async () => {

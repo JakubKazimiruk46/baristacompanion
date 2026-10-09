@@ -1,4 +1,4 @@
-import { methods as allMethods, NOTE_LABELS, type BeanProfile, type BrewMethod, type FlavorNote, type Roast } from '../../data';
+import { beanMethods, NOTE_LABELS, type BeanProfile, type BrewMethod, type FlavorNote, type Roast } from '../../data';
 import { capitalize } from '../../lib/format';
 
 export type Verdict = 'great' | 'good' | 'poor';
@@ -23,8 +23,8 @@ export const VERDICT_LABELS: Record<Verdict, string> = {
 const isClean = (m: BrewMethod) => m.suits.roasts.includes('light');
 const isStrong = (m: BrewMethod) => m.suits.roasts.includes('dark') && !isClean(m);
 
-/** Ranking metod dla profilu ziaren: od najlepiej pasującej. */
-export function rankMethods(profile: BeanProfile, methods: BrewMethod[] = allMethods): MethodMatch[] {
+/** Ranking metod dla profilu ziaren: od najlepiej pasującej. Kawy rozpuszczalnej w nim nie ma. */
+export function rankMethods(profile: BeanProfile, methods: BrewMethod[] = beanMethods): MethodMatch[] {
   return methods
     .map((method) => scoreMethod(profile, method))
     .sort((a, b) => b.score - a.score);

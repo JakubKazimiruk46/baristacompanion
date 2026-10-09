@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  beanMethods,
   drinks,
   drinksForMethod,
+  hasAlcohol,
   frothingMethods,
   getIngredient,
   getMethod,
@@ -145,10 +147,12 @@ describe('metody parzenia', () => {
     }
   });
 
-  it('jest 12 metod, w tym kawiarka i cold brew', () => {
-    expect(methods).toHaveLength(12);
+  it('jest 13 metod, w tym kawiarka, cold brew i kawa rozpuszczalna (jedyny wyjątek bez mielenia)', () => {
+    expect(methods).toHaveLength(13);
     expect(getMethod('kawiarka')).toBeDefined();
     expect(getMethod('cold-brew')).toBeDefined();
+    expect(methods.filter((m) => m.instant).map((m) => m.id)).toEqual(['kawa-rozpuszczalna']);
+    expect(beanMethods).toHaveLength(12);
   });
 });
 
@@ -196,8 +200,8 @@ describe('młynki', () => {
 });
 
 describe('napoje', () => {
-  it('jest co najmniej 12 napojów, ciepłych i zimnych', () => {
-    expect(drinks.length).toBeGreaterThanOrEqual(12);
+  it('jest co najmniej 35 napojów, ciepłych i zimnych', () => {
+    expect(drinks.length).toBeGreaterThanOrEqual(35);
     expect(drinks.some((d) => d.temperature === 'hot')).toBe(true);
     expect(drinks.some((d) => d.temperature === 'cold')).toBe(true);
   });
@@ -246,6 +250,27 @@ describe('napoje', () => {
     for (const id of ['espresso-tonic', 'latte-macchiato', 'cafe-bombon', 'cappuccino']) {
       expect(drinks.find((d) => d.id === id)?.base.methodId).toBe('kawiarka');
     }
+  });
+
+  it('alkohol: dodatki z alkoholem to składniki z grupy „alkohol” i odwrotnie', () => {
+    for (const drink of drinks) {
+      for (const extra of drink.extras) {
+        if (extra.kind === 'syrup') continue;
+        const group = getIngredient(extra.ingredientId)!.group;
+        expect(extra.kind === 'alcohol', `${drink.id}: ${extra.ingredientId}`).toBe(group === 'alcohol');
+      }
+    }
+    expect(drinks.filter(hasAlcohol).map((d) => d.id).sort()).toEqual(['espresso-martini', 'irish-coffee']);
+  });
+
+  it('każde naczynie jest użyte w co najmniej jednym napoju', () => {
+    const used = new Set(drinks.map((d) => d.serving.vessel));
+    for (const id of Object.keys(vessels)) expect(used, id).toContain(id);
+  });
+
+  it('kawa rozpuszczalna jest bazą tylko napojów, które jej wymagają', () => {
+    expect(drinksForMethod('kawa-rozpuszczalna').map((d) => d.id).sort()).toEqual(['dalgona', 'frappe-po-grecku']);
+    for (const drink of drinks) expect(drink.base.alternativeMethodIds ?? []).not.toContain('kawa-rozpuszczalna');
   });
 
   it('drip ma zimny napój (ścieżka „Mam kawę” z planu)', () => {

@@ -114,6 +114,16 @@ const ICONS: Record<string, (props: IconProps) => ReactNode> = {
       <path d="M12 10.5v6M9.4 12l5.2 3M9.4 15l5.2-3" />
     </Svg>
   ),
+  // Kawa rozpuszczalna: słoik z etykietą i łyżeczka.
+  'kawa-rozpuszczalna': (props) => (
+    <Svg {...props}>
+      <path d="M6 8.5h10v11a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 6 19.5v-11Z" />
+      <path d="M5.5 5.5h11v3h-11z" />
+      <path d="M8 12.5h6v4H8z" />
+      <path d="M18 3l-2.5 9" />
+      <path d="M18.6 1.8a1.2 1.2 0 1 1-1.2 2" />
+    </Svg>
+  ),
 };
 
 /** Ilustracja metody parzenia (ikona 24×24 w kolorze tekstu). */

@@ -134,7 +134,7 @@ export function validateDraft(
   if (waterMl === null) errors.waterMl = 'Wpisz ilość wody w mililitrach, np. 250.';
   else errors.waterMl = waterError(method, waterMl) ?? undefined;
   if (coffeeG !== null && waterMl !== null && !errors.coffeeG && !errors.waterMl) {
-    errors.coffeeG = ratioError(coffeeG, waterMl) ?? undefined;
+    errors.coffeeG = ratioError(method, coffeeG, waterMl) ?? undefined;
   }
 
   const tempMin = parseNumber(draft.tempMin);

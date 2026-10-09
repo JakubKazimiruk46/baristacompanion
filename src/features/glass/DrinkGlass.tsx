@@ -276,8 +276,22 @@ function VesselBack({ shape, transparent, inner }: { shape: VesselShape; transpa
       )}
       {shape.kind === 'stemmed' && (
         <>
-          <ellipse cx={CX} cy={shape.bottom + 42} rx={38} ry={6} className="fill-ink/[0.06] stroke-ink/30" strokeWidth={1.2} />
-          <rect x={CX - 4} y={shape.bottom + 2} width={8} height={40} className="fill-ink/[0.08] stroke-ink/30" strokeWidth={1.2} />
+          <ellipse
+            cx={CX}
+            cy={shape.bottom + (shape.stem ?? 40) + 2}
+            rx={38}
+            ry={6}
+            className="fill-ink/[0.06] stroke-ink/30"
+            strokeWidth={1.2}
+          />
+          <rect
+            x={CX - 4}
+            y={shape.bottom + 2}
+            width={8}
+            height={shape.stem ?? 40}
+            className="fill-ink/[0.08] stroke-ink/30"
+            strokeWidth={1.2}
+          />
         </>
       )}
       {transparent && <path d={inner} className="fill-ink/[0.04]" />}
@@ -285,13 +299,14 @@ function VesselBack({ shape, transparent, inner }: { shape: VesselShape; transpa
   );
 }
 
-/** Szkło z przodu: ścianki, grube dno, brzeg i odblaski. */
+/** Szkło z przodu: ścianki, grube dno, brzeg i odblaski (i szklane ucho). */
 function GlassFront({ shape, inner, clip }: { shape: VesselShape; inner: string; clip: string }) {
   const bottomW = shape.hw(1);
   const topW = shape.hw(0);
   const h = shape.bottom - shape.top;
   return (
     <>
+      {shape.handle && <GlassHandle shape={shape} />}
       <g clipPath={clip}>
         <rect x={CX - topW * 0.72} y={shape.top + 8} width={5} height={h - 16} rx={2.5} fill="#fff" fillOpacity={0.3} />
         <rect x={CX + topW * 0.6} y={shape.top + 14} width={2.5} height={h - 28} rx={1.25} fill="#fff" fillOpacity={0.2} />
@@ -312,6 +327,22 @@ function GlassFront({ shape, inner, clip }: { shape: VesselShape; inner: string;
       />
       <ellipse cx={CX} cy={shape.top} rx={topW + shape.wall / 2} ry={4} fill="none" className="stroke-ink/30" strokeWidth={1.2} />
     </>
+  );
+}
+
+/** Szklane ucho z boku szklanki. */
+function GlassHandle({ shape }: { shape: VesselShape }) {
+  const h = shape.bottom - shape.top;
+  const y1 = shape.top + h * 0.15;
+  const y2 = shape.top + h * 0.6;
+  const x1 = CX + halfWidthAt(shape, y1) + shape.wall - 1;
+  const x2 = CX + halfWidthAt(shape, y2) + shape.wall - 1;
+  const d = `M${x1} ${y1} C${x1 + 30} ${y1 - 2} ${x2 + 30} ${y2 + 6} ${x2} ${y2}`;
+  return (
+    <g data-handle="">
+      <path d={d} fill="none" className="stroke-ink/30" strokeWidth={7} strokeLinecap="round" />
+      <path d={d} fill="none" stroke="#fff" strokeOpacity={0.55} strokeWidth={4} strokeLinecap="round" />
+    </g>
   );
 }
 

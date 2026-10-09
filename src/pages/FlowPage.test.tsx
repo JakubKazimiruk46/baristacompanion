@@ -41,7 +41,7 @@ describe('ścieżka „Mam kawę”', () => {
     // 4. Napoje podzielone na zimne i ciepłe.
     expect(h1()).toBe('Co z tego zrobić?');
     const cold = screen.getByRole('region', { name: 'Na zimno' });
-    expect(within(screen.getByRole('region', { name: 'Na ciepło' })).getByText(/nie ma napojów/)).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Na ciepło' })).getByRole('link', { name: /Irish coffee/ })).toBeInTheDocument();
     await user.click(within(cold).getByRole('link', { name: /Kawa mrożona z dripa/ }));
 
     // 5. Prowadzone parzenie: z notatką do napoju, przechodzimy wszystkie kroki.

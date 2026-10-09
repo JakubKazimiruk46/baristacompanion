@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { drinks, drinksForMethod, getMethod, GRIND_LABELS, methods } from '../data';
+import { beanMethods, drinks, drinksForMethod, getMethod, GRIND_LABELS, methods } from '../data';
 import { formatRatio, formatWaterTemp } from '../features/brewing/format';
 import { capitalize, formatSeconds } from '../lib/format';
 import { renderApp } from '../test/renderApp';
@@ -19,7 +19,7 @@ describe('lista metod', () => {
 });
 
 describe('ekran metody', () => {
-  it.each(methods.map((m) => [m.name, m] as const))('%s', (_, method) => {
+  it.each(beanMethods.map((m) => [m.name, m] as const))('%s', (_, method) => {
     renderApp(`/parzenie/${method.id}`);
 
     expect(screen.getByRole('heading', { level: 1, name: method.name })).toBeInTheDocument();
@@ -42,6 +42,17 @@ describe('ekran metody', () => {
     for (const drink of drinksForMethod(method.id)) {
       expect(within(related).getByRole('heading', { name: drink.name })).toBeInTheDocument();
     }
+  });
+
+  it('kawa rozpuszczalna: bez mielenia i bez dopasowania do ziaren', () => {
+    renderApp('/parzenie/kawa-rozpuszczalna');
+    expect(screen.getByRole('heading', { level: 1, name: 'Kawa rozpuszczalna' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Mielenie' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Do jakich ziaren' })).not.toBeInTheDocument();
+    expect(screen.getByText(/nie zależy od ziaren/)).toBeInTheDocument();
+    const related = screen.getByRole('region', { name: 'Co z tego zrobić' });
+    expect(within(related).getByRole('heading', { name: 'Kawa dalgona' })).toBeInTheDocument();
+    expect(within(related).getByRole('heading', { name: 'Frappé po grecku' })).toBeInTheDocument();
   });
 
   it('jasne palenie jest oznaczone jako niepasujące do kawiarki', () => {

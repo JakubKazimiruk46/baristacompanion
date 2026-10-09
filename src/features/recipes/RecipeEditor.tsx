@@ -227,19 +227,21 @@ export function RecipeEditor({ method, initial, initialSetting, submitLabel, onS
         {shown.temp && <ErrorText id={`${ids.temp}-error`}>{shown.temp}</ErrorText>}
       </fieldset>
 
-      <fieldset>
-        <legend className="font-medium">Mielenie</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {GRIND_SIZES.map((size) => (
-            <ChoiceChip key={size} type="radio" name="grind" checked={draft.grind === size} onChange={() => update({ grind: size })}>
-              {GRIND_LABELS[size]}
-            </ChoiceChip>
-          ))}
-        </div>
-        <p className="mt-2 text-sm text-ink-muted">{capitalize(GRIND_HINTS[draft.grind])}.</p>
-      </fieldset>
+      {!method.instant && (
+        <fieldset>
+          <legend className="font-medium">Mielenie</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {GRIND_SIZES.map((size) => (
+              <ChoiceChip key={size} type="radio" name="grind" checked={draft.grind === size} onChange={() => update({ grind: size })}>
+                {GRIND_LABELS[size]}
+              </ChoiceChip>
+            ))}
+          </div>
+          <p className="mt-2 text-sm text-ink-muted">{capitalize(GRIND_HINTS[draft.grind])}.</p>
+        </fieldset>
+      )}
 
-      {grinder ? (
+      {method.instant ? null : grinder ? (
         <Field
           label={
             <>

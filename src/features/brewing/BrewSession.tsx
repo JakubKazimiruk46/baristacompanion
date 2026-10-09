@@ -98,7 +98,7 @@ export function BrewSession({ method, recipe, header, journal, onFinish }: BrewS
       </div>
 
       {/* Mieli się na początku, więc ustawienie młynka widać przy pierwszym kroku. */}
-      {state.stepIndex === 0 && (
+      {state.stepIndex === 0 && !method.instant && (
         <div className="mb-4">
           <GrinderLine method={method} {...(recipe && { fixed: recipe.grinder ?? null })} />
         </div>

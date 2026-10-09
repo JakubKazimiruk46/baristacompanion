@@ -9,6 +9,14 @@ import { GrinderPanel } from '../grinder/GrinderSetting';
  */
 export function GrindScale({ method, panel }: { method: BrewMethod; panel?: ReactNode }) {
   const { grind } = method;
+  if (method.instant) {
+    return (
+      <div className="rounded-2xl border border-line bg-surface p-4">
+        <p className="text-2xl font-semibold">Bez mielenia</p>
+        <p className="text-sm text-ink-muted">Kawa rozpuszczalna jest gotowa do użycia.</p>
+      </div>
+    );
+  }
   const active = GRIND_SIZES.indexOf(grind);
 
   return (

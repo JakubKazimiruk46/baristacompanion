@@ -71,9 +71,12 @@ function MethodDetails({ method: base }: { method: BrewMethod }) {
 
       <LastBrew methodId={method.id} />
 
-      <Section title="Mielenie">
-        <GrindScale method={method} />
-      </Section>
+      {/* Kawy rozpuszczalnej się nie miele i nie dobiera do ziaren. */}
+      {!method.instant && (
+        <Section title="Mielenie">
+          <GrindScale method={method} />
+        </Section>
+      )}
 
       <Section title="Sprzęt">
         <ul className="flex flex-wrap gap-2">
@@ -85,30 +88,34 @@ function MethodDetails({ method: base }: { method: BrewMethod }) {
         </ul>
       </Section>
 
-      <Section title="Do jakich ziaren">
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <ul aria-label="Palenie" className="flex gap-2">
-            {ROASTS.map((roast) => {
-              const fits = method.suits.roasts.includes(roast);
-              return (
-                <li
-                  key={roast}
-                  className={`rounded-full px-3 py-1 text-sm font-medium ${
-                    fits ? 'bg-accent text-on-accent' : 'bg-surface-muted text-ink-muted line-through'
-                  }`}
-                >
-                  {ROAST_LABELS[roast]}
-                  <span className="sr-only">{fits ? ' (pasuje)' : ' (nie pasuje)'}</span>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-3 text-sm text-ink-muted">
-            Nuty: {method.suits.notes.map((note) => NOTE_LABELS[note]).join(', ')}
-          </p>
-          <p className="mt-2">{method.suits.why}</p>
-        </div>
-      </Section>
+      {method.instant ? (
+        <p className="mt-8 rounded-2xl bg-accent-soft p-4 text-sm">{method.suits.why}</p>
+      ) : (
+        <Section title="Do jakich ziaren">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <ul aria-label="Palenie" className="flex gap-2">
+              {ROASTS.map((roast) => {
+                const fits = method.suits.roasts.includes(roast);
+                return (
+                  <li
+                    key={roast}
+                    className={`rounded-full px-3 py-1 text-sm font-medium ${
+                      fits ? 'bg-accent text-on-accent' : 'bg-surface-muted text-ink-muted line-through'
+                    }`}
+                  >
+                    {ROAST_LABELS[roast]}
+                    <span className="sr-only">{fits ? ' (pasuje)' : ' (nie pasuje)'}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-3 text-sm text-ink-muted">
+              Nuty: {method.suits.notes.map((note) => NOTE_LABELS[note]).join(', ')}
+            </p>
+            <p className="mt-2">{method.suits.why}</p>
+          </div>
+        </Section>
+      )}
 
       <Section title="Kroki">
         <StepList steps={method.steps} />

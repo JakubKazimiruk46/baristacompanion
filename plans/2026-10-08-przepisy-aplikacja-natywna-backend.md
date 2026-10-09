@@ -48,8 +48,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 
 | Nr | Pytanie | Przed krokiem | Moja rekomendacja | Odpowiedź |
 | :- | :- | :-: | :- | :- |
-| P1 | Drinki z alkoholem (irish coffee, espresso martini) w katalogu? | 3 | Tak, z oznaczeniem „z alkoholem” i filtrem „Bez alkoholu” | |
-| P2 | Dalgona i frappé po grecku wymagają kawy rozpuszczalnej. Dodać ją jako bazę? | 3 | Tak, jako „metodę” bez parzenia (tylko rozpuszczenie), z notatką, że to wyjątek | |
+| P1 | Drinki z alkoholem (irish coffee, espresso martini) w katalogu? | 3 | Tak, z oznaczeniem „z alkoholem” i filtrem „Bez alkoholu” | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
+| P2 | Dalgona i frappé po grecku wymagają kawy rozpuszczalnej. Dodać ją jako bazę? | 3 | Tak, jako „metodę” bez parzenia (tylko rozpuszczenie), z notatką, że to wyjątek | Przyjęta rekomendacja (sesja bez pytań, 2026-10-09), do potwierdzenia |
 | P3 | Aplikacja natywna: tylko Android na start? Publikacja w Google Play (jednorazowo 25 USD) czy tylko plik APK do zainstalowania? | 4 | Android, na start APK do testów, Google Play później | |
 | P4 | Backend: Supabase (plan darmowy, region UE)? Kto zakłada konto i projekt? | 5 | Supabase; konto zakłada autor, sesja prowadzi krok po kroku | |
 | P5 | Logowanie: link e-mail, Google, Apple? | 5 | Link e-mail + Google. Apple wymaga konta Apple Developer | |
@@ -73,7 +73,7 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
 | :- | :- |
 | 1. Ustawienie młynka | zrobione (gałąź `feature/mlynek`), czeka na akceptację autora |
 | 2. Własne przepisy | zrobione (gałąź `feature/wlasne-przepisy`, od `feature/mlynek`), czeka na akceptację autora |
-| 3. Szerszy katalog drinków | do zrobienia |
+| 3. Szerszy katalog drinków | zrobione (gałąź `feature/katalog-drinkow`, od `feature/wlasne-przepisy`), czeka na akceptację autora |
 | 4. Powiadomienia w aplikacji na Androida | do zrobienia |
 | 5. Backend: konto i prywatność | do zrobienia |
 | 6. Synchronizacja danych | do zrobienia |
@@ -104,6 +104,8 @@ Sesja, która zaczyna dany krok, zadaje autorowi pytania z kolumny „Przed krok
    - nowe naczynia (np. szklanka do irish coffee, kieliszek do martini) rysują się poprawnie i mają testy geometrii,
    - karta do udostępnienia mieści każdy nowy napój (`card.test.ts`),
    - jeśli są drinki z alkoholem: oznaczenie i filtr „Bez alkoholu”.
+
+   Wykonanie (2026-10-09): 36 napojów (+15): cortado, kawa z miodem i cynamonem, latte piernikowa, dyniowa i lawendowa, biała mocha, kawa z jajkiem po wietnamsku, frappé, smoothie z bananem, shake z masłem orzechowym, mazagran, dalgona, frappé po grecku, irish coffee, espresso martini. Syropy: piernikowy, dyniowy, lawendowy (z przepisami i zamiennikami); biała mocha używa białej czekolady jako składnika (`dairy`, bo ma mleko w proszku). Składniki: banany, cytryny, limonki, miód, masło orzechowe, biała czekolada, przyprawa do piernika, jajka i grupa „Alkohol” (whiskey, wódka, likier kawowy). Naczynia: szklanka do irish coffee (tulipan z uchem na krótkiej nóżce) i kieliszek do martini, nowa dekoracja „ziarna kawy” (`look: 'beans'`), jednostka „sztuka”. Alkohol wynika z dodatków `kind: 'alcohol'` (bez osobnego pola), ma oznaczenie „z alkoholem 18+”, ostrzeżenie i filtr `?alkohol=bez`. Kawa rozpuszczalna to metoda z `instant: true`, poza rankingiem dla ziaren i ustawieniami młynka. Niepewne proporcje mają `needsReview` (m.in. surowe żółtko, lawenda, alkohol).
 
 ### Etap B: aplikacja natywna
 

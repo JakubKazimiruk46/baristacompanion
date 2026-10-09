@@ -28,6 +28,12 @@ describe('formatAmount', () => {
     expect(formatAmount({ value: 0.5, unit: 'tsp' }, 3)).toBe('1,5 łyżeczki');
   });
 
+  it('sztuki (banan, żółtko)', () => {
+    expect(formatAmount({ value: 1, unit: 'piece' })).toBe('1 sztuka');
+    expect(formatAmount({ value: 1, unit: 'piece' }, 3)).toBe('3 sztuki');
+    expect(formatAmount({ value: 1, unit: 'piece' }, 5)).toBe('5 sztuk');
+  });
+
   it('opis słowny się nie mnoży', () => {
     expect(formatAmount('pełna szklanka', 3)).toBe('pełna szklanka');
   });

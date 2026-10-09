@@ -1,8 +1,8 @@
 import { ClockIcon, ColdIcon, HotIcon, LeafIcon } from '../../components/icons';
-import { isPlantBasedPossible, TEMPERATURE_LABELS, type Drink } from '../../data';
+import { hasAlcohol, isPlantBasedPossible, TEMPERATURE_LABELS, type Drink } from '../../data';
 import { formatMinutes } from '../../lib/format';
 
-/** Krótkie cechy napoju: temperatura, czas, wersja roślinna. */
+/** Krótkie cechy napoju: temperatura, czas, wersja roślinna, alkohol. */
 export function DrinkMeta({ drink }: { drink: Drink }) {
   const TempIcon = drink.temperature === 'hot' ? HotIcon : ColdIcon;
   return (
@@ -20,6 +20,9 @@ export function DrinkMeta({ drink }: { drink: Drink }) {
           <LeafIcon className="size-4" />
           wersja roślinna
         </li>
+      )}
+      {hasAlcohol(drink) && (
+        <li className="inline-flex items-center gap-1 rounded-full border border-current px-2">z alkoholem 18+</li>
       )}
     </ul>
   );

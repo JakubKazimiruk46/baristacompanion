@@ -39,6 +39,25 @@ describe('<DrinkGlass>', () => {
     expect(ice).toBeGreaterThan(0);
   });
 
+  it('irish coffee: szklanka z uchem, kawa z whiskey pod śmietanką', () => {
+    const { svg, layers, ice } = renderGlass('irish-coffee');
+    expect(svg).toHaveAttribute('data-vessel', 'irish-glass');
+    expect(svg.querySelector('[data-handle]')).not.toBeNull();
+    expect(layers).toEqual([
+      { name: 'kawa z whiskey', kind: 'liquid' },
+      { name: 'śmietanka', kind: 'foam' },
+    ]);
+    expect(ice).toBe(0);
+  });
+
+  it('espresso martini: kieliszek bez lodu (lód został w shakerze) i trzy ziarna kawy', () => {
+    const { svg, ice } = renderGlass('espresso-martini');
+    expect(svg).toHaveAttribute('data-vessel', 'martini-glass');
+    expect(ice).toBe(0);
+    const beans = svg.querySelector('[data-decoration="garnish"][data-look="beans"]')!;
+    expect(beans.querySelectorAll('[data-bean]')).toHaveLength(3);
+  });
+
   it('ma dostępny opis z warstwami od dołu', () => {
     render(<DrinkGlass drink={getDrink('latte-macchiato')!} />);
     expect(

@@ -736,4 +736,41 @@ export const methods: BrewMethod[] = [
       },
     ],
   },
+  {
+    id: 'kawa-rozpuszczalna',
+    name: 'Kawa rozpuszczalna',
+    instant: true,
+    brewName: 'kawa rozpuszczalna',
+    inMethod: 'z kawy rozpuszczalnej',
+    description:
+      'Wyjątek w aplikacji: kawa bez parzenia i bez mielenia, tylko rozpuszczona w wodzie. Smaku ziaren z niej nie wydobędziesz, ale to baza dwóch klasyków: kawy dalgona i frappé po grecku.',
+    equipment: ['kawa rozpuszczalna', 'kubek lub szklanka', 'czajnik', 'łyżeczka'],
+    grind: 'extra-fine',
+    dose: { coffeeG: 2, waterMl: 150 },
+    scaling: {
+      servingMl: 150,
+      waterMl: { min: 30, max: 400 },
+      stepMl: 10,
+      note: 'Płaska łyżeczka to ok. 2 g. Do dalgony i frappé po grecku kawy jest dużo, a wody mało: ilości są w przepisie napoju.',
+    },
+    waterTempC: { min: 80, max: 90 },
+    totalTimeSec: 60,
+    difficulty: 'easy',
+    suits: {
+      roasts: ['medium', 'dark'],
+      notes: [],
+      why: 'Kawa rozpuszczalna nie zależy od ziaren, które masz w domu: kupujesz ją gotową.',
+    },
+    steps: [
+      { text: 'Wsyp {coffee} g kawy rozpuszczalnej do kubka', detail: 'Płaska łyżeczka to ok. 2 g.', action: true },
+      {
+        text: 'Zalej {water} ml gorącej wody, nie wrzątku',
+        detail: 'Woda ok. 80–90°C: wrzątek podkreśla gorycz.',
+        action: true,
+      },
+      { text: 'Zamieszaj, aż kawa się rozpuści', action: true },
+    ],
+    needsReview: true,
+    reviewNote: 'Ilość kawy na kubek zależy od marki (1–2 łyżeczki na 150–200 ml). Przyjęto 2 g na 150 ml.',
+  },
 ];

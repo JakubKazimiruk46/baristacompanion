@@ -20,6 +20,10 @@ export interface VesselShape {
   /** Grubość szklanego dna pod wnętrzem. */
   base: number;
   kind: VesselKind;
+  /** Naczynie na nóżce: długość nóżki do stopki (domyślnie 40). */
+  stem?: number;
+  /** Szklane ucho z boku (szklanka do irish coffee). */
+  handle?: boolean;
 }
 
 /** Profil filiżanki: proste ścianki, a niżej zaokrąglenie do węższego dna. */
@@ -40,6 +44,19 @@ export const VESSEL_SHAPES: Record<VesselId, VesselShape> = {
     base: 0,
     kind: 'stemmed',
   },
+  // Szklanka do irish coffee: tulipan na krótkiej nóżce, z uchem.
+  'irish-glass': {
+    top: 70,
+    bottom: 206,
+    hw: (t) => 46 * Math.sqrt(1 - 0.72 * t ** 3),
+    wall: 3.5,
+    base: 0,
+    kind: 'stemmed',
+    stem: 24,
+    handle: true,
+  },
+  // Kieliszek do martini: szeroki stożek na wysokiej nóżce.
+  'martini-glass': { top: 120, bottom: 196, hw: (t) => 2 + 76 * (1 - t), wall: 3, base: 0, kind: 'stemmed' },
   cup: { top: 136, bottom: 226, hw: cupProfile(64, 28, 0.4), wall: 6, base: 0, kind: 'cup' },
   'espresso-cup': {
     top: 172,

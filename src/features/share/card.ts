@@ -3,6 +3,7 @@ import {
   getMethod,
   getMilk,
   getSyrup,
+  hasAlcohol,
   TEMPERATURE_LABELS,
   vessels,
   type Drink,
@@ -197,7 +198,7 @@ function stackCard(drink: Drink): CardLayout {
   const method = getMethod(drink.base.methodId)!;
   const meta = {
     text: fitText(
-      `${capitalize(TEMPERATURE_LABELS[drink.temperature])} · ${formatMinutes(drink.prepTimeMin)} · ${method.name}`,
+      `${capitalize(TEMPERATURE_LABELS[drink.temperature])} · ${formatMinutes(drink.prepTimeMin)} · ${method.name}${hasAlcohol(drink) ? ' · 18+' : ''}`,
       LINE_WIDTH,
       FONT.meta,
       'sans-bold',

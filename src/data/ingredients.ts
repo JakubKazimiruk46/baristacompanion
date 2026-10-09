@@ -30,6 +30,14 @@ export const extraIngredients: Ingredient[] = [
     substitutes: [{ id: 'truskawki', note: 'Kolor bardziej czerwony, smak słodszy i mniej kwaskowy.' }],
   },
   { id: 'truskawki', name: 'truskawki', group: 'fruit' },
+  { id: 'banany', name: 'banany', group: 'fruit' },
+  {
+    id: 'cytryny',
+    name: 'cytryny',
+    group: 'fruit',
+    substitutes: [{ id: 'limonki', note: 'Kwaśniejsza i bardziej aromatyczna. Weź trochę mniej soku.' }],
+  },
+  { id: 'limonki', name: 'limonki', group: 'fruit' },
 
   // Napoje
   {
@@ -44,6 +52,11 @@ export const extraIngredients: Ingredient[] = [
     ],
   },
   { id: 'woda-gazowana', name: 'woda gazowana', group: 'mixer' },
+
+  // Alkohol (napoje „z alkoholem”: oznaczenie i filtr „Bez alkoholu”)
+  { id: 'whiskey', name: 'whiskey irlandzka', group: 'alcohol' },
+  { id: 'wodka', name: 'wódka', group: 'alcohol' },
+  { id: 'likier-kawowy', name: 'likier kawowy', group: 'alcohol' },
 
   // Przyprawy
   {
@@ -65,6 +78,12 @@ export const extraIngredients: Ingredient[] = [
     substitutes: [{ id: 'kardamon-mielony', note: 'Wystarczy szczypta. Aromat będzie mniej świeży.' }],
   },
   { id: 'kardamon-mielony', name: 'kardamon mielony', group: 'spice' },
+  {
+    id: 'przyprawa-do-piernika',
+    name: 'przyprawa do piernika',
+    group: 'spice',
+    substitutes: [{ id: 'cynamon-mielony', note: 'Sam cynamon: mniej korzennie, ale w tym samym klimacie.' }],
+  },
 
   // Słodkie
   { id: 'cukier', name: 'cukier', group: 'sweet', staple: true },
@@ -86,8 +105,17 @@ export const extraIngredients: Ingredient[] = [
     ],
   },
   { id: 'kakao', name: 'kakao', group: 'sweet' },
+  { id: 'biala-czekolada', name: 'biała czekolada', group: 'sweet' },
+  {
+    id: 'miod',
+    name: 'miód',
+    group: 'sweet',
+    substitutes: [{ id: 'cukier', note: 'Łyżeczka cukru, najlepiej brązowego. Słodko, ale bez miodowego aromatu.' }],
+  },
+  { id: 'maslo-orzechowe', name: 'masło orzechowe', group: 'sweet' },
 
   // Podstawy
   { id: 'lod', name: 'lód', group: 'basic', staple: true },
+  { id: 'jajka', name: 'jajka', group: 'basic' },
   { id: 'woda', name: 'woda', group: 'basic', always: true },
 ];

@@ -36,6 +36,8 @@ export const RECIPE_LIMITS = {
   tempC: { min: 0, max: 100 },
   /** Ile ml wody na gram kawy: od koncentratu po bardzo lekki napar. */
   ratio: { min: 3, max: 25 },
+  /** Kawa rozpuszczalna to ekstrakt: łyżeczka na cały kubek. */
+  instantRatio: { min: 3, max: 150 },
 } as const;
 
 const isNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
@@ -54,11 +56,11 @@ export function waterError(method: BrewMethod, waterMl: number): string | null {
   return within(waterMl, method.scaling.waterMl) ? null : `Ten sprzęt mieści od ${min} do ${max} ml.`;
 }
 
-export function ratioError(coffeeG: number, waterMl: number): string | null {
-  const { min, max } = RECIPE_LIMITS.ratio;
-  return within(waterMl / coffeeG, RECIPE_LIMITS.ratio)
+export function ratioError(method: BrewMethod, coffeeG: number, waterMl: number): string | null {
+  const range = method.instant ? RECIPE_LIMITS.instantRatio : RECIPE_LIMITS.ratio;
+  return within(waterMl / coffeeG, range)
     ? null
-    : `Proporcja kawy do wody musi być od 1:${min} do 1:${max}.`;
+    : `Proporcja kawy do wody musi być od 1:${range.min} do 1:${range.max}.`;
 }
 
 function isStep(value: unknown): value is BrewStep {
@@ -104,7 +106,7 @@ export function parseRecipeInput(value: unknown): RecipeInput | null {
     !isNumber(dose.waterMl) ||
     !within(dose.coffeeG, RECIPE_LIMITS.coffeeG) ||
     waterError(method, dose.waterMl) !== null ||
-    ratioError(dose.coffeeG, dose.waterMl) !== null ||
+    ratioError(method, dose.coffeeG, dose.waterMl) !== null ||
     typeof temp !== 'object' ||
     temp === null ||
     !isNumber(temp.min) ||

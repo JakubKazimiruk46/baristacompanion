@@ -70,9 +70,11 @@ function RecipeDetails({ base, recipe }: { base: BrewMethod; recipe: UserRecipe 
         <DoseCalculator method={raw} doseKey={doseKey} />
       </Section>
 
-      <Section title="Mielenie">
-        <GrindScale method={method} panel={<RecipeGrinder recipe={recipe} from={from} />} />
-      </Section>
+      {!base.instant && (
+        <Section title="Mielenie">
+          <GrindScale method={method} panel={<RecipeGrinder recipe={recipe} from={from} />} />
+        </Section>
+      )}
 
       <Section title="Kroki">
         <StepList steps={method.steps} />

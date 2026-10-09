@@ -81,6 +81,14 @@ export function drinkSyrups(drink: Drink): Syrup[] {
   });
 }
 
+/** Napój z alkoholem: ma dodatek z alkoholem (oznaczenie i filtr „Bez alkoholu”). */
+export function hasAlcohol(drink: Drink): boolean {
+  return drink.extras.some((extra) => extra.kind === 'alcohol');
+}
+
+/** Metody, które parzą kawę z ziaren (bez kawy rozpuszczalnej). */
+export const beanMethods = methods.filter((method) => !method.instant);
+
 export function hasIce(drink: Drink): boolean {
   return drink.extras.some((extra) => extra.kind === 'ice');
 }

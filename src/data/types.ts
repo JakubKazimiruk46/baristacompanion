@@ -101,6 +101,11 @@ export interface BrewScaling {
 export interface BrewMethod extends Reviewable {
   id: string;
   name: string;
+  /**
+   * Wyjątek: kawa rozpuszczalna. Bez mielenia i bez ziaren (nie ma jej w rankingu metod dla
+   * ziaren ani w ustawieniach młynka), tylko rozpuszczenie w wodzie. grind jest wtedy umowny.
+   */
+  instant?: boolean;
   /** Nazwa naparu w składnikach napoju, np. „kawa z kawiarki”. */
   brewName: string;
   /** Miejscownik do zdań, np. „w kawiarce”. */
@@ -158,7 +163,7 @@ export interface Substitute {
   note: string;
 }
 
-export const INGREDIENT_GROUPS = ['milk', 'syrup', 'dairy', 'fruit', 'mixer', 'spice', 'sweet', 'basic'] as const;
+export const INGREDIENT_GROUPS = ['milk', 'syrup', 'dairy', 'fruit', 'mixer', 'alcohol', 'spice', 'sweet', 'basic'] as const;
 export type IngredientGroup = (typeof INGREDIENT_GROUPS)[number];
 
 /**
@@ -203,7 +208,9 @@ export type VesselId =
   | 'small-glass'
   | 'low-glass'
   | 'tall-glass'
-  | 'dessert-glass';
+  | 'dessert-glass'
+  | 'irish-glass'
+  | 'martini-glass';
 
 export interface Vessel {
   id: VesselId;
@@ -222,7 +229,8 @@ export type DecorationLook =
   | 'slice'
   | 'peel'
   | 'berries'
-  | 'stick';
+  | 'stick'
+  | 'beans';
 
 export interface Decoration {
   kind: DecorationKind;
@@ -257,9 +265,10 @@ export interface Layer {
   kind: LayerKind;
 }
 
-export type ExtraKind = 'fruit' | 'ice-cream' | 'cream' | 'spice' | 'mixer' | 'ice' | 'other';
+/** alcohol: napój jest „z alkoholem” (oznaczenie i filtr „Bez alkoholu”). */
+export type ExtraKind = 'fruit' | 'ice-cream' | 'cream' | 'spice' | 'mixer' | 'alcohol' | 'ice' | 'other';
 
-export const AMOUNT_UNITS = ['ml', 'g', 'cube', 'scoop', 'tsp'] as const;
+export const AMOUNT_UNITS = ['ml', 'g', 'cube', 'scoop', 'tsp', 'piece'] as const;
 export type AmountUnit = (typeof AMOUNT_UNITS)[number];
 
 /** Ilość, którą da się pomnożyć przez liczbę porcji. max: zakres, np. 4–5 kostek. */
@@ -284,7 +293,7 @@ export type Extra =
       optional?: boolean;
       /** Zmiksuj z mlekiem. */
       blended?: boolean;
-      /** Nabiał bez roślinnego zamiennika (np. bita śmietana): wyklucza wersję roślinną. */
+      /** Nabiał albo jajko bez roślinnego zamiennika (np. bita śmietana): wyklucza wersję roślinną. */
       dairy?: boolean;
     };
 

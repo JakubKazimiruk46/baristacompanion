@@ -26,6 +26,28 @@ describe('kształty naczyń', () => {
     expect(outlinePath(shape)).toMatch(/^M[\d. L-]+ Z$/);
   });
 
+  it('kieliszek do martini to stożek, a szklanka do irish coffee ma ucho i krótką nóżkę', () => {
+    const martini = VESSEL_SHAPES['martini-glass'];
+    expect(martini.kind).toBe('stemmed');
+    expect(martini.hw(0)).toBeGreaterThan(martini.hw(0.5) * 1.8);
+    expect(martini.hw(1)).toBeLessThan(5);
+    const irish = VESSEL_SHAPES['irish-glass'];
+    expect(irish.handle).toBe(true);
+    expect(irish.stem).toBeLessThan(40);
+    // Tulipan: zwęża się ku dołowi.
+    expect(irish.hw(1)).toBeLessThan(irish.hw(0));
+  });
+
+  it.each(Object.keys(VESSEL_SHAPES) as VesselId[])('%s: mieści się w rysunku razem z nóżką i stopką', (id) => {
+    const shape = VESSEL_SHAPES[id];
+    // Stopka pod nóżką, spodek pod filiżanką albo grube szklane dno.
+    const below = { stemmed: (shape.stem ?? 40) + 8, cup: shape.wall + 11, glass: shape.base };
+    const lowest = shape.bottom + below[shape.kind];
+    expect(lowest).toBeLessThanOrEqual(260);
+    expect(95 - shape.hw(0) - shape.wall).toBeGreaterThanOrEqual(0);
+    expect(95 + shape.hw(0) + shape.wall).toBeLessThanOrEqual(190);
+  });
+
   it('szerokość liczy się od brzegu do dna', () => {
     const glass = VESSEL_SHAPES['tall-glass'];
     expect(halfWidthAt(glass, glass.top)).toBe(50);

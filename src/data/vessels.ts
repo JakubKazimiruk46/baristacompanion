@@ -12,4 +12,6 @@ export const vessels: Record<VesselId, Vessel> = {
   'low-glass': { id: 'low-glass', name: 'niska szklanka', capacityMl: 300, transparent: true },
   'tall-glass': { id: 'tall-glass', name: 'wysoka szklanka', capacityMl: 400, transparent: true },
   'dessert-glass': { id: 'dessert-glass', name: 'pucharek', capacityMl: 200, transparent: true },
+  'irish-glass': { id: 'irish-glass', name: 'szklanka do irish coffee', capacityMl: 240, transparent: true },
+  'martini-glass': { id: 'martini-glass', name: 'kieliszek do martini', capacityMl: 180, transparent: true },
 };

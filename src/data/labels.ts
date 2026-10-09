@@ -104,6 +104,7 @@ export const INGREDIENT_GROUP_LABELS: Record<IngredientGroup, string> = {
   dairy: 'Śmietanka i lody',
   fruit: 'Owoce i soki',
   mixer: 'Napoje',
+  alcohol: 'Alkohol',
   spice: 'Przyprawy',
   sweet: 'Słodkie',
   basic: 'Podstawy',
@@ -116,6 +117,7 @@ export const UNIT_FORMS: Record<AmountUnit, [string, string, string]> = {
   cube: ['kostka', 'kostki', 'kostek'],
   scoop: ['gałka', 'gałki', 'gałek'],
   tsp: ['łyżeczka', 'łyżeczki', 'łyżeczek'],
+  piece: ['sztuka', 'sztuki', 'sztuk'],
 };
 
 export const DECORATION_LABELS: Record<DecorationKind, string> = {

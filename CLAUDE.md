@@ -72,7 +72,7 @@ docs/                     publikacja i lista kontrolna testu na telefonie
 | :- | :- |
 | `/` | Start z przyciskiem „Mam kawę. Co z nią zrobić?” i ulubionymi napojami |
 | `/mam-kawe`, `/mam-kawe/:krok` | ścieżka: ziarna → metody → metoda → napoje → parzenie → napoj → podanie |
-| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10`) |
+| `/napoje` | katalog z filtrami w adresie (`?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10`) |
 | `/napoje/:id` | napój; `?porcje=2` mnoży ilości, `?syrop=id` otwiera okno syropu, `?karta=1` kartę do udostępnienia |
 | `/napoje/mleko`, `/napoje/spienianie`, `/napoje/syropy` | poradniki |
 | `/napoje/co-mam`, `/napoje/zakupy` | „Co mam w domu” (składniki i sprzęt, czego brakuje) i lista zakupów |
@@ -89,11 +89,13 @@ Dolna nawigacja: Start, Napoje, Parzenie, Moje ziarna. Zakładka jest aktywna ta
 
 - Wszystkie treści po polsku, id jako slugi (`kawa-pomaranczowa`), bo trafiają do adresów.
 - Napój: baza kawowa (`methodId` + alternatywy), mleko (opcje, pierwsza polecana), dodatki (`syrupId` dla syropów, `dairy` dla nabiału bez zamiennika), warstwy **od dołu** (`liquid`/`foam`/`solid`, kolor, ml), kroki, podanie (naczynie + dekoracje z instrukcją i `look`).
-- Ilość dodatku: `{ value, max?, unit }` mnoży się z porcjami i odmienia (`formatAmount`). Tekst („pełna szklanka”) zostaje bez zmian.
+- Ilość dodatku: `{ value, max?, unit }` mnoży się z porcjami i odmienia (`formatAmount`, jednostki: ml, g, kostka, gałka, łyżeczka, sztuka). Tekst („pełna szklanka”) zostaje bez zmian.
+- Alkohol: napój jest „z alkoholem”, gdy ma dodatek `kind: 'alcohol'` (składnik z grupy `alcohol`), `hasAlcohol()`. Ma oznaczenie „z alkoholem 18+” (lista, ekran, karta), ostrzeżenie na ekranie napoju i filtr `?alkohol=bez`. Lód tylko do shakera to `kind: 'other'`, żeby nie rysował się w kieliszku.
 - Składniki: katalog `ingredients` (index.ts) składa się z mlek, syropów i `extraIngredients` (`ingredients.ts`). Każdy dodatek napoju ma `ingredientId`, a nazwę w napoju osobno (`name`). Zamiennik to `{ id, note }`: inny składnik z katalogu i co się zmieni. Zamienniki syropów są w `syrups.ts`. `staple` = na półce od początku (lód, cukier), `always` = zawsze jest (woda).
 - Metoda: `dose` to przepis, a `scaling` to granice kalkulatora (osoba w ml, zakres sprzętu, krok, w kawiarce rozmiary). W krokach ilości zapisuj jako znaczniki `{coffee}`, `{water}`, `{water*0.6}`. Ekrany pokazują metodę przeliczoną przez `scaleMethod()` (`features/brewing/dose`) na ilość z `useWaterMl()`. Nigdy nie wyświetlaj surowych kroków.
 - Własny przepis (`features/recipes`, zapis `barista-companion.recipes.v1`): metoda + własna nazwa, dawka, temperatura, mielenie, ustawienie młynka i kroki w formacie `BrewStep` (te same znaczniki). Ekrany zamieniają go na metodę (`recipeToMethod`) i przeliczają jak metodę, a ilość z kalkulatora trzymają pod `recipeDoseKey(id)`. Przepis z zapisu i z linku przechodzi przez tę samą walidację (`parseRecipeInput`). Link: `/przepis#1.<base64url z JSON>` (wersja formatu przed kropką), bez ustawienia młynka.
 - Espresso nie ma: bazą drinków „na espresso” jest kawiarka.
+- Kawa rozpuszczalna to jedyna metoda bez mielenia (`instant: true`, baza dalgony i frappé po grecku). Nie ma jej w rankingu metod dla ziaren ani w ustawieniach młynka (`beanMethods`), a ekran metody i parzenie nie pokazują mielenia.
 - Młynek (`grinders.ts`): jednostka (`click`/`mark`/`turn`), skala, krok i zakres dla każdego stopnia z `GRIND_SIZES`; `null` = tak drobno nie zmieli (tylko na drobnym końcu skali). Liczby odmieniaj przez `formatSetting()` (`features/grinder/format`), także ułamki („2,5 obrotu”).
 - Wszystko, czego nie jesteś pewien, oznaczaj `needsReview: true` + `reviewNote`. `<ReviewNote>` pokazuje to tylko w trybie deweloperskim, żeby autor mógł sprawdzić treść.
 - `data.test.ts` pilnuje spójności (odwołania, objętości, czasy, kolory). Nowy napój albo metoda muszą przez nie przejść.

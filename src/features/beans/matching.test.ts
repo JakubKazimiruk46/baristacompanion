@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { methods, type BeanProfile, type FlavorNote, type Roast } from '../../data';
+import { beanMethods as methods, type BeanProfile, type FlavorNote, type Roast } from '../../data';
 import { rankMethods, scoreMethod } from './matching';
 
 const profile = (roast: Roast, notes: FlavorNote[] = [], kind: BeanProfile['kind'] = 'blend'): BeanProfile => ({

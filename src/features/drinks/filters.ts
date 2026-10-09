@@ -1,4 +1,4 @@
-import { hasMilk, isPlantBasedPossible, type Drink, type Temperature } from '../../data';
+import { hasAlcohol, hasMilk, isPlantBasedPossible, type Drink, type Temperature } from '../../data';
 import { canMake } from '../shelf/availability';
 import { DEFAULT_SHELF, type Shelf } from '../shelf/store';
 
@@ -12,6 +12,8 @@ export interface DrinkFilters {
   temperature?: Temperature;
   milk?: 'with' | 'without';
   plantBased?: boolean;
+  /** Tylko napoje bez alkoholu. */
+  noAlcohol?: boolean;
   maxTimeMin?: TimeLimit;
 }
 
@@ -30,6 +32,7 @@ export function filterDrinks(list: Drink[], filters: DrinkFilters, context: Filt
     if (filters.milk === 'with' && !hasMilk(drink)) return false;
     if (filters.milk === 'without' && hasMilk(drink)) return false;
     if (filters.plantBased && !isPlantBasedPossible(drink)) return false;
+    if (filters.noAlcohol && hasAlcohol(drink)) return false;
     if (filters.maxTimeMin && drink.prepTimeMin > filters.maxTimeMin) return false;
     return true;
   });
@@ -39,7 +42,7 @@ export function hasActiveFilters(filters: DrinkFilters): boolean {
   return Object.values(filters).some((value) => value !== undefined && value !== false);
 }
 
-// Filtry trzymamy w adresie (?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10),
+// Filtry trzymamy w adresie (?ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10),
 // więc po powrocie z ekranu napoju lista wygląda tak samo.
 
 const TEMP_PARAM: Record<Temperature, string> = { hot: 'cieple', cold: 'zimne' };
@@ -58,6 +61,7 @@ export function filtersFromParams(params: URLSearchParams): DrinkFilters {
   if (temperature) filters.temperature = temperature;
   if (milk) filters.milk = milk;
   if (params.get('roslinne') === '1') filters.plantBased = true;
+  if (params.get('alkohol') === 'bez') filters.noAlcohol = true;
   if ((TIME_LIMITS as readonly number[]).includes(time)) filters.maxTimeMin = time as TimeLimit;
   return filters;
 }
@@ -69,6 +73,7 @@ export function filtersToParams(filters: DrinkFilters): URLSearchParams {
   if (filters.temperature) params.set('temp', TEMP_PARAM[filters.temperature]);
   if (filters.milk) params.set('mleko', MILK_PARAM[filters.milk]);
   if (filters.plantBased) params.set('roslinne', '1');
+  if (filters.noAlcohol) params.set('alkohol', 'bez');
   if (filters.maxTimeMin) params.set('czas', String(filters.maxTimeMin));
   return params;
 }

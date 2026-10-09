@@ -36,7 +36,7 @@ export function BrewingPage() {
                     {formatSeconds(method.totalTimeSec)}
                   </li>
                   <li>trudność: {DIFFICULTY_LABELS[method.difficulty]}</li>
-                  <li>mielenie: {GRIND_LABELS[method.grind]}</li>
+                  <li>{method.instant ? 'bez mielenia' : `mielenie: ${GRIND_LABELS[method.grind]}`}</li>
                 </ul>
                 <p className="mt-2 text-sm text-ink-muted">
                   <span className="sr-only">Sprzęt: </span>

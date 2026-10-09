@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { ReviewNote } from '../components/ReviewNote';
 import { Section } from '../components/Section';
 import { Sheet } from '../components/Sheet';
-import { GRIND_LABELS, GRINDER_UNIT_LABELS, methods } from '../data';
+import { beanMethods, GRIND_LABELS, GRINDER_UNIT_LABELS } from '../data';
 import { formatSetting, formatSettingRange } from '../features/grinder/format';
 import { useGrindSettingDialog } from '../features/grinder/GrindSettingSheet';
 import {
@@ -99,7 +99,7 @@ export function GrindersPage() {
 
       <Section title="Ustawienia dla metod">
         <ul className="space-y-2">
-          {methods.map((method) => {
+          {beanMethods.map((method) => {
             const setting = grinder.settings[method.id];
             const range = model?.grind[method.grind];
             return (

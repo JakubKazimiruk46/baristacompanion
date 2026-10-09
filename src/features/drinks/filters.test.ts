@@ -103,6 +103,13 @@ describe('filterDrinks', () => {
     expect(filterDrinks(fixtures, { favorites: true })).toEqual([]);
   });
 
+  it('bez alkoholu: na prawdziwych danych wypadają irish coffee i espresso martini', () => {
+    const result = ids(filterDrinks(drinks, { noAlcohol: true }));
+    expect(result).toHaveLength(drinks.length - 2);
+    expect(result).not.toContain('irish-coffee');
+    expect(result).not.toContain('espresso-martini');
+  });
+
   it('na prawdziwych danych: zimne + roślinne wyklucza kawę mrożoną z bitą śmietaną', () => {
     const result = ids(filterDrinks(drinks, { temperature: 'cold', plantBased: true }));
     expect(result).toContain('espresso-tonic');
@@ -119,10 +126,11 @@ describe('filtry w adresie', () => {
       temperature: 'cold',
       milk: 'without',
       plantBased: true,
+      noAlcohol: true,
       maxTimeMin: 10,
     } as const;
     const params = filtersToParams(filters);
-    expect(params.toString()).toBe('ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&czas=10');
+    expect(params.toString()).toBe('ulubione=1&mam=1&temp=zimne&mleko=bez&roslinne=1&alkohol=bez&czas=10');
     expect(filtersFromParams(params)).toEqual(filters);
   });
 

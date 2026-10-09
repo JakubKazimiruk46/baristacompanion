@@ -40,7 +40,7 @@ export function Decorations({ shape, decorations, surface, transparent, clip }: 
               <Garnish
                 shape={shape}
                 surface={surface}
-                look={look as 'slice' | 'peel' | 'berries' | 'stick'}
+                look={look as 'slice' | 'peel' | 'berries' | 'stick' | 'beans'}
                 color={decoration.color}
               />
             );
@@ -210,7 +210,7 @@ function Topping({
   );
 }
 
-/** Dekoracja na górze: plaster owocu, skórka, maliny, laska cynamonu. */
+/** Dekoracja na górze: plaster owocu, skórka, maliny, laska cynamonu, ziarna kawy. */
 function Garnish({
   shape,
   surface,
@@ -219,10 +219,33 @@ function Garnish({
 }: {
   shape: VesselShape;
   surface: Surface;
-  look: 'slice' | 'peel' | 'berries' | 'stick';
+  look: 'slice' | 'peel' | 'berries' | 'stick' | 'beans';
   color: string;
 }) {
   const topW = shape.hw(0);
+
+  if (look === 'beans') {
+    // Trzy ziarna kawy na piance, z bruzdą przez środek.
+    const beans = [
+      [-0.3, 0.1, -25],
+      [0.02, -0.35, 15],
+      [0.32, 0.15, 40],
+    ] as const;
+    return (
+      <g>
+        {beans.map(([rx, ry, rotate], i) => {
+          const x = surface.cx + rx * surface.rx;
+          const y = surface.y - 2 + ry * surface.ry;
+          return (
+            <g key={i} transform={`rotate(${rotate} ${x} ${y})`} data-bean="">
+              <ellipse cx={x} cy={y} rx={5} ry={3.4} fill={color} />
+              <path d={`M${x - 3.6} ${y} q1.8 -1.4 3.6 0 t3.6 0`} fill="none" stroke={lighten(color, 0.45)} strokeWidth={0.9} strokeLinecap="round" />
+            </g>
+          );
+        })}
+      </g>
+    );
+  }
 
   if (look === 'slice') {
     // Plaster nacięty do połowy i nasunięty na brzeg szklanki.

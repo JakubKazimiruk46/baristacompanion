@@ -48,6 +48,11 @@ describe('układ karty', () => {
     expect(layout.bottom).toBeLessThan(FOOTER_Y - 60);
   });
 
+  it('napój z alkoholem ma na karcie „18+”', () => {
+    expect(layoutCard(getDrink('irish-coffee')!).meta.text).toBe('Na ciepło · 12 min · Drip (V60) · 18+');
+    expect(layoutCard(getDrink('mazagran')!).meta.text).not.toMatch(/18\+/);
+  });
+
   it('długa nazwa przechodzi do drugiej linii', () => {
     expect(layoutCard(getDrink('kawa-pomaranczowa')!).title.map((l) => l.text)).toEqual(['Kawa', 'pomarańczowa']);
     expect(layoutCard(getDrink('espresso-tonic')!).title.map((l) => l.text)).toEqual(['Espresso tonic']);

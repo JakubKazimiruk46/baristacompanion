@@ -42,10 +42,15 @@ export function DrinkFiltersBar({ filters, onChange }: DrinkFiltersBarProps) {
           Bez mleka
         </Chip>
       </div>
-      <Chip pressed={filters.plantBased === true} onClick={() => toggle('plantBased', true)}>
-        <LeafIcon className="size-4" />
-        Wersja roślinna
-      </Chip>
+      <div className="flex gap-2">
+        <Chip pressed={filters.plantBased === true} onClick={() => toggle('plantBased', true)}>
+          <LeafIcon className="size-4" />
+          Wersja roślinna
+        </Chip>
+        <Chip pressed={filters.noAlcohol === true} onClick={() => toggle('noAlcohol', true)}>
+          Bez alkoholu
+        </Chip>
+      </div>
       <div role="group" aria-label="Czas przygotowania" className="flex gap-2">
         {TIME_LIMITS.map((limit) => (
           <Chip

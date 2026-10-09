@@ -4,7 +4,7 @@ import { ReviewNote } from '../components/ReviewNote';
 import { Section } from '../components/Section';
 import { ShareIcon } from '../components/icons';
 import { Stepper } from '../components/Stepper';
-import { getDrink, type Drink } from '../data';
+import { getDrink, hasAlcohol, type Drink } from '../data';
 import { MAX_SERVINGS, useServings } from '../features/drinks/amounts';
 import { BaseCard } from '../features/drinks/BaseCard';
 import { DrinkIngredients } from '../features/drinks/DrinkIngredients';
@@ -34,6 +34,11 @@ export function DrinkPage() {
         <div className="mt-3">
           <DrinkMeta drink={drink} />
         </div>
+        {hasAlcohol(drink) && (
+          <p className="mt-3 rounded-2xl bg-surface-muted p-3 text-sm">
+            Napój z alkoholem, tylko dla dorosłych. Nie podawaj go dzieciom, kobietom w ciąży ani kierowcom.
+          </p>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
           <FavoriteButton drinkId={drink.id} />
           <ShareButton drink={drink} />
