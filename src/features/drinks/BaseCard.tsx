@@ -28,18 +28,28 @@ export function BaseCard({ drink, servings = 1 }: { drink: Drink; servings?: num
         </span>
         <ChevronRightIcon className="size-5" />
       </Link>
-      {alternatives.length > 0 && (
+      {drink.base.anyMethod ? (
         <p className="mt-2 text-sm text-ink-muted">
-          Możesz też użyć:{' '}
-          {alternatives.map((alt, index) => (
-            <span key={alt.id}>
-              {index > 0 && ', '}
-              <Link to={`/parzenie/${alt.id}`} className="font-medium text-accent underline">
-                {alt.name}
-              </Link>
-            </span>
-          ))}
+          Możesz też użyć{' '}
+          <Link to="/parzenie" className="font-medium text-accent underline">
+            dowolnej innej metody
+          </Link>
+          .
         </p>
+      ) : (
+        alternatives.length > 0 && (
+          <p className="mt-2 text-sm text-ink-muted">
+            Możesz też użyć:{' '}
+            {alternatives.map((alt, index) => (
+              <span key={alt.id}>
+                {index > 0 && ', '}
+                <Link to={`/parzenie/${alt.id}`} className="font-medium text-accent underline">
+                  {alt.name}
+                </Link>
+              </span>
+            ))}
+          </p>
+        )
       )}
     </div>
   );

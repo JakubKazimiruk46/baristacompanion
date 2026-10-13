@@ -4,6 +4,7 @@ import { isValidDrink } from '../../data/validate';
 import { backendEnabled, getSupabase } from '../../lib/supabase';
 import type { MyDrink } from '../assistant/myDrinks';
 import { CommunityError, PAGE_SIZE, type CommunitySort, type ReportReason } from './api';
+import { searchWords, type CommunityFilters } from './filters';
 
 /**
  * Napoje społeczności (tabela public_drinks). Napój z serwera przechodzi te same reguły co katalog
@@ -15,18 +16,21 @@ export interface CommunityDrink {
   id: string;
   authorId: string;
   author: string;
+  /** Id „Mojego napoju” u autora: autor widzi link do oryginału zamiast „Zapisz u siebie”. */
+  sourceId: string;
   drink: Drink;
   savesCount: number;
   status: 'published' | 'reported' | 'hidden';
   createdAt: string;
 }
 
-const COLUMNS = 'id, author_id, author_nick, drink, status, saves_count, created_at';
+const COLUMNS = 'id, author_id, author_nick, source_id, drink, status, saves_count, created_at';
 
 interface Row {
   id: string;
   author_id: string;
   author_nick: string;
+  source_id: string;
   drink: unknown;
   status: CommunityDrink['status'];
   saves_count: number;
@@ -48,6 +52,7 @@ export function fromDrinkRow(row: Row): CommunityDrink | null {
     id: row.id,
     authorId: row.author_id,
     author: row.author_nick,
+    sourceId: row.source_id,
     drink,
     savesCount: row.saves_count,
     status: row.status,
@@ -64,9 +69,22 @@ function failure(error: { code?: string }): CommunityError {
   return new CommunityError('Nie udało się połączyć z serwerem. Spróbuj ponownie.');
 }
 
-export async function listDrinks(sort: CommunitySort, page = 0): Promise<CommunityDrink[]> {
+/**
+ * Opublikowane napoje stronami. Filtry i słowa sprawdza serwer na kolumnach liczonych z dokumentu
+ * (search_text, method_ids z „*” dla każdej metody, has_milk, has_alcohol; migracja community_search).
+ */
+export async function listDrinks(
+  sort: CommunitySort,
+  page = 0,
+  filters: Omit<CommunityFilters, 'sort'> = { query: '' },
+): Promise<CommunityDrink[]> {
   const supabase = await getSupabase();
   let query = supabase.from('public_drinks').select(COLUMNS).eq('status', 'published');
+  for (const word of searchWords(filters.query)) query = query.ilike('search_text', `%${word}%`);
+  if (filters.methodId) query = query.overlaps('method_ids', [filters.methodId, '*']);
+  if (filters.temperature) query = query.eq('temperature', filters.temperature);
+  if (filters.milk) query = query.eq('has_milk', filters.milk === 'with');
+  if (filters.noAlcohol) query = query.eq('has_alcohol', false);
   query =
     sort === 'popular'
       ? query.order('saves_count', { ascending: false }).order('created_at', { ascending: false })

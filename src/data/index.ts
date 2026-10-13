@@ -42,15 +42,17 @@ export const getSyrup = (id: string): Syrup | undefined => syrupsById.get(id);
 export const getIngredient = (id: string): Ingredient | undefined => ingredientsById.get(id);
 export const getGrinderModel = (id: string): GrinderModel | undefined => grinderModelsById.get(id);
 
-/** Metody, którymi da się zrobić bazę napoju: główna i alternatywne. */
+/** Metody, którymi da się zrobić bazę napoju: główna i alternatywne, przy anyMethod każda (główna pierwsza). */
 export function baseMethodIds(drink: Drink): string[] {
-  return [drink.base.methodId, ...(drink.base.alternativeMethodIds ?? [])];
+  const { methodId } = drink.base;
+  if (drink.base.anyMethod) return [methodId, ...methods.filter((m) => m.id !== methodId).map((m) => m.id)];
+  return [methodId, ...(drink.base.alternativeMethodIds ?? [])];
 }
 
 /** Napoje, których bazę da się zaparzyć tą metodą. Najpierw te, dla których metoda jest główna. */
 export function drinksForMethod(methodId: string): Drink[] {
   const main = drinks.filter((d) => d.base.methodId === methodId);
-  const alternative = drinks.filter((d) => d.base.alternativeMethodIds?.includes(methodId));
+  const alternative = drinks.filter((d) => d.base.methodId !== methodId && baseMethodIds(d).includes(methodId));
   return [...main, ...alternative];
 }
 

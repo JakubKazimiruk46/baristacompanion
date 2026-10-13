@@ -310,6 +310,8 @@ export interface Drink extends Reviewable {
     amountMl: number;
     /** Inne metody, którymi też da się zrobić bazę. */
     alternativeMethodIds?: string[];
+    /** Bazę da się zrobić każdą metodą (wtedy bez alternativeMethodIds); methodId to metoda polecana. */
+    anyMethod?: true;
     note?: string;
   };
   milk?: {

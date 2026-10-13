@@ -105,6 +105,10 @@ export function validateDrinkWith(value: unknown, catalog: DrinkCatalog): string
         if (new Set(alternatives).size !== alternatives.length) err('base.alternativeMethodIds: bez powtórzeń.');
       }
     }
+    if (d.base.anyMethod !== undefined) {
+      if (d.base.anyMethod !== true) err('base.anyMethod: tylko true.');
+      else if (alternatives !== undefined) err('base.alternativeMethodIds: zbędne, gdy pasuje każda metoda (anyMethod).');
+    }
     text(d.base.note, 'base.note', DRINK_LIMITS.note, false);
   }
 
@@ -264,7 +268,7 @@ export function normalizeDrink(value: unknown): unknown {
     'steps',
     'serving',
   ]) as Obj;
-  if (d.base !== undefined) d.base = pick(d.base, ['methodId', 'amountMl', 'alternativeMethodIds', 'note']);
+  if (d.base !== undefined) d.base = pick(d.base, ['methodId', 'amountMl', 'alternativeMethodIds', 'anyMethod', 'note']);
   if (d.milk !== undefined) d.milk = pick(d.milk, ['options', 'amountMl', 'prep']);
   d.extras = list(d.extras, (extra) => {
     if (isObj(extra) && extra.kind === 'syrup') return pick(extra, ['kind', 'syrupId', 'amountMl', 'optional']);

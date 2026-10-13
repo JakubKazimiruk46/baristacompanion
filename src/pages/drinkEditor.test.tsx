@@ -93,4 +93,27 @@ describe('kreator napoju', () => {
     renderApp('/napoje/mocha/edycja');
     expect(screen.getByRole('heading', { level: 1, name: 'Nie ma takiej strony' })).toBeInTheDocument();
   });
+
+  it('metody alternatywne i „Wszystkie metody”: zapis i opis bazy na ekranie napoju', async () => {
+    const { user, router } = renderApp('/napoje/nowy?z=espresso-tonic');
+    const others = () => screen.getByRole('group', { name: 'Też pasuje (opcjonalnie)' });
+    expect(within(others()).getByRole('checkbox', { name: 'AeroPress' })).toBeChecked();
+    expect(within(others()).queryByRole('checkbox', { name: 'Kawiarka' })).not.toBeInTheDocument();
+    await user.click(within(others()).getByRole('checkbox', { name: 'Chemex' }));
+    await user.click(screen.getByRole('button', { name: 'Zapisz napój' }));
+
+    const id = myDrinksStore.getSnapshot()[0]!.drink.id;
+    expect(myDrinksStore.getSnapshot()[0]!.drink.base.alternativeMethodIds).toEqual(['chemex', 'aeropress']);
+    expect(screen.getByRole('link', { name: 'Chemex' })).toHaveAttribute('href', '/parzenie/chemex');
+
+    await router.navigate(`/napoje/${id}/edycja`);
+    await screen.findByRole('heading', { level: 1, name: /^Edycja/ });
+    await user.click(within(others()).getByRole('checkbox', { name: 'Wszystkie metody' }));
+    expect(within(others()).getByRole('checkbox', { name: 'Syfon' })).toBeChecked();
+    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    expect(myDrinksStore.getSnapshot()[0]!.drink.base).toMatchObject({ methodId: 'kawiarka', anyMethod: true });
+    expect(myDrinksStore.getSnapshot()[0]!.drink.base.alternativeMethodIds).toBeUndefined();
+    expect(currentUrl(router)).toBe(`/napoje/${id}`);
+    expect(screen.getByRole('link', { name: 'dowolnej innej metody' })).toHaveAttribute('href', '/parzenie');
+  });
 });

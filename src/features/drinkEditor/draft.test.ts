@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drinks, getDrink } from '../../data';
+import { drinks, getDrink, methods } from '../../data';
 import { validateDrink } from '../../data/validate';
 import {
   draftErrors,
@@ -13,6 +13,7 @@ import {
   parseAmount,
   previewDrink,
   suggestLayers,
+  toggleAlternative,
   type DrinkDraft,
 } from './draft';
 
@@ -128,6 +129,34 @@ describe('kreator napoju: podgląd i podpowiedzi', () => {
     const list = [{ key: 1 }, { key: 2 }, { key: 3 }];
     expect(move(list, 2, -1).map((i) => i.key)).toEqual([2, 1, 3]);
     expect(move(list, 3, 1)).toBe(list);
+  });
+
+  it('metody alternatywne i „wszystkie metody” wracają z formularza', () => {
+    const tonic = getDrink('espresso-tonic')!;
+    const draft = { ...drinkToDraft(tonic), alternativeMethodIds: ['aeropress', 'chemex', tonic.base.methodId] };
+    expect(draftToDrink(draft, 'moj-test-abcd').base.alternativeMethodIds).toEqual(['aeropress', 'chemex']);
+
+    const any = draftToDrink({ ...draft, anyMethod: true }, 'moj-test-abcd');
+    expect(any.base).toMatchObject({ methodId: tonic.base.methodId, anyMethod: true });
+    expect(any.base.alternativeMethodIds).toBeUndefined();
+    expect(validateDrink(any)).toEqual([]);
+    expect(drinkToDraft(any)).toMatchObject({ anyMethod: true, alternativeMethodIds: [] });
+    expect(emptyDraft().anyMethod).toBe(false);
+  });
+
+  it('zaznaczanie metod alternatywnych: odznaczenie przy „wszystkich” zostawia resztę, wszystkie po kolei to „wszystkie”', () => {
+    const draft = { ...emptyDraft(), methodId: 'kawiarka' };
+    expect(toggleAlternative(draft, 'chemex')).toEqual({ anyMethod: false, alternativeMethodIds: ['chemex'] });
+    expect(toggleAlternative({ ...draft, alternativeMethodIds: ['chemex'] }, 'chemex').alternativeMethodIds).toEqual([]);
+    expect(toggleAlternative({ ...draft, alternativeMethodIds: ['chemex'] }, 'aeropress').alternativeMethodIds).toEqual(
+      ['aeropress', 'chemex'].sort((a, b) => methods.findIndex((m) => m.id === a) - methods.findIndex((m) => m.id === b)),
+    );
+
+    const withoutChemex = toggleAlternative({ ...draft, anyMethod: true }, 'chemex');
+    expect(withoutChemex.anyMethod).toBe(false);
+    expect(withoutChemex.alternativeMethodIds).toHaveLength(methods.length - 2);
+    expect(withoutChemex.alternativeMethodIds).not.toContain('chemex');
+    expect(toggleAlternative({ ...draft, ...withoutChemex }, 'chemex')).toEqual({ anyMethod: true, alternativeMethodIds: [] });
   });
 
   it('własna wersja napoju z katalogu zaczyna od jego danych', () => {

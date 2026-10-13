@@ -1,11 +1,12 @@
 import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getDrink, getMethod } from '../data';
+import { drinks, getDrink, getMethod, hasAlcohol, hasMilk, type Drink } from '../data';
 import { resetAuthForTests } from '../features/account/auth';
 import { myDrinksStore } from '../features/assistant/myDrinks';
 import { recipesStore } from '../features/recipes/store';
 import { resetSyncEngineForTests } from '../features/sync/engine';
 import { resetSyncTrackingForTests } from '../features/sync/local';
+import { foldText } from '../lib/format';
 import { resetSupabaseForTests } from '../lib/supabase';
 import { installFakeSupabase, type FakeSupabase } from '../test/fakeSupabase';
 import { currentUrl, mainNav, renderApp } from '../test/renderApp';
@@ -17,10 +18,22 @@ let fake: FakeSupabase;
 const mocha = getDrink('mocha')!;
 const tonic = getDrink('espresso-tonic')!;
 
-/** Wiersz public_drinks jak w bazie (trigger ustawia nick, nazwę, temperaturę, liczniki i stan). */
+/** Kolumny wyszukiwania jak trigger w bazie (migracja community_search). */
+function searchColumns(drink: Drink, nick: string) {
+  const extras = drink.extras.map((extra) => (extra.kind === 'syrup' ? extra.syrupId : `${extra.name} ${extra.ingredientId}`));
+  return {
+    search_text: foldText([drink.name, drink.tagline, drink.description, nick, ...extras, ...(drink.milk?.options ?? [])].join(' ')),
+    method_ids: [drink.base.methodId, ...(drink.base.anyMethod ? ['*'] : (drink.base.alternativeMethodIds ?? []))],
+    has_milk: hasMilk(drink),
+    has_alcohol: hasAlcohol(drink),
+  };
+}
+
+/** Wiersz public_drinks jak w bazie (trigger ustawia nick, nazwę, temperaturę, wyszukiwanie, liczniki i stan). */
 function drinkRow(id: string, drink: object, patch: Record<string, unknown> = {}) {
   const d = drink as { name: string; temperature: string };
   return {
+    ...searchColumns(drink as Drink, (patch.author_nick as string | undefined) ?? 'Ola'),
     id,
     author_id: 'user-ola',
     author_nick: 'Ola',
@@ -47,12 +60,14 @@ function installServer() {
     reports_count: 0,
     author_nick: fake.table('profiles').find((p) => p.id === r.author_id)?.nick,
     name: (r.drink as { name: string }).name,
+    ...searchColumns(r.drink as Drink, String(fake.table('profiles').find((p) => p.id === r.author_id)?.nick)),
     ...r,
   }));
   fake.onRpc('save_public_drink', ({ p_drink_id }, user) => {
     const saves = fake.table('drink_saves');
     const drink = drinks.find((d) => d.id === p_drink_id)!;
-    if (!saves.some((s) => s.drink_id === p_drink_id && s.user_id === user!.id)) {
+    // Autorowi zapis się nie liczy.
+    if (drink.author_id !== user!.id && !saves.some((s) => s.drink_id === p_drink_id && s.user_id === user!.id)) {
       saves.push({ drink_id: p_drink_id, user_id: user!.id });
       drink.saves_count = (drink.saves_count as number) + 1;
     }
@@ -127,16 +142,16 @@ describe('zakładka Społeczność', () => {
     );
   });
 
-  it('przepisy wszystkich metod z filtrem metody', async () => {
+  it('przepisy: metoda w pigułkach, słowa i filtry w adresie zostają po powrocie z przepisu', async () => {
     const steps = [{ text: 'Zalej {water} ml', action: true }];
-    const recipe = (id: string, methodId: string, name: string) => ({
+    const recipe = (id: string, methodId: string, name: string, description: string | null = null) => ({
       id,
       author_id: 'user-ola',
       author_nick: 'Ola',
       source_id: id,
       method_id: methodId,
       name,
-      description: null,
+      description,
       // Dawka metody: mieści się w jej granicach (walidacja jak przy własnym przepisie).
       dose: getMethod(methodId)!.dose,
       water_temp: { min: 92, max: 94 },
@@ -145,18 +160,88 @@ describe('zakładka Społeczność', () => {
       status: 'published',
       saves_count: 0,
       created_at: '2026-10-01T10:00:00.000Z',
+      // Jak trigger w bazie: nazwa, opis, autor i metoda.
+      search_text: foldText([name, description ?? '', 'Ola', methodId].join(' ')),
     });
-    fake.table('public_recipes').push(recipe('r1', 'drip', 'Poranny V60'), recipe('r2', 'chemex', 'Chemex na dwoje'));
+    fake.table('public_recipes').push(
+      recipe('r1', 'drip', 'Poranny V60'),
+      recipe('r2', 'chemex', 'Chemex na dwoje'),
+      recipe('r3', 'chemex', 'Chemex z cynamonem', 'Korzenny i słodki'),
+    );
     const { user, router } = renderApp('/spolecznosc?sekcja=przepisy');
-    const list = await screen.findByRole('list', { name: 'Przepisy społeczności' });
-    expect(within(list).getAllByRole('link')).toHaveLength(2);
+    const links = () => within(screen.getByRole('list', { name: 'Przepisy społeczności' })).getAllByRole('link');
+    await screen.findByRole('list', { name: 'Przepisy społeczności' });
+    expect(links()).toHaveLength(3);
 
-    await user.selectOptions(screen.getByLabelText('Metoda'), 'chemex');
-    await vi.waitFor(() => expect(within(screen.getByRole('list', { name: 'Przepisy społeczności' })).getAllByRole('link')).toHaveLength(1));
-    await user.click(screen.getByRole('link', { name: /Chemex na dwoje/ }));
-    expect(currentUrl(router)).toBe('/spolecznosc/przepisy/r2');
-    expect(await screen.findByRole('heading', { level: 1, name: 'Chemex na dwoje' })).toBeInTheDocument();
+    const methodsGroup = () => screen.getByRole('group', { name: 'Metoda' });
+    await user.click(within(methodsGroup()).getByRole('button', { name: 'Chemex' }));
+    await vi.waitFor(() => expect(links()).toHaveLength(2));
+    await user.type(screen.getByRole('searchbox', { name: 'Szukaj przepisu' }), 'KORZENNY');
+    await vi.waitFor(() => expect(links()).toHaveLength(1));
+    expect(currentUrl(router)).toBe('/spolecznosc?sekcja=przepisy&q=KORZENNY&metoda=chemex');
+
+    await user.click(screen.getByRole('link', { name: /Chemex z cynamonem/ }));
+    expect(currentUrl(router)).toBe('/spolecznosc/przepisy/r3');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Chemex z cynamonem' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Społeczność', current: false })).toBeInTheDocument();
+    await router.navigate(-1);
+    expect(await screen.findByRole('searchbox', { name: 'Szukaj przepisu' })).toHaveValue('KORZENNY');
+    expect(within(methodsGroup()).getByRole('button', { name: 'Chemex' })).toHaveAttribute('aria-pressed', 'true');
+    await vi.waitFor(() => expect(links()).toHaveLength(1));
+
+    // Metoda bez przepisów: komunikat z jej nazwą.
+    await user.clear(screen.getByRole('searchbox', { name: 'Szukaj przepisu' }));
+    await user.click(within(methodsGroup()).getByRole('button', { name: 'Syfon' }));
+    expect(await screen.findByText(/Nikt jeszcze nie opublikował przepisu na: Syfon/)).toBeInTheDocument();
+  });
+
+  it('napoje: słowa, szybkie filtry i metoda (alternatywna albo „wszystkie metody”) w adresie', async () => {
+    const alcoholic = drinks.find(hasAlcohol)!;
+    const anyMethod: Drink = { ...alcoholic, base: { methodId: 'kawiarka', amountMl: alcoholic.base.amountMl, anyMethod: true } };
+    const tonicChemex: Drink = { ...tonic, base: { ...tonic.base, alternativeMethodIds: ['chemex'] } };
+    fake.table('public_drinks').push(
+      drinkRow('a', mocha),
+      drinkRow('b', tonicChemex, { author_nick: 'Bartek' }),
+      drinkRow('c', anyMethod),
+    );
+    const { user, router } = renderApp('/spolecznosc');
+    const names = () =>
+      within(screen.getByRole('list', { name: 'Napoje społeczności' }))
+        .getAllByRole('heading')
+        .map((heading) => heading.textContent)
+        .sort();
+    await screen.findByRole('list', { name: 'Napoje społeczności' });
+    expect(names()).toHaveLength(3);
+
+    const quick = () => screen.getByRole('group', { name: 'Filtry' });
+    await user.click(within(quick()).getByRole('button', { name: 'Bez alkoholu' }));
+    await vi.waitFor(() => expect(names()).toEqual([mocha.name, tonic.name].sort()));
+    await user.click(within(quick()).getByRole('button', { name: 'Na zimno' }));
+    await vi.waitFor(() => expect(names()).toEqual([tonic.name]));
+    expect(currentUrl(router)).toBe('/spolecznosc?temp=zimne&alkohol=bez');
+    await user.click(within(quick()).getByRole('button', { name: 'Na zimno' }));
+    await user.click(within(quick()).getByRole('button', { name: 'Bez alkoholu' }));
+    await vi.waitFor(() => expect(names()).toHaveLength(3));
+
+    // Chemex to alternatywa toniku, a napój „każdą metodą” pasuje do każdej.
+    const methodsGroup = () => screen.getByRole('group', { name: 'Metoda' });
+    await user.click(within(methodsGroup()).getByRole('button', { name: 'Chemex' }));
+    await vi.waitFor(() => expect(names()).toEqual([tonic.name, alcoholic.name].sort()));
+    await user.click(within(methodsGroup()).getByRole('button', { name: 'Syfon' }));
+    await vi.waitFor(() => expect(names()).toEqual([alcoholic.name]));
+    await user.click(within(methodsGroup()).getByRole('button', { name: 'Wszystkie metody' }));
+    await vi.waitFor(() => expect(names()).toHaveLength(3));
+
+    // Słowa: składnik i autor, wielkość liter bez znaczenia.
+    const search = screen.getByRole('searchbox', { name: 'Szukaj napoju' });
+    await user.type(search, 'Tonik BARTEK');
+    await vi.waitFor(() => expect(names()).toEqual([tonic.name]));
+    expect(currentUrl(router)).toBe('/spolecznosc?q=Tonik+BARTEK');
+    await user.clear(search);
+    await user.type(search, 'nie ma takiego');
+    await user.click(await screen.findByRole('button', { name: 'Wyczyść filtry' }));
+    await vi.waitFor(() => expect(names()).toHaveLength(3));
+    expect(currentUrl(router)).toBe('/spolecznosc');
   });
 
   it('„Moje” bez konta: zachęta do logowania z powrotem do zakładki', () => {
@@ -255,6 +340,16 @@ describe('publikowanie własnego napoju', () => {
     await user.click(within(screen.getByRole('dialog', { name: 'Wycofać napój?' })).getByRole('button', { name: 'Wycofaj' }));
     expect(await within(section()).findByText('Wycofano napój ze społeczności.')).toBeInTheDocument();
     expect(fake.table('public_drinks')).toHaveLength(0);
+  });
+
+  it('autor napoju: zamiast „Zapisz u siebie” link do swojego oryginału', async () => {
+    const own = myDrinksStore.add({ ...mocha, id: 'x', name: 'Moja mocha' }, 1, { source: 'own' });
+    const me = fake.signIn('ania@example.com');
+    fake.table('public_drinks').push(drinkRow('a', own, { author_id: me.id, author_nick: 'Ania', source_id: own.id }));
+    renderApp('/spolecznosc/napoje/a');
+    expect(await screen.findByRole('link', { name: 'Twój napój: otwórz' })).toHaveAttribute('href', `/napoje/${own.id}`);
+    expect(screen.queryByRole('button', { name: 'Zapisz u siebie' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zgłoś' })).not.toBeInTheDocument();
   });
 
   it('propozycji AI nie publikuje się, dopóki nie zostanie poprawiona w kreatorze', () => {

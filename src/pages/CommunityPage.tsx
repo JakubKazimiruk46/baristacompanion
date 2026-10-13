@@ -3,7 +3,7 @@ import { Link, useLocation, useSearchParams } from 'react-router';
 import type { FromState } from '../components/BackLink';
 import { Chip } from '../components/Chip';
 import { EmptyState } from '../components/EmptyState';
-import { ChevronRightIcon, PeopleIcon, PlusIcon, UserIcon } from '../components/icons';
+import { ChevronRightIcon, CloseIcon, ColdIcon, HotIcon, PeopleIcon, PlusIcon, SearchIcon, UserIcon } from '../components/icons';
 import { MethodIcon } from '../components/MethodIcon';
 import { PageHeader } from '../components/PageHeader';
 import { Segmented } from '../components/Segmented';
@@ -21,6 +21,7 @@ import {
   type CommunityDrink,
   type PublishedDrink,
 } from '../features/community/drinks';
+import { filtersFromParams, filtersToParams, isNarrowed, searchWords, type CommunityFilters } from '../features/community/filters';
 import { usePagedList, type PagedState } from '../features/community/usePagedList';
 import { DrinkGlass } from '../features/glass/DrinkGlass';
 import { recipePath } from '../features/recipes/recipe';
@@ -28,6 +29,7 @@ import { recipeLine } from '../features/recipes/RecipesSection';
 import { useRecipes } from '../features/recipes/store';
 import { count } from '../lib/format';
 import { backendEnabled } from '../lib/supabase';
+import { useDebouncedValue } from '../lib/useDebouncedValue';
 import { useOnline } from '../lib/useOnline';
 
 const SECTIONS = ['napoje', 'przepisy', 'moje'] as const;
@@ -169,6 +171,77 @@ function AccountBar() {
   );
 }
 
+const chip = 'shrink-0 whitespace-nowrap';
+const row = '-mx-4 flex gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
+
+/** Filtry sekcji z adresu i ich zmiana (bez nowego wpisu w historii). Słowa trafiają do serwera po chwili bez pisania. */
+function useCommunityFilters(section: CommunitySection) {
+  const [params, setParams] = useSearchParams();
+  const filters = filtersFromParams(params);
+  const update = (next: CommunityFilters) => setParams(filtersToParams(section, next), { replace: true, preventScrollReset: true });
+  const query = useDebouncedValue(filters.query, 300);
+  const { sort, ...server } = { ...filters, query };
+  return { filters, update, sort, server, key: JSON.stringify({ ...server, sort }) };
+}
+
+function SearchField({
+  label,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="relative">
+      <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-ink-muted" />
+      <input
+        type="search"
+        aria-label={label}
+        placeholder={placeholder}
+        enterKeyHint="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-11 w-full rounded-full border border-line bg-surface pr-11 pl-11 text-base placeholder:text-ink-muted focus:border-accent focus:outline-2 focus:outline-accent/40 [&::-webkit-search-cancel-button]:appearance-none"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          className="absolute top-0 right-0 flex size-11 items-center justify-center rounded-full text-ink-muted"
+        >
+          <CloseIcon className="size-5" />
+          <span className="sr-only">Wyczyść wyszukiwanie</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Metoda jako pigułki w rzędzie (ponowne kliknięcie wybranej wraca do wszystkich). */
+function MethodChips({ value, onChange }: { value: string | undefined; onChange: (methodId: string | undefined) => void }) {
+  return (
+    <div role="group" aria-label="Metoda" className={row}>
+      <Chip className={chip} pressed={value === undefined} onClick={() => onChange(undefined)}>
+        Wszystkie metody
+      </Chip>
+      {methods.map((method) => (
+        <Chip
+          key={method.id}
+          className={chip}
+          pressed={value === method.id}
+          onClick={() => onChange(value === method.id ? undefined : method.id)}
+        >
+          {method.name}
+        </Chip>
+      ))}
+    </div>
+  );
+}
+
 function SortChips({ sort, onChange }: { sort: CommunitySort; onChange: (sort: CommunitySort) => void }) {
   return (
     <div role="group" aria-label="Kolejność" className="flex flex-wrap gap-2">
@@ -182,6 +255,18 @@ function SortChips({ sort, onChange }: { sort: CommunitySort; onChange: (sort: C
   );
 }
 
+/** Pusta lista po wyszukiwaniu albo filtrach: wyczyszczenie zostawia kolejność. */
+function NoResults({ onClear }: { onClear: () => void }) {
+  return (
+    <>
+      Nic nie pasuje do wyszukiwania.{' '}
+      <button type="button" onClick={onClear} className="h-10 font-semibold text-accent">
+        Wyczyść filtry
+      </button>
+    </>
+  );
+}
+
 /** Stan listy: wczytywanie, błąd z ponowieniem, pusta lista, „Pokaż więcej”. */
 function Feed<T>({
   list,
@@ -189,7 +274,7 @@ function Feed<T>({
   children,
 }: {
   list: { state: PagedState<T>; more: () => void; retry: () => void };
-  empty: string;
+  empty: ReactNode;
   children: (items: T[]) => ReactNode;
 }) {
   const { state } = list;
@@ -228,16 +313,63 @@ function Feed<T>({
 }
 
 function DrinksFeed() {
-  const [sort, setSort] = useState<CommunitySort>('newest');
-  const list = usePagedList((page) => listDrinks(sort, page), sort, true);
+  const { filters, update, sort, server, key } = useCommunityFilters('napoje');
+  const list = usePagedList((page) => listDrinks(sort, page, server), key, true);
   const location = useLocation();
   const from = location.pathname + location.search;
+  /** Pigułka włącza swój filtr albo, gdy już jest włączony, go zdejmuje. */
+  const quick = (label: ReactNode, on: boolean, patch: Partial<CommunityFilters>, off: Partial<CommunityFilters>) => (
+    <Chip className={chip} pressed={on} onClick={() => update({ ...filters, ...(on ? off : patch) })}>
+      {label}
+    </Chip>
+  );
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <SortChips sort={sort} onChange={setSort} />
+      <SearchField
+        label="Szukaj napoju"
+        placeholder="Nazwa, składnik albo autor"
+        value={filters.query}
+        onChange={(query) => update({ ...filters, query })}
+      />
+      <div role="group" aria-label="Filtry" className={`mt-2 ${row}`}>
+        {quick(
+          <>
+            <HotIcon className="size-4" />
+            Na ciepło
+          </>,
+          filters.temperature === 'hot',
+          { temperature: 'hot' },
+          { temperature: undefined },
+        )}
+        {quick(
+          <>
+            <ColdIcon className="size-4" />
+            Na zimno
+          </>,
+          filters.temperature === 'cold',
+          { temperature: 'cold' },
+          { temperature: undefined },
+        )}
+        {quick('Z mlekiem', filters.milk === 'with', { milk: 'with' }, { milk: undefined })}
+        {quick('Bez mleka', filters.milk === 'without', { milk: 'without' }, { milk: undefined })}
+        {quick('Bez alkoholu', filters.noAlcohol === true, { noAlcohol: true }, { noAlcohol: undefined })}
       </div>
-      <Feed list={list} empty="Nikt jeszcze nie opublikował napoju. Stwórz własny w kreatorze i opublikuj go jako pierwszy.">
+      <div className="mt-1">
+        <MethodChips value={filters.methodId} onChange={(methodId) => update({ ...filters, methodId })} />
+      </div>
+      <div className="mt-3">
+        <SortChips sort={filters.sort} onChange={(next) => update({ ...filters, sort: next })} />
+      </div>
+      <Feed
+        list={list}
+        empty={
+          isNarrowed(filters) ? (
+            <NoResults onClear={() => update({ query: '', sort: filters.sort })} />
+          ) : (
+            'Nikt jeszcze nie opublikował napoju. Stwórz własny w kreatorze i opublikuj go jako pierwszy.'
+          )
+        }
+      >
         {(items: CommunityDrink[]) => (
           <ul aria-label="Napoje społeczności" className="grid grid-cols-2 gap-3">
             {items.map((item) => (
@@ -274,31 +406,43 @@ function DrinksFeed() {
 }
 
 function RecipesFeed() {
-  const [sort, setSort] = useState<CommunitySort>('newest');
-  const [methodId, setMethodId] = useState('');
-  const list = usePagedList((page) => listRecipes(methodId || null, sort, page), `${sort}|${methodId}`, true);
+  const { filters, update, sort, server, key } = useCommunityFilters('przepisy');
+  const list = usePagedList((page) => listRecipes(server.methodId ?? null, sort, page, server.query), key, true);
   const location = useLocation();
   const from = location.pathname + location.search;
+  const method = filters.methodId ? getMethod(filters.methodId) : undefined;
   return (
     <>
-      <label htmlFor="community-method" className="block font-medium">
-        Metoda
-      </label>
-      <select
-        id="community-method"
-        value={methodId}
-        onChange={(event) => setMethodId(event.target.value)}
-        className="mt-1 mb-3 h-11 w-full rounded-xl border border-line bg-surface px-3 text-base focus:border-accent focus:outline-2 focus:outline-accent/40"
+      <SearchField
+        label="Szukaj przepisu"
+        placeholder="Nazwa, opis albo autor"
+        value={filters.query}
+        onChange={(query) => update({ ...filters, query })}
+      />
+      <div className="mt-2">
+        <MethodChips value={filters.methodId} onChange={(methodId) => update({ ...filters, methodId })} />
+      </div>
+      <div className="mt-3">
+        <SortChips sort={filters.sort} onChange={(next) => update({ ...filters, sort: next })} />
+      </div>
+      <Feed
+        list={list}
+        empty={
+          searchWords(filters.query).length > 0 ? (
+            <NoResults onClear={() => update({ query: '', sort: filters.sort })} />
+          ) : method ? (
+            <>
+              Nikt jeszcze nie opublikował przepisu na: {method.name}.{' '}
+              <Link to={`/parzenie/${method.id}`} className="font-medium text-accent underline">
+                Zrób własną wersję
+              </Link>{' '}
+              na ekranie metody.
+            </>
+          ) : (
+            'Nikt jeszcze nie opublikował przepisu. Zrób własną wersję na ekranie metody w zakładce Parzenie.'
+          )
+        }
       >
-        <option value="">Wszystkie metody</option>
-        {methods.map((method) => (
-          <option key={method.id} value={method.id}>
-            {method.name}
-          </option>
-        ))}
-      </select>
-      <SortChips sort={sort} onChange={setSort} />
-      <Feed list={list} empty="Nikt jeszcze nie opublikował przepisu na tę metodę. Zrób własną wersję na ekranie metody.">
         {(items: CommunityRecipe[]) => (
           <ul aria-label="Przepisy społeczności" className="space-y-3">
             {items.map((item) => (

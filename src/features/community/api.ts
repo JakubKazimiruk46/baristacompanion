@@ -1,4 +1,5 @@
 import { getSupabase } from '../../lib/supabase';
+import { searchWords } from './filters';
 import { parseRecipeInput, type RecipeInput, type UserRecipe } from '../recipes/recipe';
 
 /**
@@ -10,6 +11,8 @@ export interface CommunityRecipe {
   id: string;
   authorId: string;
   author: string;
+  /** Id przepisu u autora: autor widzi link do oryginału zamiast „Zapisz u siebie”. */
+  sourceId: string;
   recipe: RecipeInput;
   savesCount: number;
   status: 'published' | 'reported' | 'hidden';
@@ -21,12 +24,13 @@ export type CommunitySort = 'newest' | 'popular';
 export const PAGE_SIZE = 20;
 
 const COLUMNS =
-  'id, author_id, author_nick, method_id, name, description, dose, water_temp, grind, steps, status, saves_count, created_at';
+  'id, author_id, author_nick, source_id, method_id, name, description, dose, water_temp, grind, steps, status, saves_count, created_at';
 
 interface Row {
   id: string;
   author_id: string;
   author_nick: string;
+  source_id: string;
   method_id: string;
   name: string;
   description: string | null;
@@ -55,6 +59,7 @@ export function fromRow(row: Row): CommunityRecipe | null {
     id: row.id,
     authorId: row.author_id,
     author: row.author_nick,
+    sourceId: row.source_id,
     recipe,
     savesCount: row.saves_count,
     status: row.status,
@@ -73,11 +78,15 @@ function failure(error: { message?: string; code?: string }): CommunityError {
   return new CommunityError('Nie udało się połączyć z serwerem. Spróbuj ponownie.');
 }
 
-/** Przepisy jednej metody albo wszystkich (methodId: null, zakładka Społeczność). */
-export async function listRecipes(methodId: string | null, sort: CommunitySort, page = 0): Promise<CommunityRecipe[]> {
+/**
+ * Przepisy jednej metody albo wszystkich (methodId: null, zakładka Społeczność), opcjonalnie ze słowami
+ * (kolumna search_text: nazwa, opis, autor i metoda; sprawdza serwer, bo lista wczytuje się stronami).
+ */
+export async function listRecipes(methodId: string | null, sort: CommunitySort, page = 0, words = ''): Promise<CommunityRecipe[]> {
   const supabase = await getSupabase();
   let query = supabase.from('public_recipes').select(COLUMNS).eq('status', 'published');
   if (methodId) query = query.eq('method_id', methodId);
+  for (const word of searchWords(words)) query = query.ilike('search_text', `%${word}%`);
   query =
     sort === 'popular'
       ? query.order('saves_count', { ascending: false }).order('created_at', { ascending: false })

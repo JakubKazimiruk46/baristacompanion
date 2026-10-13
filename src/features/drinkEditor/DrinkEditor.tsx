@@ -38,6 +38,7 @@ import {
   newExtra,
   newKey,
   previewDrink,
+  toggleAlternative,
   suggestLayers,
   type DecorationDraft,
   type DrinkDraft,
@@ -193,6 +194,25 @@ export function DrinkEditor({ initial, submitLabel, onSubmit }: DrinkEditorProps
             </select>
           )}
         </Field>
+        <fieldset className="mt-4">
+          <legend className="font-medium">Też pasuje (opcjonalnie)</legend>
+          <p className="text-sm text-ink-muted">Inne metody, którymi da się zrobić bazę.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <ChoiceChip type="checkbox" checked={draft.anyMethod} onChange={() => set({ anyMethod: !draft.anyMethod, alternativeMethodIds: [] })}>
+              Wszystkie metody
+            </ChoiceChip>
+            {BASE_METHODS.filter((method) => method.id !== draft.methodId).map((method) => (
+              <ChoiceChip
+                key={method.id}
+                type="checkbox"
+                checked={draft.anyMethod || draft.alternativeMethodIds.includes(method.id)}
+                onChange={() => set(toggleAlternative(draft, method.id))}
+              >
+                {method.name}
+              </ChoiceChip>
+            ))}
+          </div>
+        </fieldset>
         <Field label="Ile kawy (ml)" error={shown.baseMl}>
           {(props) => <input {...props} inputMode="decimal" className={`${inputClass} max-w-32`} value={draft.baseMl} onChange={(e) => set({ baseMl: e.target.value })} />}
         </Field>

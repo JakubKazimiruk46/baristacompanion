@@ -73,6 +73,8 @@ export interface DrinkDraft {
   prepTimeMin: string;
   methodId: string;
   alternativeMethodIds: string[];
+  /** „Wszystkie metody”: bazę da się zrobić każdą metodą (alternativeMethodIds się wtedy nie liczy). */
+  anyMethod: boolean;
   baseMl: string;
   baseNote: string;
   milkOn: boolean;
@@ -201,6 +203,7 @@ export function emptyDraft(): DrinkDraft {
     prepTimeMin: '10',
     methodId: 'kawiarka',
     alternativeMethodIds: [],
+    anyMethod: false,
     baseMl: '50',
     baseNote: '',
     milkOn: false,
@@ -259,6 +262,7 @@ export function drinkToDraft(drink: Drink): DrinkDraft {
     prepTimeMin: String(drink.prepTimeMin),
     methodId: drink.base.methodId,
     alternativeMethodIds: drink.base.alternativeMethodIds ?? [],
+    anyMethod: drink.base.anyMethod === true,
     baseMl: toText(drink.base.amountMl),
     baseNote: drink.base.note ?? '',
     milkOn: drink.milk !== undefined,
@@ -359,7 +363,7 @@ export function draftToDrink(draft: DrinkDraft, id: string): Drink {
     base: {
       methodId: draft.methodId,
       amountMl: parseNumber(draft.baseMl) ?? 0,
-      ...(alternatives.length > 0 && { alternativeMethodIds: alternatives }),
+      ...(draft.anyMethod ? { anyMethod: true as const } : alternatives.length > 0 && { alternativeMethodIds: alternatives }),
       ...(note && { note }),
     },
     ...(draft.milkOn && {
@@ -602,3 +606,16 @@ export function hasErrors(errors: DrinkDraftErrors): boolean {
 
 /** Metody do wyboru bazy (kawa rozpuszczalna też: baza dalgony). */
 export const BASE_METHODS = methods;
+
+/**
+ * Zaznaczenie albo odznaczenie metody alternatywnej (kolejność jak na liście metod). Odznaczenie jednej
+ * przy „Wszystkich metodach” zostawia pozostałe, a zaznaczenie wszystkich po kolei to „Wszystkie metody”.
+ */
+export function toggleAlternative(draft: DrinkDraft, methodId: string): Pick<DrinkDraft, 'anyMethod' | 'alternativeMethodIds'> {
+  const others = BASE_METHODS.map((m) => m.id).filter((id) => id !== draft.methodId);
+  const chosen = new Set(draft.anyMethod ? others : draft.alternativeMethodIds);
+  if (chosen.has(methodId)) chosen.delete(methodId);
+  else chosen.add(methodId);
+  const next = others.filter((id) => chosen.has(id));
+  return next.length === others.length ? { anyMethod: true, alternativeMethodIds: [] } : { anyMethod: false, alternativeMethodIds: next };
+}

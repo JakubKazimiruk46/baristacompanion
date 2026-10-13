@@ -116,6 +116,7 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 | `20261010095000_anon_is_moderator.sql` | poprawka: `anon` może wykonać `is_moderator()` (bez tego niezalogowany nie widział przepisów społeczności: reguła odczytu woła tę funkcję) |
 | `20261010090000_user_data_collections.sql` | nowe kolekcje synchronizacji: lista „Do spróbowania” (`wishlist`) i ulubione metody (`method-favorites`) |
 | `20261010100000_community_drinks.sql` | napoje społeczności: `public_drinks` (napój jako dokument jsonb, kształt i rozmiar pilnowane w bazie, nazwa i temperatura z dokumentu, RLS), zapisy, zgłoszenia, funkcje `save_public_drink`, `report_public_drink`, `moderate_public_drink`; kolejka moderatora wspólna dla przepisów i napojów (kolumna `kind`) |
+| `20261013120000_community_search.sql` | wyszukiwanie i filtry Społeczności na serwerze: `search_text` (bez polskich znaków, funkcja `search_fold`), `method_ids`, `has_milk`, `has_alcohol` w napojach i `search_text` w przepisach (liczy trigger); zapis u siebie nie liczy się autorowi |
 
 ## 9. AI: klucz Claude i limity kosztów
 

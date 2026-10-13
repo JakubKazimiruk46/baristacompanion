@@ -87,13 +87,16 @@ function CommunityDrinkView({ item }: { item: CommunityDrink }) {
   const auth = useAuth();
   const navigate = useNavigate();
   const card = useShareCard(drink);
-  const saved = useMyDrinks().find((mine) => mine.origin?.communityId === item.id);
+  const myDrinks = useMyDrinks();
+  const saved = myDrinks.find((mine) => mine.origin?.communityId === item.id);
   const [saves, setSaves] = useState(item.savesCount);
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
   const [linkStatus, setLinkStatus] = useState<string | null>(null);
   const signedIn = auth.status === 'signed-in';
   const mine = signedIn && auth.user.id === item.authorId;
+  /** Autor nie zapisuje kopii swojego napoju: ma oryginał w „Moich napojach” (jeśli jest na tym urządzeniu). */
+  const original = mine ? myDrinks.find((own) => own.drink.id === item.sourceId) : undefined;
 
   const saveLocally = () => {
     const copy = myDrinksStore.add(drink, Date.now(), {
@@ -141,7 +144,15 @@ function CommunityDrinkView({ item }: { item: CommunityDrink }) {
         )}
         <p className="mt-3 rounded-2xl bg-accent-soft p-3 text-sm">Przepis od społeczności: proporcje sprawdź sam.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {saved ? (
+          {mine ? (
+            original ? (
+              <Link to={`/napoje/${original.drink.id}`} className={button}>
+                Twój napój: otwórz
+              </Link>
+            ) : (
+              <p className="flex min-h-11 items-center text-sm font-medium">To Twój napój.</p>
+            )
+          ) : saved ? (
             <Link to={`/napoje/${saved.drink.id}`} className={button}>
               Masz go w „Moich napojach”
             </Link>

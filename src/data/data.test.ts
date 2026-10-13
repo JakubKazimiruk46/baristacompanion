@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  baseMethodIds,
   beanMethods,
   drinks,
   drinksForMethod,
@@ -214,6 +215,14 @@ describe('pomocnicze', () => {
     expect(isPlantBasedPossible(byId('kawa-po-wiedensku'))).toBe(false);
     expect(isPlantBasedPossible(byId('bicerin'))).toBe(false);
     expect(isPlantBasedPossible(byId('kawa-mrozona-z-lodami'))).toBe(false);
+  });
+
+  it('metody bazy: główna i alternatywne, a przy „wszystkich metodach” każda (główna pierwsza)', () => {
+    const tonic = drinks.find((d) => d.id === 'espresso-tonic')!;
+    expect(baseMethodIds(tonic)).toEqual([tonic.base.methodId, ...(tonic.base.alternativeMethodIds ?? [])]);
+    const any = baseMethodIds({ ...tonic, base: { methodId: 'drip', amountMl: 50, anyMethod: true } });
+    expect(any[0]).toBe('drip');
+    expect([...any].sort()).toEqual(methods.map((m) => m.id).sort());
   });
 
   it('kolory mlek i syropów są poprawne', () => {

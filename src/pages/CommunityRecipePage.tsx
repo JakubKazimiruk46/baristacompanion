@@ -113,6 +113,8 @@ function CommunityRecipeView({ item, back }: { item: CommunityRecipe; back: { to
   const saved = recipes.find((r) => r.origin?.communityId === item.id);
   const signedIn = auth.status === 'signed-in';
   const mine = signedIn && auth.user.id === item.authorId;
+  /** Autor nie zapisuje kopii swojego przepisu: parzy i otwiera oryginał (jeśli jest na tym urządzeniu). */
+  const original = mine ? recipes.find((recipe) => recipe.id === item.sourceId) : undefined;
 
   /** Kopia u siebie (raz) i zliczenie zapisu na serwerze, jeśli ktoś jest zalogowany. */
   const saveLocally = () => {
@@ -144,25 +146,42 @@ function CommunityRecipeView({ item, back }: { item: CommunityRecipe; back: { to
         </p>
       )}
 
-      <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          className={primary}
-          onClick={() => navigate(`/parzenie/${base.id}/start?przepis=${saveLocally().id}`)}
-        >
-          Parz według tego przepisu
-        </button>
-        {saved ? (
-          <Link to={recipePath(saved)} className={secondary}>
-            Masz go u siebie: otwórz
-          </Link>
-        ) : (
-          <button type="button" className={secondary} onClick={() => navigate(recipePath(saveLocally()), { replace: true })}>
-            Zapisz u siebie
+      {mine ? (
+        <div className="flex flex-col gap-3">
+          {original ? (
+            <>
+              <button type="button" className={primary} onClick={() => navigate(`/parzenie/${base.id}/start?przepis=${original.id}`)}>
+                Parz według tego przepisu
+              </button>
+              <Link to={recipePath(original)} className={secondary}>
+                Twój przepis: otwórz
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm font-medium">To Twój przepis.</p>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            className={primary}
+            onClick={() => navigate(`/parzenie/${base.id}/start?przepis=${saveLocally().id}`)}
+          >
+            Parz według tego przepisu
           </button>
-        )}
-        <p className="text-center text-xs text-ink-muted">Parzenie zapisze kopię przepisu w Twoich przepisach.</p>
-      </div>
+          {saved ? (
+            <Link to={recipePath(saved)} className={secondary}>
+              Masz go u siebie: otwórz
+            </Link>
+          ) : (
+            <button type="button" className={secondary} onClick={() => navigate(recipePath(saveLocally()), { replace: true })}>
+              Zapisz u siebie
+            </button>
+          )}
+          <p className="text-center text-xs text-ink-muted">Parzenie zapisze kopię przepisu w Twoich przepisach.</p>
+        </div>
+      )}
 
       <dl className="mt-6 grid grid-cols-2 gap-3">
         <Fact label="Kawa i woda" value={`${formatGrams(item.recipe.dose.coffeeG)} g · ${item.recipe.dose.waterMl} ml`} />

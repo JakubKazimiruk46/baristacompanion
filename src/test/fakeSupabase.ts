@@ -176,6 +176,11 @@ export function createFakeSupabase() {
       this.filters.push((row) => (row[column] as string | number) < value);
       return this;
     }
+    /** Kolumna-tablica ma choć jedną z wartości (PostgREST: ov, SQL: &&). */
+    overlaps(column: string, values: unknown[]) {
+      this.filters.push((row) => Array.isArray(row[column]) && (row[column] as unknown[]).some((value) => values.includes(value)));
+      return this;
+    }
     ilike(column: string, pattern: string) {
       this.filters.push((row) => like(pattern).test(String(row[column] ?? '')));
       return this;
