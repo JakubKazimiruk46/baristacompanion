@@ -25,3 +25,7 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Supabase CLI: stan lokalny (połączony projekt, wersje usług)
+supabase/.temp/
+supabase/.branches/

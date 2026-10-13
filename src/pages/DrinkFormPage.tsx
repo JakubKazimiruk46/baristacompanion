@@ -3,12 +3,14 @@ import { PageHeader } from '../components/PageHeader';
 import { DRINK_LIMITS } from '../../supabase/functions/_shared/drinkRules.ts';
 import { isMyDrinkId, myDrinksStore, useDrink, useMyDrinkRecord } from '../features/assistant/myDrinks';
 import { drinkToDraft, emptyDraft } from '../features/drinkEditor/draft';
+import { editorDonePath } from '../features/community/drinks';
 import { DrinkEditor } from '../features/drinkEditor/DrinkEditor';
 import { NotFoundPage } from './NotFoundPage';
 
 /**
  * Kreator napoju: /napoje/nowy (od zera albo ?z=id: własna wersja innego napoju) i
- * /napoje/:drinkId/edycja (tylko „Moje napoje”). Zapis trafia do „Moich napojów”.
+ * /napoje/:drinkId/edycja (tylko „Moje napoje”). Zapis trafia do „Moich napojów”, a ostatni krok
+ * (okno na ekranie napoju) proponuje publikację w Społeczności albo aktualizację już opublikowanego.
  */
 export function DrinkFormPage() {
   const { drinkId } = useParams();
@@ -29,7 +31,7 @@ export function DrinkFormPage() {
           submitLabel="Zapisz zmiany"
           onSubmit={(drink) => {
             myDrinksStore.update(editing.id, drink);
-            navigate(`/napoje/${editing.id}`, { replace: true });
+            navigate(editorDonePath(editing.id, myDrinksStore.record(editing.id)), { replace: true });
           }}
         />
       </>
@@ -54,7 +56,7 @@ export function DrinkFormPage() {
         submitLabel="Zapisz napój"
         onSubmit={(drink) => {
           const saved = myDrinksStore.add(drink, Date.now(), { source: 'own' });
-          navigate(`/napoje/${saved.id}`, { replace: true });
+          navigate(editorDonePath(saved.id, myDrinksStore.record(saved.id)), { replace: true });
         }}
       />
     </>

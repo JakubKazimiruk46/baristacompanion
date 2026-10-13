@@ -41,6 +41,13 @@ export class FakeFunctionError extends Error {
   }
 }
 
+/**
+ * Tabele społeczności tak jak w bazie: jedna publikacja na (author_id, source_id), a autor zmienia tylko treść
+ * (`grant update` bez author_id i source_id). Upsert ustawia też te kolumny, więc baza go odrzuca (42501).
+ */
+const AUTHOR_TABLES = new Set(['public_recipes', 'public_drinks']);
+const sameSource = (a: Row, b: Row) => a.author_id === b.author_id && a.source_id === b.source_id;
+
 const like = (pattern: string) =>
   new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*').replace(/_/g, '.')}$`, 'i');
 
@@ -223,6 +230,14 @@ export function createFakeSupabase() {
       const error = takeError(`${this.name}.${this.op}`);
       if (error) return { data: null, error };
       const rows = table(this.name);
+      if (AUTHOR_TABLES.has(this.name)) {
+        if (this.op === 'upsert') {
+          return { data: null, error: { code: '42501', message: `permission denied for table ${this.name}` } };
+        }
+        if (this.op === 'insert' && [this.payload ?? []].flat().some((value) => rows.some((row) => sameSource(row, value)))) {
+          return { data: null, error: { code: '23505', message: 'duplicate key value violates unique constraint' } };
+        }
+      }
       let result: Row[];
       switch (this.op) {
         case 'select':

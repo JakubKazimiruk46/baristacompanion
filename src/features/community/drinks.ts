@@ -1,7 +1,7 @@
 import { normalizeDrink } from '../../../supabase/functions/_shared/drinkRules.ts';
 import type { Drink } from '../../data';
 import { isValidDrink } from '../../data/validate';
-import { getSupabase } from '../../lib/supabase';
+import { backendEnabled, getSupabase } from '../../lib/supabase';
 import type { MyDrink } from '../assistant/myDrinks';
 import { CommunityError, PAGE_SIZE, type CommunitySort, type ReportReason } from './api';
 
@@ -103,14 +103,34 @@ export async function myPublishedDrinks(userId: string): Promise<Map<string, Pub
 /** Czy „Mój napój” wolno opublikować: tylko własny z kreatora, nie kopia ani propozycja AI. */
 export const canPublishDrink = (item: MyDrink) => item.source === 'own' && !item.origin;
 
-/** Publikuje (albo aktualizuje) własny napój. Nazwę i temperaturę baza bierze z dokumentu. */
+/** Okno „Napój zapisany” na ekranie napoju, ostatni krok kreatora: /napoje/:id?opublikuj=1. */
+export const PUBLISH_STEP_PARAM = 'opublikuj';
+
+/** Dokąd kreator prowadzi po zapisie: ekran napoju, z krokiem publikacji, gdy jest backend i napój wolno opublikować. */
+export const editorDonePath = (id: string, item: MyDrink | undefined) =>
+  backendEnabled() && item && canPublishDrink(item) ? `/napoje/${id}?${PUBLISH_STEP_PARAM}=1` : `/napoje/${id}`;
+
+/**
+ * Publikuje (albo aktualizuje) własny napój. Nazwę i temperaturę baza bierze z dokumentu.
+ * Bez upsert: baza pozwala autorowi zmieniać tylko dokument, a upsert ustawia też author_id i source_id
+ * (42501). Już opublikowany napój (duplikat, 23505) dostaje więc nowy dokument przez update.
+ */
 export async function publishDrink(userId: string, item: MyDrink): Promise<void> {
   if (!canPublishDrink(item)) throw new CommunityError('Opublikować możesz tylko własne napoje z kreatora.');
   const supabase = await getSupabase();
   const { error } = await supabase
     .from('public_drinks')
-    .upsert({ author_id: userId, source_id: item.drink.id, drink: item.drink }, { onConflict: 'author_id,source_id' });
-  if (error) throw failure(error);
+    .insert({ author_id: userId, source_id: item.drink.id, drink: item.drink });
+  if (error?.code !== '23505') {
+    if (error) throw failure(error);
+    return;
+  }
+  const { error: updateError } = await supabase
+    .from('public_drinks')
+    .update({ drink: item.drink })
+    .eq('author_id', userId)
+    .eq('source_id', item.drink.id);
+  if (updateError) throw failure(updateError);
 }
 
 export async function withdrawDrink(userId: string, sourceId: string): Promise<void> {

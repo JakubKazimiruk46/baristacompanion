@@ -109,24 +109,33 @@ export async function myPublished(userId: string): Promise<Map<string, { id: str
   );
 }
 
-/** Publikuje (albo aktualizuje) własny przepis. Bez ustawienia młynka: każdy ma inny młynek. */
+/**
+ * Publikuje (albo aktualizuje) własny przepis. Bez ustawienia młynka: każdy ma inny młynek.
+ * Bez upsert: baza pozwala autorowi zmieniać tylko treść, a upsert ustawia też author_id i source_id
+ * (42501). Już opublikowany przepis (duplikat, 23505) dostaje więc nową treść przez update.
+ */
 export async function publishRecipe(userId: string, recipe: UserRecipe): Promise<void> {
   const supabase = await getSupabase();
-  const { error } = await supabase.from('public_recipes').upsert(
-    {
-      author_id: userId,
-      source_id: recipe.id,
-      method_id: recipe.methodId,
-      name: recipe.name,
-      description: recipe.note ?? null,
-      dose: recipe.dose,
-      water_temp: recipe.waterTempC,
-      grind: recipe.grind,
-      steps: recipe.steps,
-    },
-    { onConflict: 'author_id,source_id' },
-  );
-  if (error) throw failure(error);
+  const content = {
+    method_id: recipe.methodId,
+    name: recipe.name,
+    description: recipe.note ?? null,
+    dose: recipe.dose,
+    water_temp: recipe.waterTempC,
+    grind: recipe.grind,
+    steps: recipe.steps,
+  };
+  const { error } = await supabase.from('public_recipes').insert({ author_id: userId, source_id: recipe.id, ...content });
+  if (error?.code !== '23505') {
+    if (error) throw failure(error);
+    return;
+  }
+  const { error: updateError } = await supabase
+    .from('public_recipes')
+    .update(content)
+    .eq('author_id', userId)
+    .eq('source_id', recipe.id);
+  if (updateError) throw failure(updateError);
 }
 
 /** „Wycofaj”: usuwa przepis ze społeczności (kopie zapisane przez innych zostają u nich). */

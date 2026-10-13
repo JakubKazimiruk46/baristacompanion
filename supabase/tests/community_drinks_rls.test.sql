@@ -1,7 +1,7 @@
 -- Test napojów społeczności (pgTAP): widoczność, uprawnienia, kształt dokumentu, zapisy, zgłoszenia
 -- i wspólna kolejka moderatora. Uruchomienie: `npx supabase test db`.
 begin;
-select plan(13);
+select plan(16);
 
 insert into auth.users (id, email)
 values
@@ -38,6 +38,23 @@ select throws_ok(
        "base": {}, "extras": [], "layers": [], "steps": ["x"], "serving": {"decorations": []}}') $$,
   '23514', null, 'napój bez warstw odrzuca baza'
 );
+
+-- Ponowna publikacja: aplikacja robi insert, a przy duplikacie (23505) zmienia sam dokument. Upsert z PostgREST
+-- (ON CONFLICT DO UPDATE SET author_id, source_id, drink) baza odrzuca, bo autor zmienia tylko dokument.
+select throws_ok(
+  $$ insert into public.public_drinks (author_id, source_id, drink)
+     select author_id, source_id, drink from public.public_drinks
+     on conflict (author_id, source_id) do update
+       set author_id = excluded.author_id, source_id = excluded.source_id, drink = excluded.drink $$,
+  '42501', null, 'upsert odrzuca baza (dlatego aplikacja go nie używa)'
+);
+select throws_ok(
+  $$ insert into public.public_drinks (author_id, source_id, drink)
+     select author_id, source_id, drink from public.public_drinks $$,
+  '23505', null, 'ponowna publikacja tego samego napoju to duplikat'
+);
+update public.public_drinks set drink = jsonb_set(drink, '{tagline}', '"Słodko i korzennie"');
+select is((select drink->>'tagline' from public.public_drinks), 'Słodko i korzennie', 'autor aktualizuje dokument');
 
 -- Ola (bez nicku) widzi napój, nie zmieni go i nie opublikuje własnego.
 set local request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated"}';

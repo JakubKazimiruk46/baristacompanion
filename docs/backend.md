@@ -23,11 +23,11 @@ Plan darmowy wstrzymuje projekt po tygodniu bez ruchu: wtedy w panelu kliknij **
 
 ## 2. Klucze w aplikacji
 
-1. **Project Settings → API**: skopiuj **Project URL** i klucz publiczny (**anon** albo **publishable**, zaczyna się od `sb_publishable_`).
+1. Przycisk **Connect** na górze panelu pokazuje oba: **Project URL** (`https://TWOJ_REF.supabase.co`, bez `/rest/v1/`) i klucz publiczny **publishable** (zaczyna się od `sb_publishable_`; w starszych projektach **anon**). Klucz jest też w **Project Settings** (zębatka na dole lewego paska) **→ API Keys**.
 2. Lokalnie: skopiuj `.env.example` do `.env.local` i wpisz obie wartości. `.env.local` nie trafia do repozytorium.
 3. Vercel: **Project → Settings → Environment Variables** → dodaj `VITE_SUPABASE_URL` i `VITE_SUPABASE_ANON_KEY` dla **Production** i **Preview** → **Deployments → Redeploy** (zmienne wchodzą do builda).
 
-Klucz publiczny trafia do przeglądarki z założenia: dane chroni Row Level Security w bazie. **Klucza `service_role` (secret) nigdy nie wpisuj do `.env.local`, Vercela ani repozytorium.** Funkcje serwerowe dostają go od Supabase same.
+Klucz publiczny trafia do przeglądarki z założenia: dane chroni Row Level Security w bazie. **Klucza `sb_secret_…` (dawniej `service_role`) nigdy nie wpisuj do `.env.local`, Vercela ani repozytorium.** Funkcje serwerowe dostają go od Supabase same (`SUPABASE_SECRET_KEYS`, w starszych projektach `SUPABASE_SERVICE_ROLE_KEY`).
 
 ## 3. Baza i funkcje (Supabase CLI)
 
@@ -39,6 +39,8 @@ npx supabase link --project-ref TWOJ_REF            # REF to część adresu: ht
 npx supabase db push                                # tworzy tabele z supabase/migrations
 npx supabase functions deploy delete-account        # usuwanie konta
 ```
+
+Funkcje mają wyłączone sprawdzanie tokenu przez platformę (`verify_jwt = false` w `supabase/config.toml`), bo przy nowych kluczach kończy się ono błędem „Invalid JWT”. Zalogowanego użytkownika sprawdza każda funkcja sama (`requestUser`) i bez niego odpowiada 401.
 
 Kolejne kroki planu dokładają migracje i funkcje: po pobraniu zmian powtórz `db push` i `functions deploy` dla nowych funkcji (lista w punkcie 8).
 
@@ -69,7 +71,13 @@ Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeg
 
 Ten sam tekst wstaw w szablonie **Confirm signup** (pierwsze logowanie zakłada konto).
 
-Wbudowana poczta Supabase wysyła tylko kilka wiadomości na godzinę: wystarczy do testów. Przed udostępnieniem aplikacji innym ustaw własny serwer SMTP (**Authentication → Emails → SMTP Settings**, np. Resend albo poczta z domeny).
+**Szablony da się zmienić dopiero po ustawieniu własnego serwera SMTP** (**Authentication → Emails → SMTP Settings**). Do tego czasu działa wbudowana poczta Supabase, a ona:
+
+- wysyła domyślną treść: sam link, bez kodu (wpisanie kodu w aplikacji nie zadziała);
+- dostarcza tylko na adresy członków zespołu w Supabase (np. adres autora), a nie na adresy innych osób;
+- wysyła ok. 2 wiadomości na godzinę na cały projekt.
+
+Do testów autora to wystarczy. Link z PKCE działa tylko w tej samej przeglądarce, w której poproszono o logowanie, więc na komputerze otwórz go w tej samej przeglądarce co aplikację. Przed udostępnieniem aplikacji innym ustaw SMTP: z własną domeną najprościej Resend (darmowy plan, weryfikacja domeny w DNS), bez domeny na próbę Gmail z hasłem aplikacji (`smtp.gmail.com`, port 465, wymaga weryfikacji dwuetapowej; wiadomości przychodzą z prywatnego adresu, więc nie na stałe). Po ustawieniu SMTP wklej szablony z tego punktu i sprawdź limit w **Authentication → Rate Limits**.
 
 ## 6. Logowanie przez Google
 
@@ -93,7 +101,7 @@ Przed udostępnieniem aplikacji uzupełnij w polityce prywatności (`src/pages/P
 
 | Funkcja | Co robi | Sekrety (`npx supabase secrets set …`) |
 | :- | :- | :- |
-| `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i `SUPABASE_SERVICE_ROLE_KEY` sam) |
+| `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i klucz serwera sam) |
 | `scan-label` | odczyt etykiety ziaren przez Claude (zdjęcie → pola formularza), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_LABEL_SCANS` (domyślnie 20) |
 | `drink-assistant` | asystent drinków: Claude układa napój z katalogu aplikacji (P9), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_DRINKS` (domyślnie 10) |
 

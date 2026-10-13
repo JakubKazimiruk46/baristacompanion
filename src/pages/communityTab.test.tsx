@@ -273,4 +273,54 @@ describe('publikowanie własnego napoju', () => {
       `/konto?wroc=${encodeURIComponent(`/napoje/${own.id}`)}`,
     );
   });
+
+  it('ostatni krok kreatora: okno publikuje nowy napój, a po edycji aktualizuje opublikowany', async () => {
+    const me = fake.signIn('ania@example.com');
+    fake.table('profiles').find((p) => p.id === me.id)!.nick = 'Ania';
+    const { user, router } = renderApp('/napoje/nowy?z=mocha');
+    await user.click(screen.getByRole('button', { name: 'Zapisz napój' }));
+
+    const [saved] = myDrinksStore.getSnapshot();
+    const id = saved!.drink.id;
+    expect(currentUrl(router)).toBe(`/napoje/${id}?opublikuj=1`);
+    const step = () => screen.getByRole('dialog', { name: 'Napój zapisany' });
+    expect(await within(step()).findByText(/z Twoim nickiem „Ania”/)).toBeInTheDocument();
+    await user.click(within(step()).getByRole('button', { name: 'Opublikuj' }));
+    expect(await within(step()).findByText('Opublikowano. Dziękujemy!')).toBeInTheDocument();
+    expect(fake.table('public_drinks')).toMatchObject([{ author_id: me.id, source_id: id, name: 'Mocha po mojemu' }]);
+    expect(within(step()).getByRole('link', { name: 'Zobacz w Społeczności' })).toHaveAttribute(
+      'href',
+      `/spolecznosc/napoje/${fake.table('public_drinks')[0]!.id as string}`,
+    );
+    await user.click(within(step()).getByRole('button', { name: 'Gotowe' }));
+    expect(currentUrl(router)).toBe(`/napoje/${id}`);
+    expect(within(screen.getByRole('region', { name: 'Społeczność' })).getByRole('link', { name: 'Opublikowany' })).toBeInTheDocument();
+
+    // Edycja opublikowanego napoju: okno proponuje aktualizację, bez drugiej publikacji.
+    await router.navigate(`/napoje/${id}/edycja`);
+    const name = await screen.findByLabelText('Nazwa napoju');
+    await user.clear(name);
+    await user.type(name, 'Mocha z cynamonem');
+    await user.click(screen.getByRole('button', { name: 'Zapisz zmiany' }));
+    expect(await within(step()).findByText(/Ten napój jest w Społeczności/)).toBeInTheDocument();
+    await user.click(within(step()).getByRole('button', { name: 'Zaktualizuj w społeczności' }));
+    expect(await within(step()).findByText('Zaktualizowano napój w społeczności.')).toBeInTheDocument();
+    expect(fake.table('public_drinks')).toHaveLength(1);
+    expect(fake.table('public_drinks')[0]!.drink).toMatchObject({ name: 'Mocha z cynamonem' });
+  });
+
+  it('ostatni krok kreatora bez konta: logowanie wraca do okna, „Nie teraz” je zamyka', async () => {
+    const { user, router } = renderApp('/napoje/nowy?z=mocha');
+    await user.click(screen.getByRole('button', { name: 'Zapisz napój' }));
+    const id = myDrinksStore.getSnapshot()[0]!.drink.id;
+
+    const step = screen.getByRole('dialog', { name: 'Napój zapisany' });
+    expect(within(step).getByRole('link', { name: 'Zaloguj się' })).toHaveAttribute(
+      'href',
+      `/konto?wroc=${encodeURIComponent(`/napoje/${id}?opublikuj=1`)}`,
+    );
+    await user.click(within(step).getByRole('button', { name: 'Nie teraz' }));
+    expect(currentUrl(router)).toBe(`/napoje/${id}`);
+    expect(screen.queryByRole('dialog', { name: 'Napój zapisany' })).not.toBeInTheDocument();
+  });
 });

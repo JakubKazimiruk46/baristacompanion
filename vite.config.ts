@@ -63,5 +63,8 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Testy nie czytają backendu z .env.local autora: domyślnie bez konta i bez AI,
+    // a testy z backendem włączają go same (vi.stubEnv).
+    env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '', VITE_AI_ENABLED: '' },
   },
 });

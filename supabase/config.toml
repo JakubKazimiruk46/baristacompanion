@@ -40,5 +40,14 @@ client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 skip_nonce_check = false
 
+# Funkcje same sprawdzają zalogowanego użytkownika (requestUser w _shared/http.ts) i bez niego zwracają 401.
+# Sprawdzanie tokenu przez platformę (verify_jwt) jest wyłączone, bo przy nowych kluczach Supabase
+# (sb_publishable_/sb_secret_) i nowych kluczach podpisu kończy się błędem „Invalid JWT”.
 [functions.delete-account]
-verify_jwt = true
+verify_jwt = false
+
+[functions.scan-label]
+verify_jwt = false
+
+[functions.drink-assistant]
+verify_jwt = false

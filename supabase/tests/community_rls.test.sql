@@ -1,7 +1,7 @@
 -- Test przepisów społeczności (pgTAP): widoczność, uprawnienia, zgłoszenia i moderacja.
 -- Uruchomienie: `npx supabase test db`.
 begin;
-select plan(13);
+select plan(16);
 
 insert into auth.users (id, email)
 values
@@ -32,6 +32,23 @@ select throws_ok(
              '{"min": 92, "max": 96}', 'medium-fine', '[]') $$,
   '23514', null, 'przepis bez kroków odrzuca baza'
 );
+
+-- Ponowna publikacja: aplikacja robi insert, a przy duplikacie (23505) zmienia samą treść. Upsert z PostgREST
+-- (ON CONFLICT DO UPDATE SET author_id, source_id, …) baza odrzuca, bo autor zmienia tylko treść.
+select throws_ok(
+  $$ insert into public.public_recipes (author_id, source_id, method_id, name, dose, water_temp, grind, steps)
+     select author_id, source_id, method_id, name, dose, water_temp, grind, steps from public.public_recipes
+     on conflict (author_id, source_id) do update
+       set author_id = excluded.author_id, source_id = excluded.source_id, name = excluded.name $$,
+  '42501', null, 'upsert odrzuca baza (dlatego aplikacja go nie używa)'
+);
+select throws_ok(
+  $$ insert into public.public_recipes (author_id, source_id, method_id, name, dose, water_temp, grind, steps)
+     select author_id, source_id, method_id, name, dose, water_temp, grind, steps from public.public_recipes $$,
+  '23505', null, 'ponowna publikacja tego samego przepisu to duplikat'
+);
+update public.public_recipes set description = 'Na jasne ziarna';
+select is((select description from public.public_recipes), 'Na jasne ziarna', 'autor aktualizuje treść');
 
 -- Ola (bez nicku) widzi przepis, nie może go zmienić ani opublikować własnego.
 set local request.jwt.claims = '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated"}';

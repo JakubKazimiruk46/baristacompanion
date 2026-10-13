@@ -24,9 +24,26 @@ const env = (name: string) => {
   return value;
 };
 
-/** Klient z uprawnieniami serwera (klucz service_role tylko w sekretach funkcji, nigdy w przeglądarce). */
+/**
+ * Klucz serwera: nowy klucz `sb_secret_…` (Supabase daje je jako JSON z nazwami, domyślny to `default`),
+ * a w starszych projektach klucz `service_role`, który Supabase wycofuje do końca 2026.
+ */
+function secretKey(): string {
+  const keys = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (keys) {
+    try {
+      const value: unknown = JSON.parse(keys)?.default;
+      if (typeof value === 'string' && value) return value;
+    } catch {
+      // Uszkodzona zmienna: zostaje stary klucz.
+    }
+  }
+  return env('SUPABASE_SERVICE_ROLE_KEY');
+}
+
+/** Klient z uprawnieniami serwera (klucz serwera tylko w sekretach funkcji, nigdy w przeglądarce). */
 export function adminClient(): SupabaseClient {
-  return createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), {
+  return createClient(env('SUPABASE_URL'), secretKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
