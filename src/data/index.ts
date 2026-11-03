@@ -1,11 +1,28 @@
-import { drinks } from './drinks';
+import { drinks as ownDrinks } from './drinks';
 import { grinderModels } from './grinders';
 import { extraIngredients } from './ingredients';
 import { methods } from './methods';
 import { frothingMethods, frothingSummary, milks } from './milks';
-import { syrups } from './syrups';
+import { syrups as ownSyrups } from './syrups';
 import type { BrewMethod, Drink, GrinderModel, Ingredient, Milk, Syrup } from './types';
 import { vessels } from './vessels';
+
+interface CreditedCatalog {
+  creditedDrinks: Drink[];
+  creditedIngredients: Ingredient[];
+  creditedSyrups: Syrup[];
+}
+
+/**
+ * Cudze przepisy (creditedDrinks.ts, z autorem w `credit`) są tylko na komputerze autora, poza repozytorium.
+ * Bez zgody autorów nie trafiają do żadnego buildu produkcyjnego (Vercel, Google Play): tylko `npm run dev` i testy.
+ */
+const credited: Partial<CreditedCatalog> = import.meta.env.DEV
+  ? (Object.values(import.meta.glob<CreditedCatalog>('./creditedDrinks.ts', { eager: true }))[0] ?? {})
+  : {};
+
+const drinks: Drink[] = [...ownDrinks, ...(credited.creditedDrinks ?? [])];
+const syrups: Syrup[] = [...ownSyrups, ...(credited.creditedSyrups ?? [])];
 
 /** Katalog składników: mleka, syropy i dodatki napojów (półka, zakupy, zamienniki). */
 const ingredients: Ingredient[] = [
@@ -19,6 +36,7 @@ const ingredients: Ingredient[] = [
     }),
   ),
   ...extraIngredients,
+  ...(credited.creditedIngredients ?? []),
 ];
 
 export { drinks, frothingMethods, frothingSummary, grinderModels, ingredients, methods, milks, syrups, vessels };

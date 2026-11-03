@@ -197,7 +197,8 @@ describe('napoje', () => {
   });
 
   it('kawa rozpuszczalna jest bazą tylko napojów, które jej wymagają', () => {
-    expect(drinksForMethod('kawa-rozpuszczalna').map((d) => d.id).sort()).toEqual(['dalgona', 'frappe-po-grecku']);
+    const own = drinksForMethod('kawa-rozpuszczalna').filter((d) => !d.credit);
+    expect(own.map((d) => d.id).sort()).toEqual(['dalgona', 'frappe-po-grecku']);
     for (const drink of drinks) expect(drink.base.alternativeMethodIds ?? []).not.toContain('kawa-rozpuszczalna');
   });
 

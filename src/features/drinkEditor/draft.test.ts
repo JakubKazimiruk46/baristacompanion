@@ -23,7 +23,8 @@ describe('kreator napoju: napój ↔ formularz', () => {
   it.each(drinks.map((d) => [d.name, d] as const))('%s wraca z formularza bez zmian', (_, drink) => {
     const draft = drinkToDraft(drink);
     expect(hasErrors(draftErrors(draft))).toBe(false);
-    const { needsReview: _review, reviewNote: _note, ...plain } = drink;
+    // Autor cudzego przepisu nie przechodzi do „Własnej wersji”.
+    const { needsReview: _review, reviewNote: _note, credit: _credit, ...plain } = drink;
     expect(draftToDrink(draft, drink.id)).toEqual(plain);
   });
 

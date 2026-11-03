@@ -58,6 +58,13 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      // Cudze przepisy (src/data/creditedDrinks.ts, tylko lokalnie) dołącza tylko `npm run dev`. Bez tej flagi Rollup
+      // zostawia w buildzie fragmenty pliku (szablony tekstu), choć nic z niego nie jest używane.
+      treeshake: { moduleSideEffects: (id) => !/[\\/]creditedDrinks\.ts$/.test(id) },
+    },
+  },
   test: {
     // Testy E2E (Playwright) leżą w e2e/ i uruchamia je `npm run test:e2e`.
     include: ['src/**/*.test.{ts,tsx}'],

@@ -163,6 +163,11 @@ describe('ekran napoju', () => {
     expect(screen.queryByText(/Napój z alkoholem/)).not.toBeInTheDocument();
   });
 
+  it('własny przepis jest bez autora', () => {
+    renderApp('/napoje/mazagran');
+    expect(screen.queryByText(/^Przepis:/)).not.toBeInTheDocument();
+  });
+
   it('link do metody prowadzi do jej ekranu', async () => {
     const { user, router } = renderApp('/napoje/espresso-tonic');
     await user.click(screen.getByRole('link', { name: 'Jak zaparzyć: Kawiarka' }));

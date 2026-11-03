@@ -40,6 +40,7 @@ function DrinkView({ drink }: { drink: Drink }) {
         <div className="mt-3">
           <DrinkMeta drink={drink} />
         </div>
+        {drink.credit && <p className="mt-3 text-sm text-ink-muted">Przepis: {drink.credit.author}</p>}
         {hasAlcohol(drink) && (
           <p className="mt-3 rounded-2xl bg-surface-muted p-3 text-sm">
             Napój z alkoholem, tylko dla dorosłych. Nie podawaj go dzieciom, kobietom w ciąży ani kierowcom.
