@@ -1,3 +1,10 @@
+// Gradle 8.14 nie działa na Javie 25 z Android Studio, więc uruchamia się na Javie 21
+// z gradle/gradle-daemon-jvm.properties (pobiera ją sam). Adresy w tym pliku wyznacza
+// ta wtyczka: ./gradlew updateDaemonJvm --jvm-version=21
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')

@@ -19,6 +19,8 @@ Nie trafia do repozytorium: kopia aplikacji w `android/app/src/main/assets/publi
 2. Przy pierwszym uruchomieniu kreator **Setup Wizard** pobierze SDK. Wybierz **Standard** i poczekaj na koniec (kilka GB).
 3. Windows może zapytać o dostęp do sieci dla Javy i emulatora: zezwól dla sieci prywatnej.
 
+**Java:** Android Studio (od 2026.2) ma wbudowaną Javę 25, a Gradle 8.14 z projektu działa najwyżej na Javie 24 (błąd „Unsupported class file major version 69”). Dlatego Gradle uruchamia się na Javie 21 z `android/gradle/gradle-daemon-jvm.properties` i przy pierwszej synchronizacji pobiera ją sam (ok. 200 MB, do `%USERPROFILE%\.gradle\jdks`). Jeśli mimo to sync zgłosi ten błąd: **File → Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK** → wybierz Javę 21 (albo **Download JDK…** → wersja 21). Adresy pobrania odświeża `gradlew updateDaemonJvm --jvm-version=21` w folderze `android/`.
+
 ## 2. Zbudowanie i otwarcie projektu
 
 W katalogu projektu (`F:\baristacompanion`):
@@ -29,7 +31,7 @@ npm run android:sync   # build PWA i kopia do projektu Androida
 npm run android:open   # otwiera folder android/ w Android Studio
 ```
 
-W Android Studio poczekaj, aż na dole zniknie pasek **Gradle sync** (za pierwszym razem kilka minut). Jeśli Android Studio zaproponuje aktualizację wtyczki Gradle (AGP), na razie odmów: projekt jest przygotowany pod wersję z Capacitora.
+W Android Studio poczekaj, aż na dole zniknie pasek **Gradle sync** (za pierwszym razem kilka minut: pobiera Gradle, Javę 21 i brakującą platformę Androida 36). Jeśli Android Studio zaproponuje aktualizację wtyczki Gradle (AGP 9, „Upgrade Assistant”) albo samego Gradle do wersji 9, odmów: Capacitor 8 działa z AGP 8. Android Studio zapisze ścieżkę do SDK w `android/local.properties` (poza repozytorium).
 
 Po każdej zmianie w kodzie aplikacji uruchom znowu `npm run android:sync` i dopiero wtedy ▶ Run.
 
@@ -54,7 +56,7 @@ npm run android:apk
 
 Plik: `android/app/build/outputs/apk/debug/app-debug.apk`. Przenieś go na telefon (kabel, Dysk Google), otwórz i zezwól na instalację z tego źródła. To wersja testowa (podpis debug): Google Play wymaga osobnego podpisu wydania, patrz punkt 8.
 
-Jeśli `npm run android:apk` zgłasza brak Javy, uruchom go z terminala Android Studio (**View → Tool Windows → Terminal**) albo ustaw `JAVA_HOME` na `C:\Program Files\Android\Android Studio\jbr`.
+Jeśli `npm run android:apk` zgłasza brak Javy, uruchom go z terminala Android Studio (**View → Tool Windows → Terminal**) albo ustaw `JAVA_HOME` na `C:\Program Files\Android\Android Studio\jbr` (Java 25 wystarczy do startu, a samo budowanie i tak idzie na Javie 21). „SDK location not found”: otwórz projekt raz w Android Studio (zapisze `android/local.properties`) albo ustaw `ANDROID_HOME` na `%LOCALAPPDATA%\Android\Sdk`.
 
 ## 5. Test powiadomień (lista kontrolna)
 

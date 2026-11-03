@@ -1,9 +1,12 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
 // Test bazy (database.test.ts) działa w środowisku node: bez okna nie ma czego uzupełniać.
 const dom = typeof window !== 'undefined';
+
+// Katalog rysuje kilkadziesiąt kafelków z SVG: przy równoległych testach przejście z niego trwa dłużej niż domyślna sekunda.
+configure({ asyncUtilTimeout: 3000 });
 
 // jsdom nie implementuje przewijania, a używa go <ScrollRestoration>.
 if (dom) window.scrollTo = () => {};
