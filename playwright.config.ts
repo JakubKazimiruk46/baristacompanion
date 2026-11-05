@@ -6,6 +6,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
+  // Na runnerze GitHuba przejście między ekranami potrafi się zawiesić (stary obraz zasłania stronę).
+  retries: process.env.CI ? 1 : 0,
   reporter: 'list',
   use: {
     ...devices['Pixel 7'],
