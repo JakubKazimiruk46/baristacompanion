@@ -32,5 +32,12 @@ export function useDialogParam(key: string) {
     setParams(search, { replace: true, preventScrollReset: true });
   };
 
-  return { value, open, close };
+  /** Zmienia otwarte okno (np. kolejne losowanie) bez nowego wpisu w historii. */
+  const replace = (next: string) => {
+    const search = new URLSearchParams(params);
+    search.set(key, next);
+    navigate({ search: search.toString() }, { replace: true, state: location.state, preventScrollReset: true });
+  };
+
+  return { value, open, close, replace };
 }

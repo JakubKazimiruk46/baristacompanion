@@ -46,18 +46,30 @@ describe('konto: bez backendu i bez logowania', () => {
 
   it('bez zapisanej sesji start aplikacji nie ładuje biblioteki Supabase', async () => {
     const { user } = renderApp('/');
-    await user.click(screen.getByRole('link', { name: /Konto/ }));
+    expect(createClientMock).not.toHaveBeenCalled();
+    await user.click(within(mainNav()).getByRole('link', { name: 'Społeczność' }));
+    await user.click(screen.getByRole('link', { name: /Zaloguj się, żeby udostępniać/ }));
     expect(screen.getByRole('heading', { level: 1, name: 'Konto' })).toBeInTheDocument();
-    expect(within(mainNav()).getByRole('link', { name: 'Start' })).toHaveAttribute('aria-current', 'page');
-    // Dopiero ekran konta ładuje klienta.
+    expect(within(mainNav()).getByRole('link', { name: 'Społeczność' })).toHaveAttribute('aria-current', 'page');
+    // Dopiero społeczność i ekran konta ładują klienta (raz).
     await vi.waitFor(() => expect(createClientMock).toHaveBeenCalledTimes(1));
   });
 
-  it('wejście na konto jest też w „Moich ziarnach”', async () => {
-    const { user, router } = renderApp('/ziarna');
-    expect(createClientMock).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('link', { name: /Konto i prywatność/ }));
-    expect(currentUrl(router)).toBe('/konto');
+  it('logowanie z zakładki Społeczność wraca do niej', async () => {
+    const { user, router } = renderApp('/spolecznosc');
+    await user.click(screen.getByRole('link', { name: /Zaloguj się, żeby udostępniać/ }));
+    expect(currentUrl(router)).toBe('/konto?wroc=%2Fspolecznosc');
+    await user.type(await screen.findByLabelText('Adres e-mail'), 'ania@example.com');
+    await user.click(screen.getByRole('button', { name: 'Wyślij link do logowania' }));
+    await user.type(await screen.findByLabelText('Kod z e-maila'), fake.validCode);
+    await user.click(screen.getByRole('button', { name: 'Zaloguj' }));
+    await vi.waitFor(() => expect(currentUrl(router)).toBe('/spolecznosc'));
+    expect(await screen.findByRole('link', { name: /Ustaw nick, żeby publikować/ })).toHaveAttribute('href', '/konto');
+  });
+
+  it('adres powrotu tylko w aplikacji', () => {
+    renderApp('/konto?wroc=https%3A%2F%2Fzly.example');
+    expect(localStorage.getItem('barista-companion.auth-return.v1')).toBeNull();
   });
 });
 

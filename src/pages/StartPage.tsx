@@ -1,11 +1,10 @@
 import { Link } from 'react-router';
-import { BeanIcon, BrewIcon, ChevronRightIcon, DrinkIcon, UserIcon } from '../components/icons';
+import { BarIcon, BrewIcon, ChevronRightIcon, DrinkIcon, PeopleIcon } from '../components/icons';
 import { Section } from '../components/Section';
 import { getDrink } from '../data';
 import { ColdBrewBadge } from '../features/coldbrew/ColdBrewLinks';
 import { DrinkCard } from '../features/drinks/DrinkCard';
 import { useFavorites } from '../features/favorites/store';
-import { flowStore } from '../features/flow/store';
 import { DrinkGlass } from '../features/glass/DrinkGlass';
 
 const HERO_DRINKS = ['espresso-tonic', 'kawa-pomaranczowa', 'latte-macchiato'];
@@ -13,8 +12,8 @@ const HERO_DRINKS = ['espresso-tonic', 'kawa-pomaranczowa', 'latte-macchiato'];
 const SHORTCUTS = [
   { to: '/napoje', label: 'Napoje', hint: 'drinki kawowe na ciepło i na zimno', Icon: DrinkIcon },
   { to: '/parzenie', label: 'Parzenie', hint: 'metody krok po kroku, ze stoperem', Icon: BrewIcon },
-  { to: '/ziarna', label: 'Moje ziarna', hint: 'Twoje kawy i jak je zaparzyć', Icon: BeanIcon },
-  { to: '/konto', label: 'Konto', hint: 'opcjonalne: Twoje dane na wszystkich urządzeniach', Icon: UserIcon },
+  { to: '/baribar', label: 'Baribar', hint: 'ziarna, mleka, syropy i dodatki, które masz', Icon: BarIcon },
+  { to: '/spolecznosc', label: 'Społeczność', hint: 'napoje i przepisy innych; z kontem udostępnisz swoje', Icon: PeopleIcon },
 ];
 
 export function StartPage() {
@@ -38,13 +37,12 @@ export function StartPage() {
       <Link
         to="/mam-kawe"
         viewTransition
-        onClick={() => flowStore.set({})}
         className="mt-8 flex min-h-16 items-center justify-center rounded-3xl bg-accent px-6 py-4 text-center font-display text-2xl font-semibold text-on-accent shadow-lg shadow-accent/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       >
         Mam kawę. Co z nią zrobić?
       </Link>
       <p className="mt-3 text-center text-sm text-ink-muted">
-        Siedem kroków: ziarna, metoda, mielenie, napój, parzenie, składanie i podanie.
+        Napój z Twojej listy, niespodzianka albo krok po kroku od ziaren.
       </p>
 
       <div className="mt-2 text-center">

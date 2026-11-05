@@ -297,9 +297,18 @@ export type Extra =
       dairy?: boolean;
     };
 
+/** Cudzy przepis (np. z Instagrama): autor ma prawa do treści, więc przed publikacją aplikacji potrzebna jego zgoda. */
+export interface DrinkCredit {
+  /** Kto i gdzie, np. „@autor (Instagram)”. */
+  author: string;
+  url: string;
+}
+
 export interface Drink extends Reviewable {
   id: string;
   name: string;
+  /** Tylko napoje z creditedDrinks.ts. */
+  credit?: DrinkCredit;
   tagline: string;
   description: string;
   temperature: Temperature;
@@ -310,6 +319,8 @@ export interface Drink extends Reviewable {
     amountMl: number;
     /** Inne metody, którymi też da się zrobić bazę. */
     alternativeMethodIds?: string[];
+    /** Bazę da się zrobić każdą metodą (wtedy bez alternativeMethodIds); methodId to metoda polecana. */
+    anyMethod?: true;
     note?: string;
   };
   milk?: {

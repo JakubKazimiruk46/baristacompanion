@@ -11,10 +11,12 @@ import {
   signInWithGoogle,
   signOut,
   useAuth,
+  useAuthNotice,
   verifyLoginCode,
   type AccountUser,
 } from '../features/account/auth';
 import { downloadAccountExport, loadProfile, NICK_LIMITS, nickError, saveNick, type Profile } from '../features/account/profile';
+import { returnStore, safeReturnPath } from '../features/account/returnTo';
 import { isModerator } from '../features/community/api';
 import { dayAndTime } from '../features/coldbrew/time';
 import { downloadBackup, importBackup } from '../features/sync/backup';
@@ -39,10 +41,23 @@ export function AccountPage() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>(null);
   const redirectError = params.get('error_description') ?? params.get('error');
+  const nativeNotice = useAuthNotice();
+
+  // Wejście z zachęty do logowania (?wroc=/spolecznosc): po zalogowaniu wracamy tam. Adres
+  // zapisujemy, bo link z e-maila otwiera aplikację od nowa i ?wroc= przepada.
+  const requested = safeReturnPath(params.get('wroc'));
+  useEffect(() => {
+    if (requested) returnStore.set(requested);
+  }, [requested]);
 
   // Po powrocie z linku albo z Google adres ma ?code=: po zalogowaniu go sprzątamy.
   useEffect(() => {
-    if (auth.status === 'signed-in' && params.has('code')) navigate('/konto', { replace: true });
+    if (auth.status !== 'signed-in') return;
+    const target = returnStore.getSnapshot();
+    if (target) {
+      returnStore.set(null);
+      navigate(target, { replace: true });
+    } else if (params.has('code')) navigate('/konto', { replace: true });
   }, [auth.status, params, navigate]);
 
   return (
@@ -54,6 +69,11 @@ export function AccountPage() {
       {notice && (
         <p role="status" className="mb-4 rounded-2xl bg-accent-soft p-4 text-sm font-medium">
           {notice}
+        </p>
+      )}
+      {nativeNotice && auth.status !== 'signed-in' && (
+        <p role="alert" className="mb-4 rounded-2xl border border-red-700/40 bg-red-700/10 p-4 text-sm">
+          {nativeNotice}
         </p>
       )}
       {redirectError && auth.status !== 'signed-in' && (
@@ -144,7 +164,7 @@ function SignIn() {
         <form onSubmit={verify} noValidate className="mt-6 space-y-4">
           <p className="rounded-2xl bg-accent-soft p-4 text-sm">
             Wysłaliśmy wiadomość na <strong>{sentTo}</strong>. Kliknij link w wiadomości albo wpisz kod z e-maila.
-            {native && ' W aplikacji na Androida wpisz kod: link otworzy się w przeglądarce.'}
+            {native && ' Link otworzy tę aplikację; jeśli otworzy się przeglądarka, wpisz kod.'}
           </p>
           <div>
             <label htmlFor={ids.code} className="font-medium">
@@ -199,26 +219,20 @@ function SignIn() {
           <button type="submit" className={primary} disabled={busy || !online}>
             Wyślij link do logowania
           </button>
-          {native ? (
-            <p className="text-sm text-ink-muted">W aplikacji na Androida logowanie przez Google będzie później.</p>
-          ) : (
-            <>
-              <p aria-hidden="true" className="text-center text-sm text-ink-muted">
-                albo
-              </p>
-              <button
-                type="button"
-                className={secondary}
-                disabled={!online}
-                onClick={async () => {
-                  const result = await signInWithGoogle();
-                  if (!result.ok) setError(result.message);
-                }}
-              >
-                Zaloguj przez Google
-              </button>
-            </>
-          )}
+          <p aria-hidden="true" className="text-center text-sm text-ink-muted">
+            albo
+          </p>
+          <button
+            type="button"
+            className={secondary}
+            disabled={!online}
+            onClick={async () => {
+              const result = await signInWithGoogle();
+              if (!result.ok) setError(result.message);
+            }}
+          >
+            Zaloguj przez Google
+          </button>
           <p className="text-sm text-ink-muted">
             Logując się, akceptujesz{' '}
             <Link to="/prywatnosc" className="font-medium text-accent underline">

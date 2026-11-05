@@ -13,6 +13,8 @@ npm run preview
 
 Otwórz adres `Local` z terminala (`http://localhost:4173`) i przeklikaj kilka ekranów. Jeśli działa tutaj, zadziała też na Vercelu.
 
+**Cudze przepisy.** `src/data/creditedDrinks.ts` (napoje z cudzych przepisów, pole `credit`: autor i adres) jest tylko na komputerze autora: jest w `.gitignore`, a build produkcyjny (`npm run build`, więc i Vercel, i Android) go pomija. Żeby taki napój trafił do publicznej wersji, potrzebujesz zgody autora. Z nią przenieś napój do `drinks.ts` (razem z polem `credit`), a jego składniki i syropy z `creditedIngredients` i `creditedSyrups` do `ingredients.ts` i `syrups.ts`.
+
 ## 1. Repozytorium na GitHubie
 
 Vercel pobiera kod z GitHuba (albo GitLaba, Bitbucketa).

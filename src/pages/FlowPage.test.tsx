@@ -17,6 +17,8 @@ const stepLabel = () => screen.getByText(/^Mam kawę · krok/).textContent;
 
 async function describeLightFruity(user: UserEvent) {
   await user.click(screen.getByRole('link', { name: 'Mam kawę. Co z nią zrobić?' }));
+  expect(h1()).toBe('Co dziś robimy?');
+  await user.click(screen.getByRole('link', { name: /Wybiorę sam/ }));
   expect(h1()).toBe('Jakie masz ziarna?');
   await user.click(within(screen.getByRole('group', { name: 'Palenie' })).getByLabelText('jasne'));
   await user.click(within(screen.getByRole('group', { name: 'Nuty smakowe' })).getByLabelText('owocowe'));
@@ -62,7 +64,7 @@ describe('ścieżka „Mam kawę”', () => {
     expect(router.state.location.pathname).toBe('/mam-kawe/podanie');
     expect(screen.getByRole('region', { name: 'Jak podać' })).toHaveTextContent('Niska szklanka');
     expect(screen.getByRole('link', { name: 'Wróć na start' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('button', { name: 'Zacznij od nowa' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Zacznij od nowa' })).toBeInTheDocument();
   });
 
   it('cofanie nie gubi wyborów', async () => {
@@ -95,7 +97,7 @@ describe('ścieżka „Mam kawę”', () => {
 
   it('zapisane ziarna można wybrać od razu', async () => {
     beansStore.add({ name: 'Brazylia', profile: { roast: 'dark', notes: ['chocolate'], kind: 'blend' } });
-    const { user } = renderApp('/mam-kawe');
+    const { user } = renderApp('/mam-kawe/ziarna');
     await user.click(screen.getByLabelText(/Brazylia/));
     await user.click(screen.getByRole('link', { name: 'Dalej: polecane metody' }));
     const ranking = screen.getByRole('list', { name: 'Ranking metod' });
@@ -103,7 +105,7 @@ describe('ścieżka „Mam kawę”', () => {
   });
 
   it('bez palenia nie da się przejść dalej', () => {
-    renderApp('/mam-kawe');
+    renderApp('/mam-kawe/ziarna');
     expect(screen.getByRole('link', { name: 'Dalej: polecane metody' })).toHaveAttribute('aria-disabled', 'true');
   });
 
@@ -122,7 +124,7 @@ describe('ścieżka „Mam kawę”', () => {
 
   it('wejście prosto na późny krok cofa do brakującego wyboru', () => {
     const { router } = renderApp('/mam-kawe/napoje');
-    expect(router.state.location.pathname).toBe('/mam-kawe');
+    expect(router.state.location.pathname).toBe('/mam-kawe/ziarna');
     expect(h1()).toBe('Jakie masz ziarna?');
   });
 

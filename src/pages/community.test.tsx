@@ -55,7 +55,8 @@ function installServer() {
   fake.onRpc('save_public_recipe', ({ p_recipe_id }, user) => {
     const saves = fake.table('recipe_saves');
     const recipe = recipes.find((r) => r.id === p_recipe_id)!;
-    if (!saves.some((s) => s.recipe_id === p_recipe_id && s.user_id === user!.id)) {
+    // Autorowi zapis się nie liczy.
+    if (recipe.author_id !== user!.id && !saves.some((s) => s.recipe_id === p_recipe_id && s.user_id === user!.id)) {
       saves.push({ recipe_id: p_recipe_id, user_id: user!.id });
       recipe.saves_count = (recipe.saves_count as number) + 1;
     }
@@ -167,6 +168,25 @@ describe('przepis społeczności', () => {
     expect(screen.getByText('Przepis od Ola na: Drip (V60).')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Społeczność' })).toHaveTextContent('Opublikować możesz tylko własne przepisy');
     await vi.waitFor(() => expect(fake.table('public_recipes')[0]!.saves_count).toBe(3));
+  });
+
+  it('autor: zamiast „Zapisz u siebie” parzy i otwiera swój oryginał, bez kopii', async () => {
+    const me = fake.signIn('ania@example.com');
+    const original = recipesStore.add({
+      methodId: 'drip',
+      name: 'Klasyk',
+      dose: { coffeeG: 16, waterMl: 250 },
+      waterTempC: { min: 92, max: 94 },
+      grind: 'medium-fine',
+      steps,
+    });
+    fake.table('public_recipes').push(row('a', { name: 'Klasyk', author_id: me.id, author_nick: 'Ania', source_id: original.id }));
+    const { user, router } = renderApp('/spolecznosc/przepisy/a');
+    expect(await screen.findByRole('link', { name: 'Twój przepis: otwórz' })).toHaveAttribute('href', `/parzenie/drip/przepisy/${original.id}`);
+    expect(screen.queryByRole('button', { name: 'Zapisz u siebie' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Parz według tego przepisu' }));
+    expect(currentUrl(router)).toBe(`/parzenie/drip/start?przepis=${original.id}`);
+    expect(recipesStore.getSnapshot()).toHaveLength(1);
   });
 
   it('„Parz według tego przepisu” zapisuje kopię (raz) i zaczyna parzenie', async () => {

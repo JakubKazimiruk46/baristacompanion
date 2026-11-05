@@ -1,10 +1,10 @@
 import type { Drink } from './types';
 
 // Użytkownicy nie mają ekspresu: tam, gdzie przepis wymaga espresso, bazą jest kawa z kawiarki.
-const MOKA_AS_ESPRESSO = 'Kawa z kawiarki zamiast espresso. Z mlekiem smakuje bardzo podobnie.';
+export const MOKA_AS_ESPRESSO = 'Kawa z kawiarki zamiast espresso. Z mlekiem smakuje bardzo podobnie.';
 
-const COFFEE = '#4a2a1a';
-const COFFEE_LIGHTER = '#5a3424';
+export const COFFEE = '#4a2a1a';
+export const COFFEE_LIGHTER = '#5a3424';
 
 export const drinks: Drink[] = [
   {

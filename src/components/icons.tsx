@@ -322,3 +322,109 @@ export function ShieldIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Zakładka w książce (chcę spróbować). Wypełniona: fill="currentColor". */
+export function BookmarkIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.5L5.5 21V4.5a1 1 0 0 1 1-1Z" />
+    </Icon>
+  );
+}
+
+/** Kostka do gry (losowanie). */
+export function DiceIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="3.5" />
+      <circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="8.5" cy="15.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15.5" cy="15.5" r="1.1" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
+/** Lupa (szukaj). */
+export function SearchIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10.5" cy="10.5" r="6" />
+      <path d="m15 15 5 5" />
+    </Icon>
+  );
+}
+
+/** Suwaki (filtry). */
+export function SlidersIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+      <circle cx="15" cy="7" r="2" />
+      <circle cx="9" cy="17" r="2" />
+    </Icon>
+  );
+}
+
+/** Drogowskaz (wybiorę sam). */
+export function SignpostIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 3v18M8.5 21h7" />
+      <path d="M12 5.5h6.5l2 2-2 2H12M12 11.5H5.5l-2 2 2 2H12" />
+    </Icon>
+  );
+}
+
+/** Iskry (zaskocz mnie). */
+export function SparklesIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M10 3.5 11.6 8a2 2 0 0 0 1.3 1.3l4.6 1.7-4.6 1.6a2 2 0 0 0-1.3 1.3L10 18.5l-1.6-4.6a2 2 0 0 0-1.3-1.3L2.5 11l4.6-1.7A2 2 0 0 0 8.4 8L10 3.5Z" />
+      <path d="M18 14.5v5M15.5 17h5M17.5 3v3.5M15.75 4.75h3.5" />
+    </Icon>
+  );
+}
+
+/** Butelka i ziarno (zakładka Baribar). */
+export function BarIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M7 2.5h3v3.2c0 .6.3 1.1.8 1.5l.7.6c.6.5 1 1.2 1 2V20a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 4.5 20V9.8c0-.8.4-1.5 1-2l.7-.6c.5-.4.8-.9.8-1.5V2.5Z" />
+      <path d="M4.5 12.5h8" />
+      <ellipse cx="17.5" cy="16.5" rx="3" ry="4" transform="rotate(25 17.5 16.5)" />
+      <path d="M16.2 13.2c1 1.2 1.4 2.4 1 3.6s-.2 2.3.8 3" />
+    </Icon>
+  );
+}
+
+/** Dwie osoby (zakładka Społeczność). */
+export function PeopleIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c.9-3.4 3.4-5 6.5-5s5.6 1.6 6.5 5" />
+      <path d="M15.5 4.8a3.5 3.5 0 0 1 0 6.4M17.5 15.2c2 .6 3.4 2.2 4 4.8" />
+    </Icon>
+  );
+}
+
+/** Flaga (zgłoś). */
+export function FlagIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 21V4M5 4.5h11.5l-2 4 2 4H5" />
+    </Icon>
+  );
+}
+
+/** Ogniwa łańcucha (link). */
+export function LinkIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </Icon>
+  );
+}

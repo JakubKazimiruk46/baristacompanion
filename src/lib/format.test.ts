@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { count, formatMinutes, formatSeconds, plural } from './format';
+import { count, foldText, formatMinutes, formatSeconds, matchesQuery, plural } from './format';
 
 const FORMS: [string, string, string] = ['napój', 'napoje', 'napojów'];
 
@@ -42,5 +42,18 @@ describe('formatowanie czasu', () => {
     [16 * 3600, '16 h'],
   ])('%i s → %s', (sec, text) => {
     expect(formatSeconds(sec)).toBe(text);
+  });
+});
+
+describe('wyszukiwanie', () => {
+  it('bez wielkości liter i polskich znaków', () => {
+    expect(foldText('Kawa POMARAŃCZOWA z łyżką')).toBe('kawa pomaranczowa z lyzka');
+  });
+
+  it('każde słowo musi gdzieś wystąpić', () => {
+    expect(matchesQuery('pomarancz kawa', ['Kawa pomarańczowa'])).toBe(true);
+    expect(matchesQuery('mrożona', ['Kawa mrożona z lodami', 'deser'])).toBe(true);
+    expect(matchesQuery('kawa lody', ['Kawa pomarańczowa'])).toBe(false);
+    expect(matchesQuery('  ', ['cokolwiek'])).toBe(true);
   });
 });

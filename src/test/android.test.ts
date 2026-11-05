@@ -34,6 +34,26 @@ describe('capacitor.config.ts', () => {
   });
 });
 
+describe('budowanie (Gradle)', () => {
+  it('Gradle działa na Javie 21, którą pobiera sam (Android Studio ma Javę 25, a Gradle 8 jej nie obsługuje)', () => {
+    const daemon = fs.readFileSync('android/gradle/gradle-daemon-jvm.properties', 'utf8');
+    expect(daemon).toMatch(/^toolchainVersion=21$/m);
+    expect(daemon).toMatch(/^toolchainUrl\.WINDOWS\.X86_64=https/m);
+  });
+
+  it('zostaje przy Gradle 8 i AGP 8, z którymi działa Capacitor 8', () => {
+    expect(fs.readFileSync('android/gradle/wrapper/gradle-wrapper.properties', 'utf8')).toMatch(
+      /distributionUrl=.*gradle-8\.[\d.]+-all\.zip/,
+    );
+    expect(fs.readFileSync('android/build.gradle', 'utf8')).toContain("'com.android.tools.build:gradle:8.");
+  });
+
+  it('bez plików i właściwości, które AGP 9 usunie', () => {
+    expect(fs.readFileSync('android/app/build.gradle', 'utf8')).not.toContain("'proguard-android.txt'");
+    expect(fs.readFileSync('android/build.gradle', 'utf8')).not.toContain('rootProject.buildDir');
+  });
+});
+
 describe('service worker', () => {
   it('rejestruje się tylko poza aplikacją natywną', () => {
     expect(fs.readFileSync('vite.config.ts', 'utf8')).toContain('injectRegister: false');

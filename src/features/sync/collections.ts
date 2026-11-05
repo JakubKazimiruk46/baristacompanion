@@ -1,6 +1,7 @@
 import { myDrinksStore, parseMyDrink, type MyDrink } from '../assistant/myDrinks';
 import { beansStore, parseBeans, type SavedBean } from '../beans/store';
 import { dosesStore, parseDoses } from '../brewing/doseStore';
+import { methodFavoritesStore, parseMethodFavorites } from '../favorites/methods';
 import { favoritesStore, parseFavorites } from '../favorites/store';
 import { grindersStore, parseGrinders, type GrindersState, type SavedGrinder } from '../grinder/store';
 import { journalStore, MAX_ENTRIES, parseJournal, type JournalEntry } from '../journal/store';
@@ -8,6 +9,7 @@ import { parseRecipes, recipesStore } from '../recipes/store';
 import type { UserRecipe } from '../recipes/recipe';
 import { parseShopping, shoppingStore, type ShoppingItem } from '../shelf/shopping';
 import { parseShelf, shelfStore, type Shelf } from '../shelf/store';
+import { parseWishlist, wishlistStore } from '../wishlist/store';
 import { stableStringify, type CollectionName, type SyncRecord } from './records';
 
 /** Pierwsze logowanie: id lokalnego duplikatu → id rekordu z konta, dla każdej kolekcji. */
@@ -90,6 +92,28 @@ const favorites: Collection<string[]> = {
   // Sortowanie jest stabilne: rekordy bez czasu (stary zapis) zostają w dotychczasowej kolejności.
   fromRecords: (records) => [...records].sort((a, b) => b.updatedAt - a.updatedAt).map((r) => r.id),
   parse: (id, data) => (data === true && parseFavorites([id]).length === 1 ? true : null),
+};
+
+/** Ulubione metody: rekord na metodę, ostatnio dodane pierwsze. */
+const methodFavorites: Collection<string[]> = {
+  name: 'method-favorites',
+  subscribe: methodFavoritesStore.subscribe,
+  read: methodFavoritesStore.getSnapshot,
+  write: methodFavoritesStore.replaceAll,
+  toRecords: (ids) => new Map(ids.map((id) => [id, true])),
+  fromRecords: (records) => [...records].sort((a, b) => b.updatedAt - a.updatedAt).map((r) => r.id),
+  parse: (id, data) => (data === true && parseMethodFavorites([id]).length === 1 ? true : null),
+};
+
+/** „Do spróbowania”: rekord na napój, ostatnio dodane pierwsze (jak ulubione). */
+const wishlist: Collection<string[]> = {
+  name: 'wishlist',
+  subscribe: wishlistStore.subscribe,
+  read: wishlistStore.getSnapshot,
+  write: wishlistStore.replaceAll,
+  toRecords: (ids) => new Map(ids.map((id) => [id, true])),
+  fromRecords: (records) => [...records].sort((a, b) => b.updatedAt - a.updatedAt).map((r) => r.id),
+  parse: (id, data) => (data === true && parseWishlist([id]).length === 1 ? true : null),
 };
 
 /** Półka: jeden rekord. Przy pierwszym logowaniu łączy to, co jest w domu według obu urządzeń. */
@@ -216,6 +240,8 @@ export const collections: Collection[] = [
   grinders,
   recipes,
   myDrinks,
+  wishlist,
+  methodFavorites,
 ] as Collection[];
 
 export const getCollection = (name: CollectionName) => collections.find((c) => c.name === name)!;

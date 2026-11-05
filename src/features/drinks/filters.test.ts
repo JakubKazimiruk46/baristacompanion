@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { drinks, type Drink } from '../../data';
-import { filterDrinks, filtersFromParams, filtersToParams, hasActiveFilters } from './filters';
+import { filterDrinks, filtersFromParams, filtersToParams, hasActiveFilters, searchDrinks, sheetFilterCount } from './filters';
 
 function drink(overrides: Partial<Drink> & Pick<Drink, 'id'>): Drink {
   return {
@@ -142,5 +142,25 @@ describe('filtry w adresie', () => {
     expect(hasActiveFilters({})).toBe(false);
     expect(hasActiveFilters({ plantBased: false })).toBe(false);
     expect(hasActiveFilters({ maxTimeMin: 10 })).toBe(true);
+  });
+});
+
+describe('wyszukiwanie i licznik filtrów', () => {
+  it('szuka po nazwie i haśle, bez polskich znaków', () => {
+    const found = searchDrinks(drinks, 'pomaranczowa');
+    expect(found.map((d) => d.id)).toContain('kawa-pomaranczowa');
+    expect(searchDrinks(drinks, '')).toHaveLength(drinks.length);
+    expect(searchDrinks(drinks, 'nie ma takiego napoju')).toEqual([]);
+  });
+
+  it('liczy tylko filtry z okna, nie szybkie', () => {
+    expect(sheetFilterCount({ temperature: 'cold', favorites: true })).toBe(0);
+    expect(sheetFilterCount({ milk: 'without', noAlcohol: true, maxTimeMin: 10, plantBased: false })).toBe(3);
+  });
+
+  it('„Do spróbowania” zostawia napoje z listy', () => {
+    const found = filterDrinks(drinks, { toTry: true }, { wishlistIds: ['mocha'] });
+    expect(found.map((d) => d.id)).toEqual(['mocha']);
+    expect(filtersToParams({ toTry: true }).toString()).toBe('sprobuj=1');
   });
 });

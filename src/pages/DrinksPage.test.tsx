@@ -1,8 +1,21 @@
 import { screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import type { UserEvent } from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { drinks } from '../data';
-import { filterDrinks } from '../features/drinks/filters';
+import { filterDrinks, searchDrinks } from '../features/drinks/filters';
 import { currentUrl, renderApp } from '../test/renderApp';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+/** Okno „Filtry”: przełącza podane filtry i zatwierdza „Pokaż …”. */
+async function inFilterSheet(user: UserEvent, ...buttons: string[]) {
+  await user.click(screen.getByRole('button', { name: /^Filtry/ }));
+  const sheet = screen.getByRole('dialog', { name: 'Filtry' });
+  for (const name of buttons) await user.click(within(sheet).getByRole('button', { name }));
+  await user.click(within(sheet).getByRole('button', { name: /^Pokaż/ }));
+}
 
 function listedNames() {
   return screen
@@ -27,19 +40,20 @@ describe('lista napojów', () => {
     expect(listedNames()).toEqual(names(filterDrinks(drinks, { temperature: 'cold' })));
     expect(listedNames()).toContain('Kawa mrożona z lodami');
 
-    await user.click(screen.getByRole('button', { name: 'Wersja roślinna' }));
+    await inFilterSheet(user, 'Wersja roślinna');
     const expected = names(filterDrinks(drinks, { temperature: 'cold', plantBased: true }));
     expect(listedNames()).toEqual(expected);
     expect(listedNames()).not.toContain('Kawa mrożona z lodami');
     expect(currentUrl(router)).toBe('/napoje?temp=zimne&roslinne=1');
+    expect(screen.getByRole('button', { name: /^Filtry\s*\(1\)$/ })).toBeInTheDocument();
   });
 
   it('„Bez alkoholu” ukrywa napoje z alkoholem, które na liście mają oznaczenie', async () => {
     const { user, router } = renderApp('/napoje');
-    expect(screen.getByRole('link', { name: /Irish coffee/ })).toHaveTextContent('z alkoholem 18+');
+    expect(screen.getByRole('link', { name: /Irish coffee/ })).toHaveTextContent('18+ z alkoholem');
     expect(screen.getByRole('link', { name: /Espresso tonic/ })).not.toHaveTextContent('z alkoholem');
 
-    await user.click(screen.getByRole('button', { name: 'Bez alkoholu' }));
+    await inFilterSheet(user, 'Bez alkoholu');
     expect(currentUrl(router)).toBe('/napoje?alkohol=bez');
     expect(listedNames()).not.toContain('Irish coffee');
     expect(listedNames()).not.toContain('Espresso martini');
@@ -68,10 +82,61 @@ describe('lista napojów', () => {
   it('czyta filtry z adresu i pozwala je wyczyścić', async () => {
     const { user } = renderApp('/napoje?temp=cieple&mleko=bez');
     expect(listedNames()).toEqual(['Americano z kawiarki', 'Kawa po turecku']);
-    expect(screen.getByRole('button', { name: 'Bez mleka' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Na ciepło' })).toHaveAttribute('aria-pressed', 'true');
+    const pills = screen.getByRole('list', { name: 'Włączone filtry' });
+    expect(within(pills).getByRole('button', { name: 'Bez mleka: usuń filtr' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Wyczyść filtry' }));
     expect(listedNames()).toHaveLength(drinks.length);
+  });
+
+  it('okno filtrów pokazuje liczbę wyników, a zamknięcie bez „Pokaż” niczego nie zmienia', async () => {
+    const { user, router } = renderApp('/napoje');
+    await user.click(screen.getByRole('button', { name: 'Filtry' }));
+    const sheet = screen.getByRole('dialog', { name: 'Filtry' });
+    await user.click(within(sheet).getByRole('button', { name: 'do 10 min' }));
+    const expected = filterDrinks(drinks, { maxTimeMin: 10 }).length;
+    expect(within(sheet).getByRole('button', { name: /^Pokaż/ })).toHaveTextContent(String(expected));
+
+    await user.click(within(sheet).getByRole('button', { name: 'Zamknij' }));
+    expect(listedNames()).toHaveLength(drinks.length);
+    expect(currentUrl(router)).toBe('/napoje');
+  });
+
+  it('wyszukiwanie po nazwie bez polskich znaków, w adresie', async () => {
+    const { user, router } = renderApp('/napoje?temp=zimne');
+    await user.type(screen.getByRole('searchbox', { name: 'Szukaj napoju' }), 'mrozona');
+    const expected = names(searchDrinks(filterDrinks(drinks, { temperature: 'cold' }), 'mrozona'));
+    expect(expected.length).toBeGreaterThan(0);
+    expect(listedNames()).toEqual(expected);
+    expect(listedNames()).toContain('Kawa mrożona z lodami');
+    expect(currentUrl(router)).toBe('/napoje?temp=zimne&q=mrozona');
+
+    await user.click(screen.getByRole('button', { name: 'Wyczyść wyszukiwanie' }));
+    expect(currentUrl(router)).toBe('/napoje?temp=zimne');
+  });
+
+  it('nic nie pasuje do wyszukiwania: podpowiedź', async () => {
+    renderApp('/napoje?q=ketchup');
+    expect(screen.getByRole('heading', { name: 'Nic nie pasuje do „ketchup”' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Wylosuj kawę' })).toBeDisabled();
+  });
+
+  it('„Wylosuj kawę” losuje spośród wyników filtrów i pozwala losować dalej', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const { user, router } = renderApp('/napoje?temp=zimne&mleko=bez');
+    const pool = filterDrinks(drinks, { temperature: 'cold', milk: 'without' });
+    await user.click(screen.getByRole('button', { name: 'Wylosuj kawę' }));
+    const sheet = screen.getByRole('dialog', { name: 'Wylosowana kawa' });
+    expect(within(sheet).getByText(`Losujemy spośród ${pool.length} napojów pasujących do filtrów.`)).toBeInTheDocument();
+    expect(within(sheet).getByRole('heading', { name: pool[0]!.name })).toBeInTheDocument();
+
+    await user.click(within(sheet).getByRole('button', { name: 'Losuj jeszcze raz' }));
+    expect(within(sheet).getByRole('heading', { name: pool[1]!.name })).toBeInTheDocument();
+    expect(new URLSearchParams(router.state.location.search).get('los')).toBe(pool[1]!.id);
+
+    await user.click(within(sheet).getByRole('link', { name: 'Zobacz przepis' }));
+    expect(router.state.location.pathname).toBe(`/napoje/${pool[1]!.id}`);
   });
 });
 
@@ -96,6 +161,11 @@ describe('ekran napoju', () => {
   it('napój bez alkoholu nie ma ostrzeżenia', () => {
     renderApp('/napoje/mazagran');
     expect(screen.queryByText(/Napój z alkoholem/)).not.toBeInTheDocument();
+  });
+
+  it('własny przepis jest bez autora', () => {
+    renderApp('/napoje/mazagran');
+    expect(screen.queryByText(/^Przepis:/)).not.toBeInTheDocument();
   });
 
   it('link do metody prowadzi do jej ekranu', async () => {

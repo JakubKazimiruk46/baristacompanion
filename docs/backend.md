@@ -23,11 +23,11 @@ Plan darmowy wstrzymuje projekt po tygodniu bez ruchu: wtedy w panelu kliknij **
 
 ## 2. Klucze w aplikacji
 
-1. **Project Settings → API**: skopiuj **Project URL** i klucz publiczny (**anon** albo **publishable**, zaczyna się od `sb_publishable_`).
+1. Przycisk **Connect** na górze panelu pokazuje oba: **Project URL** (`https://TWOJ_REF.supabase.co`, bez `/rest/v1/`) i klucz publiczny **publishable** (zaczyna się od `sb_publishable_`; w starszych projektach **anon**). Klucz jest też w **Project Settings** (zębatka na dole lewego paska) **→ API Keys**.
 2. Lokalnie: skopiuj `.env.example` do `.env.local` i wpisz obie wartości. `.env.local` nie trafia do repozytorium.
 3. Vercel: **Project → Settings → Environment Variables** → dodaj `VITE_SUPABASE_URL` i `VITE_SUPABASE_ANON_KEY` dla **Production** i **Preview** → **Deployments → Redeploy** (zmienne wchodzą do builda).
 
-Klucz publiczny trafia do przeglądarki z założenia: dane chroni Row Level Security w bazie. **Klucza `service_role` (secret) nigdy nie wpisuj do `.env.local`, Vercela ani repozytorium.** Funkcje serwerowe dostają go od Supabase same.
+Klucz publiczny trafia do przeglądarki z założenia: dane chroni Row Level Security w bazie. **Klucza `sb_secret_…` (dawniej `service_role`) nigdy nie wpisuj do `.env.local`, Vercela ani repozytorium.** Funkcje serwerowe dostają go od Supabase same (`SUPABASE_SECRET_KEYS`, w starszych projektach `SUPABASE_SERVICE_ROLE_KEY`).
 
 ## 3. Baza i funkcje (Supabase CLI)
 
@@ -39,6 +39,8 @@ npx supabase link --project-ref TWOJ_REF            # REF to część adresu: ht
 npx supabase db push                                # tworzy tabele z supabase/migrations
 npx supabase functions deploy delete-account        # usuwanie konta
 ```
+
+Funkcje mają wyłączone sprawdzanie tokenu przez platformę (`verify_jwt = false` w `supabase/config.toml`), bo przy nowych kluczach kończy się ono błędem „Invalid JWT”. Zalogowanego użytkownika sprawdza każda funkcja sama (`requestUser`) i bez niego odpowiada 401.
 
 Kolejne kroki planu dokładają migracje i funkcje: po pobraniu zmian powtórz `db push` i `functions deploy` dla nowych funkcji (lista w punkcie 8).
 
@@ -52,10 +54,11 @@ Kolejne kroki planu dokładają migracje i funkcje: po pobraniu zmian powtórz `
   - `http://localhost:4173/konto`
   - `https://barista-companion.vercel.app/konto`
   - `https://*-TWOJ-ZESPOL.vercel.app/konto` (podglądy Vercela; nazwa zespołu jest w adresie podglądu)
+  - `pl.baristacompanion.app://konto` (aplikacja na Androida: link z e-maila i Google wracają do aplikacji)
 
 ## 5. Logowanie e-mailem: link i kod
 
-Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeglądarce, a kod także w aplikacji na Androida (tam link otworzyłby przeglądarkę zamiast aplikacji).
+Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeglądarce i w aplikacji na Androida (otwiera aplikację adresem `pl.baristacompanion.app://konto`, jeśli jest na liście z punktu 4), a kod jest zapasem, gdy link otworzy się na innym urządzeniu albo w przeglądarce.
 
 **Authentication → Emails → Templates → Magic Link**: temat `Logowanie do Barista Companion`, treść:
 
@@ -68,7 +71,13 @@ Aplikacja wysyła jedną wiadomość z linkiem **i** kodem. Link działa w przeg
 
 Ten sam tekst wstaw w szablonie **Confirm signup** (pierwsze logowanie zakłada konto).
 
-Wbudowana poczta Supabase wysyła tylko kilka wiadomości na godzinę: wystarczy do testów. Przed udostępnieniem aplikacji innym ustaw własny serwer SMTP (**Authentication → Emails → SMTP Settings**, np. Resend albo poczta z domeny).
+**Szablony da się zmienić dopiero po ustawieniu własnego serwera SMTP** (**Authentication → Emails → SMTP Settings**). Do tego czasu działa wbudowana poczta Supabase, a ona:
+
+- wysyła domyślną treść: sam link, bez kodu (wpisanie kodu w aplikacji nie zadziała);
+- dostarcza tylko na adresy członków zespołu w Supabase (np. adres autora), a nie na adresy innych osób;
+- wysyła ok. 2 wiadomości na godzinę na cały projekt.
+
+Do testów autora to wystarczy. Link z PKCE działa tylko w tej samej przeglądarce, w której poproszono o logowanie, więc na komputerze otwórz go w tej samej przeglądarce co aplikację. Przed udostępnieniem aplikacji innym ustaw SMTP: z własną domeną najprościej Resend (darmowy plan, weryfikacja domeny w DNS), bez domeny na próbę Gmail z hasłem aplikacji (`smtp.gmail.com`, port 465, wymaga weryfikacji dwuetapowej; wiadomości przychodzą z prywatnego adresu, więc nie na stałe). Po ustawieniu SMTP wklej szablony z tego punktu i sprawdź limit w **Authentication → Rate Limits**.
 
 ## 6. Logowanie przez Google
 
@@ -77,7 +86,7 @@ Wbudowana poczta Supabase wysyła tylko kilka wiadomości na godzinę: wystarczy
 3. **Credentials → Create credentials → OAuth client ID** → typ **Web application** → **Authorized redirect URIs**: `https://TWOJ_REF.supabase.co/auth/v1/callback`.
 4. Skopiuj **Client ID** i **Client secret** do Supabase: **Authentication → Sign In / Providers → Google** → włącz i wklej.
 
-W aplikacji na Androida przycisk Google jest ukryty (Google blokuje logowanie w osadzonej przeglądarce): tam logowanie kodem z e-maila.
+W aplikacji na Androida Google otwiera się w karcie systemowej (Custom Tabs, `@capacitor/browser`), bo w osadzonym WebView Google logowania nie pozwala. Po zalogowaniu karta wraca do aplikacji adresem `pl.baristacompanion.app://konto?code=…`, a aplikacja wymienia kod na sesję. W Google Cloud nic dodatkowego nie trzeba: przekierowanie z Google i tak trafia do Supabase.
 
 ## 7. Sprawdzenie
 
@@ -92,7 +101,7 @@ Przed udostępnieniem aplikacji uzupełnij w polityce prywatności (`src/pages/P
 
 | Funkcja | Co robi | Sekrety (`npx supabase secrets set …`) |
 | :- | :- | :- |
-| `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i `SUPABASE_SERVICE_ROLE_KEY` sam) |
+| `delete-account` | usuwa użytkownika i wszystkie jego dane | brak (Supabase daje `SUPABASE_URL` i klucz serwera sam) |
 | `scan-label` | odczyt etykiety ziaren przez Claude (zdjęcie → pola formularza), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_LABEL_SCANS` (domyślnie 20) |
 | `drink-assistant` | asystent drinków: Claude układa napój z katalogu aplikacji (P9), dzienny limit | `ANTHROPIC_API_KEY`; opcjonalnie `AI_DAILY_DRINKS` (domyślnie 10) |
 
@@ -104,6 +113,10 @@ Migracje po kolei (`npx supabase db push` wgrywa brakujące):
 | `20261009130000_user_data.sql` | synchronizacja: tabela `user_data` (rekord na wiersz, RLS tylko dla właściciela, limit 20 000 wierszy) i funkcja `sync_push` (zapisuje tylko nowsze wersje) |
 | `20261009150000_ai_usage.sql` | dzienne liczniki AI (`ai_usage`) i funkcje `consume_ai_quota` / `release_ai_quota` (tylko dla funkcji serwerowych) |
 | `20261009140000_community_recipes.sql` | przepisy społeczności: `public_recipes` (ograniczenia długości i kroków, RLS), zapisy, zgłoszenia, moderatorzy i funkcje do zapisu, zgłoszeń i moderacji |
+| `20261010095000_anon_is_moderator.sql` | poprawka: `anon` może wykonać `is_moderator()` (bez tego niezalogowany nie widział przepisów społeczności: reguła odczytu woła tę funkcję) |
+| `20261010090000_user_data_collections.sql` | nowe kolekcje synchronizacji: lista „Do spróbowania” (`wishlist`) i ulubione metody (`method-favorites`) |
+| `20261010100000_community_drinks.sql` | napoje społeczności: `public_drinks` (napój jako dokument jsonb, kształt i rozmiar pilnowane w bazie, nazwa i temperatura z dokumentu, RLS), zapisy, zgłoszenia, funkcje `save_public_drink`, `report_public_drink`, `moderate_public_drink`; kolejka moderatora wspólna dla przepisów i napojów (kolumna `kind`) |
+| `20261013120000_community_search.sql` | wyszukiwanie i filtry Społeczności na serwerze: `search_text` (bez polskich znaków, funkcja `search_fold`), `method_ids`, `has_milk`, `has_alcohol` w napojach i `search_text` w przepisach (liczy trigger); zapis u siebie nie liczy się autorowi |
 
 ## 9. AI: klucz Claude i limity kosztów
 

@@ -19,6 +19,7 @@ function parseFlow(value: unknown): FlowState {
   if (typeof value !== 'object' || value === null) return {};
   const v = value as Record<string, unknown>;
   const state: FlowState = {};
+  if (v.start === 'wishlist' || v.start === 'surprise') state.start = v.start;
   if (typeof v.beanId === 'string') state.beanId = v.beanId;
   const described = parseProfile(v.described);
   if (described) state.described = described;

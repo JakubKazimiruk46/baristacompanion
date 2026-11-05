@@ -3,7 +3,7 @@ import { ingredients, methods, milks, vessels } from '.';
 import type { Drink } from './types';
 
 /** Adresy innych ekranów pod /napoje/: napój nie może mieć takiego id. */
-export const DRINK_PAGES = ['mleko', 'spienianie', 'syropy', 'co-mam', 'zakupy', 'asystent'];
+export const DRINK_PAGES = ['mleko', 'spienianie', 'syropy', 'co-mam', 'zakupy', 'asystent', 'nowy'];
 
 /** Katalog aplikacji dla reguł napoju (i dla asystenta drinków: tylko te id są dozwolone, P9). */
 export const appCatalog: DrinkCatalog = {

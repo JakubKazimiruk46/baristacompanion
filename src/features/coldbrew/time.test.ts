@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayAndTime, formatRemaining, isReady, progress, readyAt } from './time';
+import { dayAndTime, formatRemaining, isReady, progress, readyAt, shortDay } from './time';
 
 // Daty lokalne (tak jak na telefonie użytkownika): new Date(rok, miesiąc-1, dzień, godz, min).
 const at = (day: number, h: number, m = 0) => new Date(2026, 9, day, h, m).getTime(); // październik 2026
@@ -63,5 +63,15 @@ describe('formatRemaining', () => {
     [0, 'mniej niż minuta'],
   ])('%i ms → %s', (ms, text) => {
     expect(formatRemaining(ms)).toBe(text);
+  });
+});
+
+describe('krótko, kiedy było', () => {
+  it('dziś, wczoraj, kilka dni temu, data', () => {
+    const now = at(9, 10);
+    expect(shortDay(at(9, 7), now)).toBe('dziś');
+    expect(shortDay(at(8, 23), now)).toBe('wczoraj');
+    expect(shortDay(at(5, 12), now)).toBe('4 dni temu');
+    expect(shortDay(at(1, 12), now)).toBe('1.10');
   });
 });

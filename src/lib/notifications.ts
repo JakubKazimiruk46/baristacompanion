@@ -15,9 +15,13 @@ export const isNativeApp = () => Capacitor.isNativePlatform();
 
 type Plugin = (typeof import('@capacitor/local-notifications'))['LocalNotifications'];
 
-let plugin: Promise<Plugin> | null = null;
+/**
+ * Wtyczka Capacitora to Proxy, które ma każdą metodę, także `then`. Zwrócona wprost z obietnicy
+ * zostałaby wzięta za obietnicę („LocalNotifications.then() is not implemented”), więc leży w obiekcie.
+ */
+let plugin: Promise<{ notifications: Plugin }> | null = null;
 
-function load(): Promise<Plugin> {
+function load(): Promise<{ notifications: Plugin }> {
   plugin ??= import('@capacitor/local-notifications').then(async ({ LocalNotifications }) => {
     // Kanał z dźwiękiem i wysoką ważnością: powiadomienie wyskakuje na ekranie i dzwoni.
     await LocalNotifications.createChannel({
@@ -28,7 +32,7 @@ function load(): Promise<Plugin> {
       visibility: 1,
       vibration: true,
     }).catch(() => {});
-    return LocalNotifications;
+    return { notifications: LocalNotifications };
   });
   return plugin;
 }
@@ -46,7 +50,7 @@ export type NotificationPermission = 'granted' | 'denied' | 'prompt' | 'unsuppor
 export async function notificationPermission(): Promise<NotificationPermission> {
   if (!isNativeApp()) return 'unsupported';
   try {
-    const { display } = await (await load()).checkPermissions();
+    const { display } = await (await load()).notifications.checkPermissions();
     return display === 'granted' ? 'granted' : display === 'denied' ? 'denied' : 'prompt';
   } catch {
     return 'unsupported';
@@ -57,7 +61,7 @@ export async function notificationPermission(): Promise<NotificationPermission> 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!isNativeApp()) return false;
   try {
-    const { display } = await (await load()).requestPermissions();
+    const { display } = await (await load()).notifications.requestPermissions();
     markAsked('asked');
     return display === 'granted';
   } catch {
@@ -69,7 +73,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 export async function exactAlarmsAllowed(): Promise<boolean> {
   if (!isNativeApp()) return false;
   try {
-    return (await (await load()).checkExactNotificationSetting()).exact_alarm === 'granted';
+    return (await (await load()).notifications.checkExactNotificationSetting()).exact_alarm === 'granted';
   } catch {
     return false;
   }
@@ -79,7 +83,7 @@ export async function exactAlarmsAllowed(): Promise<boolean> {
 export async function openExactAlarmSettings(): Promise<boolean> {
   if (!isNativeApp()) return false;
   try {
-    const { exact_alarm } = await (await load()).changeExactNotificationSetting();
+    const { exact_alarm } = await (await load()).notifications.changeExactNotificationSetting();
     markAsked('exactAsked');
     return exact_alarm === 'granted';
   } catch {
@@ -103,7 +107,7 @@ export interface PlannedNotification {
 export function scheduleNotification(notification: PlannedNotification): Promise<boolean> {
   if (!isNativeApp() || notification.at <= Date.now()) return Promise.resolve(false);
   return enqueue(async () => {
-    const notifications = await load();
+    const { notifications } = await load();
     if ((await notifications.checkPermissions()).display !== 'granted') return false;
     const exact = (await notifications.checkExactNotificationSetting()).exact_alarm === 'granted';
     await notifications.cancel({ notifications: [{ id: notification.id }] });
@@ -131,7 +135,7 @@ export function cancelNotification(id: number): Promise<void> {
   if (!isNativeApp()) return Promise.resolve();
   const visible = document.visibilityState === 'visible';
   return enqueue(async () => {
-    const notifications = await load();
+    const { notifications } = await load();
     await notifications.cancel({ notifications: [{ id }] });
     if (visible) await notifications.removeDeliveredNotificationsById({ ids: [id] });
   }, undefined);
@@ -141,7 +145,7 @@ export function cancelNotification(id: number): Promise<void> {
 export function removeDeliveredNotification(id: number): Promise<void> {
   if (!isNativeApp()) return Promise.resolve();
   return enqueue(async () => {
-    await (await load()).removeDeliveredNotificationsById({ ids: [id] });
+    await (await load()).notifications.removeDeliveredNotificationsById({ ids: [id] });
   }, undefined);
 }
 

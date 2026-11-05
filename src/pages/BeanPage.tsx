@@ -39,7 +39,7 @@ export function BeanPage() {
 
   return (
     <>
-      <PageHeader title={bean.name} lead={bean.roaster} back={{ to: '/ziarna', label: 'Moje ziarna' }}>
+      <PageHeader title={bean.name} lead={bean.roaster} back={{ to: '/baribar', label: 'Baribar' }}>
         <div className="mt-3">
           <BeanSummary profile={bean.profile} />
         </div>
@@ -82,7 +82,7 @@ export function BeanPage() {
             className="flex h-12 flex-1 items-center justify-center rounded-full bg-red-700 font-semibold text-white"
             onClick={() => {
               beansStore.remove(bean.id);
-              navigate('/ziarna', { replace: true });
+              navigate('/baribar', { replace: true });
             }}
           >
             Usuń ziarna

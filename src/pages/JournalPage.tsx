@@ -6,7 +6,7 @@ import { EntryCard } from '../features/journal/EntryCard';
 import { useJournal } from '../features/journal/store';
 import { count } from '../lib/format';
 import { useNow } from '../lib/useNow';
-import { addButtonClass } from './BeansPage';
+import { addButtonClass } from '../features/bar/BeansSection';
 
 export function JournalPage() {
   const entries = useJournal();

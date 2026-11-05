@@ -20,7 +20,20 @@ const plugin = vi.hoisted(() => ({
   cancel: vi.fn(async () => {}),
   removeDeliveredNotificationsById: vi.fn(async () => {}),
 }));
-vi.mock('@capacitor/local-notifications', () => ({ LocalNotifications: plugin }));
+// Jak prawdziwa wtyczka Capacitora: Proxy, które ma każdą metodę, także `then` (a nieznana rzuca błąd).
+// Zwrócona wprost z obietnicy zostałaby wzięta za obietnicę.
+vi.mock('@capacitor/local-notifications', () => ({
+  LocalNotifications: new Proxy(plugin, {
+    get: (target, prop) =>
+      typeof prop !== 'string'
+        ? undefined
+        : prop in target
+          ? target[prop as keyof typeof target]
+          : () => {
+              throw new Error(`"LocalNotifications.${prop}()" is not implemented on android`);
+            },
+  }),
+}));
 
 type Scheduled = { id: number; title: string; body: string; isExactNotification: boolean; schedule: { at: Date } };
 const scheduled = () =>

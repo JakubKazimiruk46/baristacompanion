@@ -25,3 +25,14 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Supabase CLI: stan lokalny (połączony projekt, wersje usług)
+supabase/.temp/
+supabase/.branches/
+
+# Cudze przepisy bez zgody autorów: tylko lokalnie (src/data/index.ts, docs/publikacja.md, krok 0)
+src/data/creditedDrinks*
+
+# Nagrania z aplikacji (film wgrywa się do README przez przeglądarkę) i ich scenariusze
+*.webm
+.claude/video/

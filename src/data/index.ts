@@ -1,11 +1,28 @@
-import { drinks } from './drinks';
+import { drinks as ownDrinks } from './drinks';
 import { grinderModels } from './grinders';
 import { extraIngredients } from './ingredients';
 import { methods } from './methods';
 import { frothingMethods, frothingSummary, milks } from './milks';
-import { syrups } from './syrups';
+import { syrups as ownSyrups } from './syrups';
 import type { BrewMethod, Drink, GrinderModel, Ingredient, Milk, Syrup } from './types';
 import { vessels } from './vessels';
+
+interface CreditedCatalog {
+  creditedDrinks: Drink[];
+  creditedIngredients: Ingredient[];
+  creditedSyrups: Syrup[];
+}
+
+/**
+ * Cudze przepisy (creditedDrinks.ts, z autorem w `credit`) są tylko na komputerze autora, poza repozytorium.
+ * Bez zgody autorów nie trafiają do żadnego buildu produkcyjnego (Vercel, Google Play): tylko `npm run dev` i testy.
+ */
+const credited: Partial<CreditedCatalog> = import.meta.env.DEV
+  ? (Object.values(import.meta.glob<CreditedCatalog>('./creditedDrinks.ts', { eager: true }))[0] ?? {})
+  : {};
+
+const drinks: Drink[] = [...ownDrinks, ...(credited.creditedDrinks ?? [])];
+const syrups: Syrup[] = [...ownSyrups, ...(credited.creditedSyrups ?? [])];
 
 /** Katalog składników: mleka, syropy i dodatki napojów (półka, zakupy, zamienniki). */
 const ingredients: Ingredient[] = [
@@ -19,6 +36,7 @@ const ingredients: Ingredient[] = [
     }),
   ),
   ...extraIngredients,
+  ...(credited.creditedIngredients ?? []),
 ];
 
 export { drinks, frothingMethods, frothingSummary, grinderModels, ingredients, methods, milks, syrups, vessels };
@@ -42,15 +60,17 @@ export const getSyrup = (id: string): Syrup | undefined => syrupsById.get(id);
 export const getIngredient = (id: string): Ingredient | undefined => ingredientsById.get(id);
 export const getGrinderModel = (id: string): GrinderModel | undefined => grinderModelsById.get(id);
 
-/** Metody, którymi da się zrobić bazę napoju: główna i alternatywne. */
+/** Metody, którymi da się zrobić bazę napoju: główna i alternatywne, przy anyMethod każda (główna pierwsza). */
 export function baseMethodIds(drink: Drink): string[] {
-  return [drink.base.methodId, ...(drink.base.alternativeMethodIds ?? [])];
+  const { methodId } = drink.base;
+  if (drink.base.anyMethod) return [methodId, ...methods.filter((m) => m.id !== methodId).map((m) => m.id)];
+  return [methodId, ...(drink.base.alternativeMethodIds ?? [])];
 }
 
 /** Napoje, których bazę da się zaparzyć tą metodą. Najpierw te, dla których metoda jest główna. */
 export function drinksForMethod(methodId: string): Drink[] {
   const main = drinks.filter((d) => d.base.methodId === methodId);
-  const alternative = drinks.filter((d) => d.base.alternativeMethodIds?.includes(methodId));
+  const alternative = drinks.filter((d) => d.base.methodId !== methodId && baseMethodIds(d).includes(methodId));
   return [...main, ...alternative];
 }
 

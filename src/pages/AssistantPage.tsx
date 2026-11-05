@@ -156,7 +156,7 @@ function Assistant({ online }: { online: boolean }) {
           {shelf === null && (
             <p className="mt-2 text-sm text-ink-muted">
               Zaznacz w{' '}
-              <Link to="/napoje/co-mam" className="font-medium text-accent underline">
+              <Link to="/baribar?sekcja=mleka" className="font-medium text-accent underline">
                 Co mam w domu
               </Link>
               , co masz w kuchni, a asystent weźmie to pod uwagę.

@@ -52,6 +52,22 @@ describe('validateDrink: reguły spójności napoju', () => {
     );
   });
 
+  it('baza: metody alternatywne albo każda metoda (anyMethod), nie jedno i drugie', () => {
+    const any = (change: (base: Record<string, unknown>) => void) =>
+      broken((d) => {
+        delete d.base.alternativeMethodIds;
+        change(d.base as unknown as Record<string, unknown>);
+      });
+    expect(any((b) => (b.anyMethod = true))).toEqual([]);
+    expect(any((b) => (b.anyMethod = 'tak'))).toContain('base.anyMethod: tylko true.');
+    expect(broken((d) => (d.base.anyMethod = true))).toContain(
+      'base.alternativeMethodIds: zbędne, gdy pasuje każda metoda (anyMethod).',
+    );
+    expect(normalizeDrink({ ...base(), base: { methodId: 'drip', amountMl: 50, anyMethod: true } })).toMatchObject({
+      base: { methodId: 'drip', amountMl: 50, anyMethod: true },
+    });
+  });
+
   it('teksty i listy w granicach, a id nie zajmuje adresu innego ekranu', () => {
     expect(broken((d) => (d.name = 'x'.repeat(61)))).toContain('Nazwa: najwyżej 60 znaków.');
     expect(broken((d) => (d.steps = []))).toContain('steps: co najmniej jeden krok.');

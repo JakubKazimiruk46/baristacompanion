@@ -3,7 +3,7 @@ import type { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { beanMethods } from '../data';
 import { beansStore } from '../features/beans/store';
-import { renderApp } from '../test/renderApp';
+import { currentUrl, renderApp } from '../test/renderApp';
 
 beforeEach(() => {
   localStorage.clear();
@@ -27,15 +27,15 @@ async function addBean(user: UserEvent, name: string) {
   await user.click(screen.getByRole('button', { name: 'Zapisz ziarna' }));
 }
 
-describe('Moje ziarna', () => {
+describe('ziarna w Baribarze', () => {
   it('pusta lista zachęca do dodania ziaren', () => {
-    renderApp('/ziarna');
+    renderApp('/baribar');
     expect(screen.getByText('Nie masz jeszcze zapisanych ziaren')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Dodaj ziarna' })).toHaveAttribute('href', '/ziarna/nowe');
   });
 
   it('dodane ziarna zostają po odświeżeniu', async () => {
-    const { user, router } = renderApp('/ziarna');
+    const { user, router } = renderApp('/baribar');
     await addBean(user, 'Yirgacheffe');
 
     expect(router.state.location.pathname).toMatch(/^\/ziarna\/.+/);
@@ -49,8 +49,9 @@ describe('Moje ziarna', () => {
     // „Odświeżenie”: nowa aplikacja, pusty stan w pamięci, dane tylko z localStorage.
     cleanup();
     beansStore.reset();
-    renderApp('/ziarna');
-    expect(screen.getByRole('heading', { level: 2, name: 'Yirgacheffe' })).toBeInTheDocument();
+    renderApp('/baribar');
+    const light = screen.getByRole('region', { name: 'Jasne palenie' });
+    expect(within(light).getByRole('heading', { level: 3, name: 'Yirgacheffe' })).toBeInTheDocument();
     expect(screen.getByText('Palarnia Testowa')).toBeInTheDocument();
   });
 
@@ -64,7 +65,7 @@ describe('Moje ziarna', () => {
   });
 
   it('„Jak zaparzyć?” pokazuje ranking metod z uzasadnieniem i linkami', async () => {
-    const { user, router } = renderApp('/ziarna');
+    const { user, router } = renderApp('/baribar');
     await addBean(user, 'Kenia');
 
     await user.click(screen.getByRole('button', { name: 'Jak zaparzyć?' }));
@@ -82,7 +83,7 @@ describe('Moje ziarna', () => {
   });
 
   it('edycja i usuwanie', async () => {
-    const { user, router } = renderApp('/ziarna');
+    const { user, router } = renderApp('/baribar');
     await addBean(user, 'Brazylia');
 
     await user.click(screen.getByRole('link', { name: 'Edytuj' }));
@@ -97,7 +98,7 @@ describe('Moje ziarna', () => {
     await user.click(screen.getByRole('button', { name: 'Usuń' }));
     const dialog = screen.getByRole('dialog', { name: 'Usunąć „Brazylia Santos”?' });
     await user.click(within(dialog).getByRole('button', { name: 'Usuń ziarna' }));
-    expect(router.state.location.pathname).toBe('/ziarna');
+    expect(router.state.location.pathname).toBe('/baribar');
     expect(screen.getByText('Nie masz jeszcze zapisanych ziaren')).toBeInTheDocument();
   });
 
@@ -109,10 +110,30 @@ describe('Moje ziarna', () => {
       throw new DOMException('SecurityError');
     });
 
-    const { user } = renderApp('/ziarna');
-    expect(screen.getByRole('status')).toHaveTextContent('nie pozwala zapisywać danych');
+    const { user } = renderApp('/baribar');
+    expect(screen.getByText(/nie pozwala zapisywać danych/)).toBeInTheDocument();
     await addBean(user, 'Gwatemala');
     expect(screen.getByRole('heading', { level: 1, name: 'Gwatemala' })).toBeInTheDocument();
+  });
+
+  it('wyszukiwanie, filtr palenia i grupy według palenia (w adresie)', async () => {
+    beansStore.add({ name: 'Kenia Kiambu', roaster: 'Palarnia Słoneczna', profile: { roast: 'light', notes: ['fruity'], kind: 'single-origin' } });
+    beansStore.add({ name: 'Brazylia Santos', profile: { roast: 'dark', notes: ['chocolate'], kind: 'blend' } });
+    beansStore.add({ name: 'Etiopia Guji', profile: { roast: 'light', notes: ['floral'], kind: 'single-origin' } });
+    const { user, router } = renderApp('/baribar');
+    expect(screen.getAllByRole('region').map((r) => r.getAttribute('aria-labelledby') && r.querySelector('h2')?.textContent)).toEqual([
+      'Jasne palenie',
+      'Ciemne palenie',
+    ]);
+
+    await user.type(screen.getByRole('searchbox', { name: 'Szukaj ziaren' }), 'sloneczna');
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Kenia Kiambu']);
+    expect(screen.getByText('1 kawa z 3')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Wyczyść filtry' }));
+    await user.click(within(screen.getByRole('group', { name: 'Palenie' })).getByRole('button', { name: 'Ciemne' }));
+    expect(currentUrl(router)).toBe('/baribar?palenie=ciemne');
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Brazylia Santos']);
   });
 
   it('nieznane ziarna pokazują stronę błędu', () => {

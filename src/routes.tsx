@@ -1,15 +1,19 @@
-import type { RouteObject } from 'react-router';
+import { Navigate, type RouteObject } from 'react-router';
 import { AppLayout } from './components/AppLayout';
 import { AccountPage } from './pages/AccountPage';
 import { AssistantPage } from './pages/AssistantPage';
+import { BaribarPage } from './pages/BaribarPage';
 import { BeanFormPage } from './pages/BeanFormPage';
 import { BeanPage } from './pages/BeanPage';
-import { BeansPage } from './pages/BeansPage';
 import { BrewingPage } from './pages/BrewingPage';
 import { BrewSessionPage } from './pages/BrewSessionPage';
+import { CommunityDrinkPage } from './pages/CommunityDrinkPage';
+import { CommunityPage } from './pages/CommunityPage';
 import { CommunityRecipePage } from './pages/CommunityRecipePage';
+import { DrinkFormPage } from './pages/DrinkFormPage';
 import { DrinkPage } from './pages/DrinkPage';
 import { DrinksPage } from './pages/DrinksPage';
+import { FlowMenuPage, WishlistFlowPage } from './pages/FlowMenuPage';
 import { FlowPage } from './pages/FlowPage';
 import { FrothingPage } from './pages/FrothingPage';
 import { GrinderFormPage } from './pages/GrinderFormPage';
@@ -24,9 +28,9 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { RecipeFormPage } from './pages/RecipeFormPage';
 import { RecipePage } from './pages/RecipePage';
 import { SharedRecipePage } from './pages/SharedRecipePage';
-import { ShelfPage } from './pages/ShelfPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { StartPage } from './pages/StartPage';
+import { SurprisePage } from './pages/SurprisePage';
 import { SyrupsPage } from './pages/SyrupsPage';
 
 /** Wspólna definicja tras: createBrowserRouter w aplikacji, createMemoryRouter w testach. */
@@ -36,16 +40,21 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     children: [
       { index: true, element: <StartPage /> },
-      { path: 'mam-kawe', element: <FlowPage /> },
+      { path: 'mam-kawe', element: <FlowMenuPage /> },
+      { path: 'mam-kawe/do-sprobowania', element: <WishlistFlowPage /> },
+      { path: 'mam-kawe/zaskocz', element: <SurprisePage /> },
       { path: 'mam-kawe/:step', element: <FlowPage /> },
       { path: 'napoje', element: <DrinksPage /> },
       { path: 'napoje/mleko', element: <MilkPage /> },
       { path: 'napoje/spienianie', element: <FrothingPage /> },
       { path: 'napoje/syropy', element: <SyrupsPage /> },
-      { path: 'napoje/co-mam', element: <ShelfPage /> },
+      // Dawne „Co mam w domu”: teraz sekcje Baribaru.
+      { path: 'napoje/co-mam', element: <Navigate to="/baribar?sekcja=mleka" replace /> },
       { path: 'napoje/zakupy', element: <ShoppingListPage /> },
       { path: 'napoje/asystent', element: <AssistantPage /> },
+      { path: 'napoje/nowy', element: <DrinkFormPage /> },
       { path: 'napoje/:drinkId', element: <DrinkPage /> },
+      { path: 'napoje/:drinkId/edycja', element: <DrinkFormPage /> },
       { path: 'parzenie', element: <BrewingPage /> },
       { path: 'parzenie/dziennik', element: <JournalPage /> },
       { path: 'parzenie/dziennik/:entryId', element: <JournalEntryPage /> },
@@ -56,7 +65,11 @@ export const routes: RouteObject[] = [
       { path: 'parzenie/:methodId/przepisy/:recipeId/edycja', element: <RecipeFormPage /> },
       { path: 'parzenie/:methodId/spolecznosc/:recipeId', element: <CommunityRecipePage /> },
       { path: 'przepis', element: <SharedRecipePage /> },
-      { path: 'ziarna', element: <BeansPage /> },
+      { path: 'spolecznosc', element: <CommunityPage /> },
+      { path: 'spolecznosc/napoje/:communityId', element: <CommunityDrinkPage /> },
+      { path: 'spolecznosc/przepisy/:recipeId', element: <CommunityRecipePage /> },
+      { path: 'baribar', element: <BaribarPage /> },
+      { path: 'ziarna', element: <Navigate to="/baribar" replace /> },
       { path: 'ziarna/nowe', element: <BeanFormPage /> },
       { path: 'ziarna/mlynek', element: <GrindersPage /> },
       { path: 'ziarna/mlynek/nowy', element: <GrinderFormPage /> },

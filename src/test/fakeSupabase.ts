@@ -41,6 +41,13 @@ export class FakeFunctionError extends Error {
   }
 }
 
+/**
+ * Tabele społeczności tak jak w bazie: jedna publikacja na (author_id, source_id), a autor zmienia tylko treść
+ * (`grant update` bez author_id i source_id). Upsert ustawia też te kolumny, więc baza go odrzuca (42501).
+ */
+const AUTHOR_TABLES = new Set(['public_recipes', 'public_drinks']);
+const sameSource = (a: Row, b: Row) => a.author_id === b.author_id && a.source_id === b.source_id;
+
 const like = (pattern: string) =>
   new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*').replace(/_/g, '.')}$`, 'i');
 
@@ -169,6 +176,11 @@ export function createFakeSupabase() {
       this.filters.push((row) => (row[column] as string | number) < value);
       return this;
     }
+    /** Kolumna-tablica ma choć jedną z wartości (PostgREST: ov, SQL: &&). */
+    overlaps(column: string, values: unknown[]) {
+      this.filters.push((row) => Array.isArray(row[column]) && (row[column] as unknown[]).some((value) => values.includes(value)));
+      return this;
+    }
     ilike(column: string, pattern: string) {
       this.filters.push((row) => like(pattern).test(String(row[column] ?? '')));
       return this;
@@ -223,6 +235,14 @@ export function createFakeSupabase() {
       const error = takeError(`${this.name}.${this.op}`);
       if (error) return { data: null, error };
       const rows = table(this.name);
+      if (AUTHOR_TABLES.has(this.name)) {
+        if (this.op === 'upsert') {
+          return { data: null, error: { code: '42501', message: `permission denied for table ${this.name}` } };
+        }
+        if (this.op === 'insert' && [this.payload ?? []].flat().some((value) => rows.some((row) => sameSource(row, value)))) {
+          return { data: null, error: { code: '23505', message: 'duplicate key value violates unique constraint' } };
+        }
+      }
       let result: Row[];
       switch (this.op) {
         case 'select':
@@ -311,10 +331,18 @@ export function createFakeSupabase() {
         signIn(email);
         return { data: { session }, error: null };
       }),
-      signInWithOAuth: vi.fn(async (_options: { provider: string; options?: Record<string, unknown> }) => ({
-        data: {},
+      signInWithOAuth: vi.fn(async (options: { provider: string; options?: Record<string, unknown> }) => ({
+        data: { provider: options.provider, url: `https://test.supabase.co/auth/v1/authorize?provider=${options.provider}` },
         error: null,
       })),
+      // Powrót z logowania z kodem (PKCE): poprawny kod loguje użytkownika z fake.codeEmail.
+      exchangeCodeForSession: vi.fn(async (code: string) => {
+        if (code !== fake.validAuthCode) {
+          return { data: { session: null }, error: { message: 'invalid flow state', code: 'bad_code_verifier', status: 400 } };
+        }
+        signIn(fake.codeEmail);
+        return { data: { session }, error: null };
+      }),
       signOut: vi.fn(async (_options?: { scope?: string }) => {
         signOutLocal();
         return { error: null };
@@ -386,6 +414,9 @@ export function createFakeSupabase() {
     table,
     /** Kod z e-maila, który przechodzi weryfikację. */
     validCode: '123456',
+    /** Kod z adresu powrotu (link z e-maila, Google), który exchangeCodeForSession przyjmuje. */
+    validAuthCode: 'kod-pkce',
+    codeEmail: 'ania@example.com',
     signIn,
     signOutLocal,
     get session() {

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, ScrollRestoration, useLocation } from 'react-router';
+import { useNativeAuthReturn } from '../features/account/useNativeAuthReturn';
 import { useColdBrewNotification } from '../features/coldbrew/useColdBrewNotification';
 import { useSync } from '../features/sync/useSync';
 import { BottomNav } from './BottomNav';
@@ -9,6 +10,8 @@ export function AppLayout() {
   const firstRender = useRef(true);
   // Gotowe cold brew przypomina się samo (aplikacja na Androida), na każdym ekranie.
   useColdBrewNotification();
+  // Aplikacja na Androida: powrót z logowania (link z e-maila, Google) pod własnym adresem aplikacji.
+  useNativeAuthReturn();
   // Śledzenie zmian zawsze, a synchronizacja z kontem, gdy ktoś jest zalogowany.
   useSync();
 

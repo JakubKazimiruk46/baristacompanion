@@ -3,6 +3,8 @@ import { expect, test } from '@playwright/test';
 test('Mam kawę: jasne ziarna → drip → zimny napój → podanie', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Mam kawę. Co z nią zrobić?' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Co dziś robimy?' })).toBeVisible();
+  await page.getByRole('link', { name: /Wybiorę sam/ }).click();
 
   // 1. Ziarna z opakowania: jasno palone, owocowe.
   await expect(page.getByRole('heading', { level: 1, name: 'Jakie masz ziarna?' })).toBeVisible();

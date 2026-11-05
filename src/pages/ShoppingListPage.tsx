@@ -47,7 +47,7 @@ export function ShoppingListPage() {
       {items.length === 0 ? (
         <EmptyState icon={CartIcon} title="Lista jest pusta">
           Na ekranie napoju albo w{' '}
-          <Link to="/napoje/co-mam" className="font-medium text-accent underline">
+          <Link to="/baribar?sekcja=mleka" className="font-medium text-accent underline">
             Co mam w domu
           </Link>{' '}
           dodasz brakujące składniki jednym tapnięciem.

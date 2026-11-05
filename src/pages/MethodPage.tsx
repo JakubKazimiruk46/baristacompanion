@@ -22,6 +22,7 @@ import { StepList } from '../features/brewing/StepList';
 import { ColdBrewVariantsSection } from '../features/coldbrew/ColdBrewLinks';
 import { useColdBrew } from '../features/coldbrew/store';
 import { DrinkCard } from '../features/drinks/DrinkCard';
+import { MethodFavoriteButton } from '../features/favorites/MethodFavoriteButton';
 import { EntryCard } from '../features/journal/EntryCard';
 import { useJournal } from '../features/journal/store';
 import { CommunitySection } from '../features/community/CommunitySection';
@@ -52,6 +53,9 @@ function MethodDetails({ method: base }: { method: BrewMethod }) {
         back={{ to: '/parzenie', label: 'Parzenie' }}
         icon={<MethodIcon methodId={method.id} className="size-9" />}
       >
+        <div className="mt-4">
+          <MethodFavoriteButton methodId={method.id} />
+        </div>
         <ReviewNote item={method} />
       </PageHeader>
 

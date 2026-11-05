@@ -20,9 +20,15 @@ afterEach(() => {
 const readyCount = (ingredients: string[]) =>
   drinks.filter((d) => canMake(d, { ingredients, methods: [] })).length;
 
-describe('Co mam w domu', () => {
+describe('Baribar: półka', () => {
+  it('stary adres „Co mam w domu” prowadzi do Baribaru', () => {
+    const { router } = renderApp('/napoje/co-mam');
+    expect(currentUrl(router)).toBe('/baribar?sekcja=mleka');
+    router.dispose();
+  });
+
   it('zaznaczanie składników zmienia liczbę napojów do zrobienia', async () => {
-    const { user } = renderApp('/napoje/co-mam');
+    const { user } = renderApp('/baribar?sekcja=dodatki');
     const DRINKS: [string, string, string] = ['napój', 'napoje', 'napojów'];
     expect(screen.getByRole('status')).toHaveTextContent(
       `Zrobisz teraz: ${count(readyCount(DEFAULT_SHELF.ingredients), DRINKS)}`,
@@ -38,8 +44,20 @@ describe('Co mam w domu', () => {
     expect(shelfStore.getSnapshot()!.ingredients).toContain('tonik');
   });
 
+  it('mleka i syropy: karty z liczbą napojów, a syrop da się zrobić samemu', async () => {
+    const { user, router } = renderApp('/baribar?sekcja=mleka');
+    const milks = screen.getByRole('list', { name: 'Mleka' });
+    await user.click(within(milks).getByLabelText(/Mleko owsiane barista/));
+    expect(shelfStore.getSnapshot()!.ingredients).toContain('owsiane-barista');
+
+    await user.click(screen.getByRole('radio', { name: /Syropy/ }));
+    expect(currentUrl(router)).toBe('/baribar?sekcja=syropy');
+    await user.click(screen.getByRole('button', { name: 'Zrób sam: Syrop waniliowy' }));
+    expect(screen.getByRole('dialog', { name: 'Syrop waniliowy' })).toBeInTheDocument();
+  });
+
   it('sprzęt zawęża napoje', async () => {
-    const { user } = renderApp('/napoje/co-mam');
+    const { user } = renderApp('/baribar?sekcja=sprzet');
     const equipment = screen.getByRole('group', { name: 'Sprzęt do parzenia' });
     await user.click(within(equipment).getByLabelText('Prasa francuska'));
     // Z prasy, lodu i cukru nie wyjdzie americano z kawiarki.
@@ -52,7 +70,7 @@ describe('braki na ekranie napoju i lista zakupów', () => {
     renderApp('/napoje/espresso-tonic');
     expect(screen.getByRole('link', { name: 'Sprawdź, czy masz wszystko w domu' })).toHaveAttribute(
       'href',
-      '/napoje/co-mam',
+      '/baribar?sekcja=mleka',
     );
   });
 
@@ -103,7 +121,7 @@ describe('filtr „Mogę zrobić” w katalogu', () => {
   it('pokazuje tylko napoje z tego, co jest w domu', async () => {
     shelfStore.set({ ingredients: ['lod', 'tonik', 'krowie'], methods: [] });
     const { user, router } = renderApp('/napoje');
-    expect(screen.getByRole('link', { name: /Co mam w domu/ })).toHaveTextContent(
+    expect(screen.getByRole('link', { name: /Baribar.*zrobisz/ })).toHaveTextContent(
       `zrobisz ${count(readyCount(['lod', 'tonik', 'krowie']), ['napój', 'napoje', 'napojów'])}`,
     );
 
