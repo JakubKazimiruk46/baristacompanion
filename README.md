@@ -4,7 +4,8 @@ Kawa bez ekspresu: od ziaren przez parzenie po efektowne podanie drinków kawowy
 
 *A Polish-language PWA for home baristas who brew without an espresso machine: coffee drinks, guided brewing, and what you can make from what you have.*
 
-<!-- Film z prezentacją: w edytorze GitHuba przeciągnij tu plik .webm albo .mp4, a GitHub wstawi link do odtwarzacza. -->
+[barista-companion-prezentacja-2026-11-03.webm](https://github.com/user-attachments/assets/80741dbc-55ff-4b74-b194-33da41c2400b)
+
 
 Aplikacja jest dla osób, które parzą kawę metodami alternatywnymi (kawiarka, drip, AeroPress, prasa francuska, cold brew…) i chcą zrobić z niej coś więcej niż zwykłą czarną kawę. Działa w przeglądarce i offline, bez konta: wszystkie dane zostają na urządzeniu.
 
